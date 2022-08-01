@@ -1,0 +1,15 @@
+/* Customizations Here (Optional) */
+
+@import "./_variables.scss";
+
+body,
+html {
+    width: 100%;
+    height: 100%;
+    //overflow: hidden;
+}
+
+body > header {
+    width: 100%;
+    height: 100%;
+}
