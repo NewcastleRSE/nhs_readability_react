@@ -1,3 +1,22 @@
+/* Punctuation if '?' or '!' or '.' where not part of a floating point number or section number (e.g. 1.2.11) */
+const punctuationRe = /[?!]+|(?<!\d+)\.(?!\d+)/g;
+
+/* Single whitespace match */
+const singleWhitespaceRe = /\s/g;
+
+/* Single whitespace match */
+const multiWhitespaceRe = /\s+/;
+
+/* Locale language */
+const localeLang = "en-UK";
+
+/* Sentence complexity threshold (SMOG value > which sentence is deemed complex) */
+const sentenceComplexityThreshold = 4.0;
+
+/* Conversion from US grade level to UK reading age */
+const ukReadingAgeCorrection = 5;
+
+/* Easy words */
 const easyWords = [
   "a",
   "able",
@@ -2948,5 +2967,7 @@ const easyWords = [
   "yourselves",
   "youth",
   "you've",
-]
-export default easyWords;
+];
+
+export default { punctuationRe, singleWhitespaceRe, multiWhitespaceRe, localeLang, sentenceComplexityThreshold, easyWords };
+

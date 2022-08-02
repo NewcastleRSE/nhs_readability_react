@@ -1,25 +1,26 @@
 /**
-* @module TextModel
-*/
+ * @module TextModel
+ */
 
 import { syllable } from 'syllable';
 import pluralize from 'pluralize';
-import easyWords from './EasyWords';
+import { localeLang, easyWords, ukReadingAgeCorrection } from './Constants';
 import { ContentState, EditorState } from 'draft-js';
+import ParagraphRecord from './ParagraphRecord';
 
-const LOCALE_LANG = "en-UK";
+const localeLang = "en-UK";
 
-const INITIALISER = {
+/* Document-level counts */
+const GLOBAL_COUNT_INITIALISER = {
     nCharacters: 0,
     nSpaces: 0,
     nPunctuation: 0,
+    nWords: 0,
     nSyllables: 0,
     nPolySyllables: 0,
-    nWords: 0
+    nSentences: 0,
+    nParagraphs: 0
 };
-
-/* Punctuation if '?' or '!' or '.' where not part of a floating point number of section number (e.g. 1.2.11) */
-const PUNCTUATION_RE = /[?!]+|(?<!\d+)\.(?!\d+)/g;
 
 /* Conversion from US grade level to UK reading age */
 const UK_READING_AGE_CORRECTION = 5;
@@ -29,130 +30,144 @@ const UK_READING_AGE_CORRECTION = 5;
  */
 export default class TextModel {
 
+    /**
+     * Creates analysis record of paragraph text indexed by ContentBlock key, containing individual StateRecords
+     * @param {String} initialText model initialisation text
+     */
     constructor(initialText = '') {
         let state = EditorState.createEmpty();
         if (initialText != '') {
             state = EditorState.createWithContent(ContentState.createFromText(initialText));
         }
-        Object.assign(this, INITIALISER, {
-            lang: LOCALE_LANG,
-            editorState: state,           
+        Object.assign(this, GLOBAL_COUNT_INITIALISER, {
+            lang: localeLang,
+            editorState: state,  
+            modelState: {},         
             easyWordSet: new Set(easyWords)            
         });
+        if (initialText != '') {
+            this.stateUpdate(state);
+        }
     }
 
-    update(newEditorState) {
+    /* Getters for global model properties */
+    get nCharacters() {
+        return(this.nCharacters);
+    }
 
-        console.group('update()');
+    get nSpaces() {
+        return(this.nSpaces);
+    }
+
+    get nWords() {
+        return(this.nWords);
+    }
+
+    get nSyllables() {
+        return(this.nSyllables);
+    }
+
+    get nPolySyllables() {
+        return(this.nPolySyllables);
+    }
+
+    get nSentences() {
+        return(this.nSentences);
+    }
+
+    get nParagraphs() {
+        return(this.nParagraphs);
+    }
+    /* End of getters */
+
+    /**
+     * Update the text model state based on a new EditorState
+     * @param {EditorState} newEditorState 
+     */
+    stateUpdate(newEditorState) {
+
+        console.group('stateUpdate()');
         console.log('New editor state:\n', newEditorState);
 
         let changeType = newEditorState.getLastChangeType();
         switch(changeType) {
+
             case 'adjust-depth':
             case 'apply-entity':
             case 'change-block-data':
             case 'change-block-type':
             case 'change-inline-style':
                 /* No changes to actual text have occurred */
-                console.log('Change type', changeType, 'means no text changes have occurred');
+                console.log('Change type', changeType, '=> no text changes have occurred');
                 break;
+
             default:
                 /* Text changes may have occurred */
+                console.log('Change type', changeType, '=> further checks for text changes required');
                 const currentContentState = this.editorState.getCurrentContent();
                 const newContentState = newEditorState.getCurrentContent();
-                if (currentContentState != newContentState) {
+                if (currentContentState != newContentState) {  
+
+                    /* Recompute all global counts */
+                    Object.assign(this, GLOBAL_COUNT_INITIALISER);
+                    let liveKeys = [];
+
                     /* Content has changed => update all metrics */
-                    Object.assign(this, INITIALISER);
+                    console.log('Text changes have occurred');
                     newContentState.getBlockMap().forEach(bm => {
+
+                        let blockKey = bm.getKey();
                         let blockText = bm.getText();
-                        this.nCharacters += this.characterCount(blockText);
-                        this.nSpaces += this.whitespaceCount(blockText);
-                        this.nWords += this.wordCount(blockText);
-                        this.nSyllables += this.syllableCount(blockText);
-                        this.nPolySyllables += this. polySyllableCount(blockText);
+                        let paraRecord = this._paragraphRecord(blockKey, blockText);
+                        console.log('Check block', blockKey, 'for changes...');
+                        console.log('Existing state record:\n', paraRecord);
+                                                
+                        this.nCharacters += paraRecord.nChars;
+                        this.nSpaces += paraRecord.nSpaces;
+                        this.nPunctuation += paraRecord.nPunctuation;
+                        this.nWords += paraRecord.wordCount();
+                        this.nSyllables += paraRecord.syllableCount();
+                        this.nPolySyllables += paraRecord.wordCount(3);
+                        this.nSentences += paraRecord.getSentences().length;
+                        if (blockText.trim().length > 0) {
+                            /* draft-js will create paragraphs containing a single carriage return, not very useful */
+                            this.nParagraphs++;
+                        }
+                        liveKeys.push(blockKey);
+                    });
+
+                    /* Delete all paragraph records for dead blocks */
+                    Object.keys(this.modelState).forEach(k => {
+                        if (!(k in liveKeys)) {
+                            delete this.modelState[k];
+                        }
                     });
                 } else {
                     console.log('Content state has not changed');
                 }
                 break;
         }
+
         this.editorState = newEditorState;
             
+        console.dir('Updated model:\n', this);
         console.groupEnd();   
     }
 
     /**
-     * Count number of characters in text
+     * Return existing paragraph state record for key, or create a new one if not present
+     * @param {String} key 
      * @param {String} text
-     * @returns character count
+     * @return {Object}
      */
-    characterCount(text) {
-        return(text.length);
+     _paragraphRecord(key, text) {
+        if (!(key in this.modelState)) {
+            this.modelState[key] = new ParagraphRecord(key, text);
+        } else {
+            this.modelState[key].setText(text);
+        }
+        return(this.modelState[key]);
     }
-
-    /**
-     * Count number of punctuation characters in text
-     * @param {String} text
-     * @returns punctuation character count
-     */
-    punctuationCount(text) {
-        return((text.match(PUNCTUATION_RE) || []).length);
-    }
-
-    /**
-     * Count number of whitespace characters in text
-     * @param {String} text
-     * @returns whitespace count
-     */
-    whitespaceCount(text) {
-        return((text.match(/\s/g) || []).length);
-    }
-
-    /**
-     * Count number of words in text
-     * @param {String} text
-     * @returns word count
-     */
-    wordCount(text) {
-        let trimmed = text.trim();
-        return(trimmed != "" ? trimmed.split(/\s+/).length : 0);
-    }
-
-    /**
-     * Count number of syllables in text
-     * @param {String} text
-     * @returns syllable count
-     */
-    syllableCount(text) {
-        return(syllable(text.toLocaleLowerCase(LOCALE_LANG)));
-    }
-
-    /**
-     * Count number of polysyllables in text
-     * @param {String} text
-     * @returns polysyllable count
-     */
-    polySyllableCount(text) {
-        let trimmed = text.toLocaleLowerCase(LOCALE_LANG).trim();
-        return(trimmed != "" ? trimmed.split(/\s+/).filter(w => syllable(w) >= 3).length : 0);
-    }
-
-    // {
-    //     const newContentState = newState.getCurrentContent();                                
-    //     const currentContentState = this.state.editorState.getCurrentContent();
-    //     if (currentContentState != newContentState) {
-    //         console.log('Content has changed!');
-    //         console.log('Old:\n', currentContentState.getPlainText(), '\nNew:\n', newContentState.getPlainText());
-    //         console.dir(newContentState.getBlockMap());
-    //         newContentState.getBlockMap().forEach(bm => {
-    //             console.log(bm.getKey(), bm.getType(), bm.getLength(), bm.getText());
-    //             console.dir(bm.getCharacterList());
-    //         });
-    //         this.setState({ editorState: newState });
-    //     } else {
-    //         console.log('Content has NOT changed!');
-    //     }
-    // }
 
     /**
      * Round a floating point number to 'dp' decimal places
@@ -165,65 +180,13 @@ export default class TextModel {
     }
     
     /**
-     * Count characters in current text
-     * @param {boolean} ignoreSpaces 
-     * @returns number of characters in text
-     */
-    charCount(ignoreSpaces = false) {
-        return(this.nCharacters - (ignoreSpaces ? this.nSpaces : 0));
-    }
-
-    /**
-     * Count number of letters in current text
-     * @param {boolean} ignoreSpaces 
-     * @returns number of letters in text
-     */
-    letterCount(ignoreSpaces = true) {
-        return(this.nCharacters - this.nPunctuation - (ignoreSpaces ? this.nSpaces : 0));
-    }
-
-    /**
-     * Count number of punctuation characters in current text
-     * @returns number of punctuation characters
-     */
-    punctuationCount() {
-        return(this.nPunctuation);
-    }
-
-    /**
-     * Count words in current text
-     * @returns number of words
-     */
-    lexiconCount() {        
-        return(this.nWords);
-    }
-    
-    /**
-     * Count number of syllables in current text
-     * @returns number of syllables in text
-     */
-    syllableCount() {
-        return(this.nSyllables);       
-    }
-
-    /**
-     * Count number of sentences in current text
-     * @returns number of sentences
-     */
-    sentenceCount() {       
-        return(this.sentences.length);    
-    }
-
-    /**
      * Compute average length of sentences in current text
      * @returns average sentence length
      */
     averageSentenceLength() {
-        let asl = 0;
-        let nWords = this.lexiconCount();
-        let nSents = this.sentenceCount();
-        if (nWords != 0 && nSents != 0) {
-            asl = this._roundFloat((nWords / nSents), 1);
+        let asl = 0;       
+        if (this.nWords != 0 && this.nSentences != 0) {
+            asl = this._roundFloat((this.nWords / this.nSentences), 1);
         }
         return(asl);
     }
@@ -233,11 +196,9 @@ export default class TextModel {
      * @returns average number of syllables per word
      */
     averageSyllablesPerWord() {
-        let syllablesPerWord = 0;
-        let nSyllables = this.syllableCount();
-        let nWords = this.lexiconCount();
-        if (nSyllables != 0 && nWords != 0) {
-            syllablesPerWord = this._roundFloat((nSyllables / nWords), 1);
+        let syllablesPerWord = 0;      
+        if (this.nSyllables != 0 && this.nWords != 0) {
+            syllablesPerWord = this._roundFloat((this.nSyllables / this.nWords), 1);
         }
         return(syllablesPerWord);
     }
@@ -247,11 +208,9 @@ export default class TextModel {
      * @returns 
      */
     averageCharacterPerWord() {
-        let charactersPerWord = 0;
-        let nChars = this.charCount();
-        let nWords = this.lexiconCount();
-        if (nChars != 0 && nWords != 0) {
-            charactersPerWord = this._roundFloat((nChars / nWords), 2);
+        let charactersPerWord = 0;     
+        if (this.nCharacters != 0 && this.nWords != 0) {
+            charactersPerWord = this._roundFloat((this.nCharacters / this.nWords), 2);
         }
         return(charactersPerWord);
     }
@@ -262,10 +221,9 @@ export default class TextModel {
      */
     averageLettersPerWord() {
         let lettersPerWord = 0;
-        let nLetts = this.letterCount();
-        let nWords = this.lexiconCount();
-        if (nLetts != 0 && nWords != 0) {
-            lettersPerWord = this._roundFloat((nLetts / nWords), 2);
+        let nLetts = this.nCharacters - this.nPunctuation - this.nSpaces;
+        if (nLetts != 0 && this.nWords != 0) {
+            lettersPerWord = this._roundFloat((nLetts / this.nWords), 2);
         }
         return(lettersPerWord);
     }
@@ -275,21 +233,11 @@ export default class TextModel {
      * @returns average sentences per word
      */
     averageSentencesPerWord() {
-        let sentencesPerWord = 0;
-        let nSents = this.sentenceCount();
-        let nWords = this.lexiconCount();
-        if (nSents != 0 && nWords != 0) {
-            sentencesPerWord = this._roundFloat((nSents / nWords), 2);
+        let sentencesPerWord = 0;  
+        if (this.nSentences != 0 && this.nWords != 0) {
+            sentencesPerWord = this._roundFloat((this.nSentences / this.nWords), 2);
         }
         return(sentencesPerWord);
-    }
-
-    /**
-     * Count number of polysyllabic words in current text
-     * @returns polysyllable count
-     */
-     polySyllableCount() {
-        return(this.nPolySyllables);    
     }
 
     /**
@@ -301,7 +249,7 @@ export default class TextModel {
         console.group('toUKReadingAge()');
         let ukra = 'n/a';
         if (grade >= 4) {
-            ukra = this._roundFloat(grade + UK_READING_AGE_CORRECTION, 2);
+            ukra = this._roundFloat(grade + ukReadingAgeCorrection, 2);
         }
         console.debug('UK Reading Age', ukra);
         console.groupEnd();
@@ -379,10 +327,8 @@ export default class TextModel {
     smogIndex() {
         console.group('smogIndex()');
         let smog = 0.0;
-        let sentences = this.sentenceCount();
-        if (sentences >= 3) {
-            let polySyllab = this.polySyllableCount();
-            smog = this._roundFloat(1.043 * (30 * (polySyllab / sentences)) ** 0.5 + 3.1291, 1);            
+        if (this.nSentences >= 3) {
+            smog = this._roundFloat(1.043 * (30 * (this.nPolySyllables / this.nSentences)) ** 0.5 + 3.1291, 1);            
         }
         console.debug('SMOG Index', smog);
         console.groupEnd();
@@ -409,12 +355,8 @@ export default class TextModel {
      */
     automatedReadabilityIndex() {
         console.group('automatedReadabilityIndex()');
-        let nChars = this.charCount();
-        let nWords = this.lexiconCount();
-        let nSents = this.sentenceCount();
-
-        let avCharsPerWord = nWords == 0 ? 0 : nChars / nWords;
-        let avWordsPerSentence = nSents == 0 ? 0 : nWords / nSents;
+        let avCharsPerWord = this.nWords == 0 ? 0 : this.nCharacters / this.nWords;
+        let avWordsPerSentence = this.nSentences == 0 ? 0 : this.nWords / this.nSentences;
         let ari = this._roundFloat(
             (4.71 * this._roundFloat(avCharsPerWord, 2)) +
             (0.5 * this._roundFloat(avWordsPerSentence, 2)) -
@@ -425,6 +367,15 @@ export default class TextModel {
         return(ari);        
     }
 
+    forAllSentences(callback) {
+        for (const prec of Object.values(this.modelState)) {
+            if (!prec.forAllSentences(callback)) {
+                return(false);
+            }
+        }
+        return(true);
+    }
+
     /**
      * Callback enumerating easy and difficult (syllables >= 3) words in current text
      * NOTE: used as a callback from linsearWriteFormula()
@@ -433,24 +384,30 @@ export default class TextModel {
      * @returns 
      */
     _easyAndDifficultWords(sampleSize = 100, syllableThreshold = 3) {
+        console.group('_easyAndDifficultWords()');
+        console.log('Entering with sample size', sampleSize, 'syllable threshold', syllableThreshold);
         let ret = {
             easy: 0,
             difficult: 0,
             sentences: 0
         };
         let nProcessed = 0;
-        for (let i = 0; i < this.sentences.length && nProcessed < sampleSize; i++) {
-            let sentence = this.sentences[i];            
-            let sentenceWords = sentence.rawText.toLocaleLowerCase(this.lang).split(/\s/);
+        this.forAllSentences(s => {
+            let sentenceWords = s.getWords();
+            let processing = true;
             if (nProcessed + sentenceWords.length > sampleSize) {
                 /* Reduce the last list before finishing */
                 sentenceWords = sentenceWords.slice(0, sampleSize - nProcessed);
+                processing = false;
             }
             ret.difficult += (sentenceWords.filter(w => syllable(w) >= syllableThreshold)).length;
             ret.easy += (sentenceWords.length - ret.difficult);
-            ret.sentences = i;
+            ret.sentences++;
             nProcessed += sentenceWords.length;
-        }
+            return(processing);
+        }); 
+        console.log('Returning', ret);
+        console.groupEnd();       
         return(ret);
     }
 
