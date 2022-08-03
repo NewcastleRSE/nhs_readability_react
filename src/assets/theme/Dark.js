@@ -1,7 +1,7 @@
 import { createTheme } from '@mui/material/styles';
-import { grey } from "@mui/material/colors";
+import { blue, grey } from "@mui/material/colors";
 
-const darkTheme = Object.assign(createTheme({ palette: { mode: 'dark' }}, {
+const darkTheme = Object.assign(createTheme({ palette: { mode: 'dark' } }, {
     overrides: {        
         MUIRichTextEditor: {
             root: {
@@ -23,7 +23,7 @@ const darkTheme = Object.assign(createTheme({ palette: { mode: 'dark' }}, {
                 width: 'inherit',
                 position: 'static',
                 color: grey.A700
-             }    
+            }    
         }
     }
 }));

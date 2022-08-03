@@ -8,8 +8,6 @@ import { localeLang, easyWords, ukReadingAgeCorrection } from './Constants';
 import { ContentState, EditorState } from 'draft-js';
 import ParagraphRecord from './ParagraphRecord';
 
-const localeLang = "en-UK";
-
 /* Document-level counts */
 const GLOBAL_COUNT_INITIALISER = {
     nCharacters: 0,
@@ -49,36 +47,6 @@ export default class TextModel {
             this.stateUpdate(state);
         }
     }
-
-    /* Getters for global model properties */
-    get nCharacters() {
-        return(this.nCharacters);
-    }
-
-    get nSpaces() {
-        return(this.nSpaces);
-    }
-
-    get nWords() {
-        return(this.nWords);
-    }
-
-    get nSyllables() {
-        return(this.nSyllables);
-    }
-
-    get nPolySyllables() {
-        return(this.nPolySyllables);
-    }
-
-    get nSentences() {
-        return(this.nSentences);
-    }
-
-    get nParagraphs() {
-        return(this.nParagraphs);
-    }
-    /* End of getters */
 
     /**
      * Update the text model state based on a new EditorState
@@ -125,9 +93,9 @@ export default class TextModel {
                         this.nCharacters += paraRecord.nChars;
                         this.nSpaces += paraRecord.nSpaces;
                         this.nPunctuation += paraRecord.nPunctuation;
-                        this.nWords += paraRecord.wordCount();
+                        this.nWords += paraRecord.wordCount(1);
                         this.nSyllables += paraRecord.syllableCount();
-                        this.nPolySyllables += paraRecord.wordCount(3);
+                        //this.nPolySyllables += paraRecord.wordCount(3);
                         this.nSentences += paraRecord.getSentences().length;
                         if (blockText.trim().length > 0) {
                             /* draft-js will create paragraphs containing a single carriage return, not very useful */
@@ -155,6 +123,28 @@ export default class TextModel {
     }
 
     /**
+     * Extract model properties representing count metrics
+     * Thanks to https://stackoverflow.com/questions/17781472/how-to-get-a-subset-of-a-javascript-objects-properties for the elegant
+     * way of doing this, rather than the usual loop
+     * @returns Object containing metric data
+     */
+    getMetrics() {
+        return((
+            ({ nCharacters, nSpaces, nPunctuation, nWords, nSyllables, nPolySyllables, nSentences, nParagraphs }) => 
+            ({ nCharacters, nSpaces, nPunctuation, nWords, nSyllables, nPolySyllables, nSentences, nParagraphs }))(this)
+        );
+    }
+
+    forAllSentences(callback) {
+        for (const prec of Object.values(this.modelState)) {
+            if (!prec.forAllSentences(callback)) {
+                return(false);
+            }
+        }
+        return(true);
+    }
+
+    /**
      * Return existing paragraph state record for key, or create a new one if not present
      * @param {String} key 
      * @param {String} text
@@ -162,7 +152,7 @@ export default class TextModel {
      */
      _paragraphRecord(key, text) {
         if (!(key in this.modelState)) {
-            this.modelState[key] = new ParagraphRecord(key, text);
+            this.modelState[key] = new ParagraphRecord(text);
         } else {
             this.modelState[key].setText(text);
         }
@@ -367,15 +357,6 @@ export default class TextModel {
         return(ari);        
     }
 
-    forAllSentences(callback) {
-        for (const prec of Object.values(this.modelState)) {
-            if (!prec.forAllSentences(callback)) {
-                return(false);
-            }
-        }
-        return(true);
-    }
-
     /**
      * Callback enumerating easy and difficult (syllables >= 3) words in current text
      * NOTE: used as a callback from linsearWriteFormula()
@@ -465,8 +446,8 @@ export default class TextModel {
             total: 0,
             difficult: 0
         };
-        this.sentences.forEach(sentence => {
-            let sentenceWords = sentence.rawText.split(/\s/);
+        this.forAllSentences(s => {
+            let sentenceWords = s.getWords();
             ret.total += sentenceWords.length;
             sentenceWords.forEach(word => {
                 let normalised = this.presentTense(pluralize(word.toLocaleLowerCase(), 1));
@@ -474,7 +455,7 @@ export default class TextModel {
                     ret.difficult++;
                 }
             });
-        });
+        });        
         return(ret);
     }
 

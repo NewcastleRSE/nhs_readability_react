@@ -34,29 +34,9 @@ export default class ParagraphRecord {
         }
     }
 
-    /* Getters for individual fields */
-
-    get hashCode() {
-        return(this.hashCode);
-    }
-
-    get nChars() {
-        return(this.nChars);
-    }
-
-    get nSpaces() {
-        return(this.nSpaces);
-    }
-
-    get nPunctuation() {
-        return(this.nPunctuation);
-    }
-
-    get sentences() {
+    getSentences() {
         return(this.sentences);
     }
-
-    /* End of getters */
 
     /**
      * Initialise the state record to given text

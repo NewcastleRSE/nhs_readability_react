@@ -2969,5 +2969,5 @@ const easyWords = [
   "you've",
 ];
 
-export default { punctuationRe, singleWhitespaceRe, multiWhitespaceRe, localeLang, sentenceComplexityThreshold, easyWords };
+export { punctuationRe, singleWhitespaceRe, multiWhitespaceRe, localeLang, sentenceComplexityThreshold, ukReadingAgeCorrection, easyWords };
 

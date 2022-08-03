@@ -3,7 +3,7 @@
  */
 
 import { syllable } from "syllable";
-import { localeLang, multiWhitespaceRe, sentenceComplexityThreshold } from './RegularExpressions';
+import { localeLang, multiWhitespaceRe, sentenceComplexityThreshold } from './Constants';
 
 /** 
  * @classdesc Class to model a sentence
@@ -23,11 +23,17 @@ export default class Sentence {
         let words = [];
         let trimmed = this.text.trim().toLocaleLowerCase(localeLang);
         if (trimmed != '') {
-            let words = trimmed.split(multiWhitespaceRe);
-            if (syllableThreshold > 1) {
-                words = words.filter(w => syllable(w) >= syllableThreshold);
+            words = trimmed.split(multiWhitespaceRe);
+            console.log('Words before', words);
+            if (syllableThreshold > 1) {                
+                words = words.filter(w => {
+                    const syllables = syllable(w);
+                    console.log(syllables, 'syllables in word', w, 'threshold is', syllableThreshold, 'function return', syllables >= syllableThreshold);
+                    return(syllables >= syllableThreshold);
+                });                
             }
-        }   
+        }
+        console.log('Words after', words);  
         return(words);
     }
 
