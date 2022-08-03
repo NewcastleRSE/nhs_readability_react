@@ -46,6 +46,7 @@ export default class ParagraphRecord {
         let newHash = this._hashCode(text);
         if (newHash != this.hashCode) {
             /* Text has changed => recompute all fields */
+            console.log('Hash code discrepancy - new: ', newHash, 'old: ', this.hashCode, '=> changes have occurred');
             Object.assign(this, {
                 hashCode: newHash,
                 nChars: text.length,
@@ -53,6 +54,9 @@ export default class ParagraphRecord {
                 nPunctuation: (text.match(punctuationRe) || []).length,
                 sentences: this._splitIntoSentences(text)
             })
+        } else {
+            //TODO this is never happening, so wonder why?
+            console.log('Hash codes equal => no change');
         }
     }
 
@@ -101,7 +105,9 @@ export default class ParagraphRecord {
         if (trimmed != '') {
             let sentenceTexts = trimmed.split(punctuationRe).map(s => s.trim());
             sentenceTexts.forEach(st => {
-                sentences.push(new Sentence(st));
+                if (st != '') {
+                    sentences.push(new Sentence(st));
+                }                
             });
         }
         return(sentences);

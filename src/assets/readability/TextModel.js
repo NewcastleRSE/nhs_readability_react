@@ -95,7 +95,7 @@ export default class TextModel {
                         this.nPunctuation += paraRecord.nPunctuation;
                         this.nWords += paraRecord.wordCount(1);
                         this.nSyllables += paraRecord.syllableCount();
-                        //this.nPolySyllables += paraRecord.wordCount(3);
+                        this.nPolySyllables += paraRecord.wordCount(3);
                         this.nSentences += paraRecord.getSentences().length;
                         if (blockText.trim().length > 0) {
                             /* draft-js will create paragraphs containing a single carriage return, not very useful */
