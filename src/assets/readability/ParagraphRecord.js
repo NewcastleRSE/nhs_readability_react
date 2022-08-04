@@ -43,6 +43,10 @@ export default class ParagraphRecord {
      * @param {String} text 
      */
     setText(text) {
+
+        console.group('setText()');
+        console.log('Initialise paragraph record to', text);
+
         let newHash = this._hashCode(text);
         if (newHash != this.hashCode) {
             /* Text has changed => recompute all fields */
@@ -58,6 +62,9 @@ export default class ParagraphRecord {
             //TODO this is never happening, so wonder why?
             console.log('Hash codes equal => no change');
         }
+
+        console.log(JSON.stringify(this));
+        console.groupEnd();
     }
 
     /**

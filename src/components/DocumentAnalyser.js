@@ -163,6 +163,51 @@ const metricListItems = [
     }
 ];
 
+const readabilityListItems = [
+    {
+        key: 1,
+        id: 'readingTime',
+        primary: 'Average reading time',
+        help: 'Estimated reading time for document, based on a 250 words per minute average'
+    },
+    {
+        key: 2,
+        id: 'smogIndex',
+        primary: 'SMOG Index',
+        help: `
+            <p>Returns the SMOG index of the given text. This is a grade formula in that a score of 9.3 means that a US ninth grader would be able to read the document.
+            Texts of fewer than 30 sentences are statistically invalid, because the SMOG formula was normed on 30-sentence samples</p>
+            Further reading on <a href="https://en.wikipedia.org/wiki/SMOG" target="_blank">Wikipedia</a>
+        `
+    },
+    {
+        key: 3,
+        id: 'ukReadingAge',
+        primary: 'Estimated UK Reading Age',
+        help: `
+            <p>The US grade system is translated into a UK school reading age via the following table:</p>
+            <table class="table is-fullwidth">
+                <tr><th>Year in<br/>England</th><th>Student age</th><th>US grade</th></tr>
+                <tr><td>Nursery</td><td>3-4</td><td>Preschool</td></tr>
+                <tr><td>Reception</td><td>4-5</td><td>Preschool</td></tr>
+                <tr><td>Year 2</td><td>6-7</td><td>Grade 1</td></tr>
+                <tr><td>Year 3</td><td>7-8</td><td>Grade 2</td></tr>
+                <tr><td>Year 4</td><td>8-9</td><td>Grade 3</td></tr>
+                <tr><td>Year 5</td><td>9-10</td><td>Grade 4</td></tr>
+                <tr><td>Year 6</td><td>10-11</td><td>Grade 5</td></tr>
+                <tr><td>Year 7</td><td>11-12</td><td>Grade 6</td></tr>
+                <tr><td>Year 8</td><td>12-13</td><td>Grade 7</td></tr>
+                <tr><td>Year 9</td><td>13-14</td><td>Grade 8</td></tr>
+                <tr><td>Year 10</td><td>14-15</td><td>Grade 9</td></tr>
+                <tr><td>Year 11</td><td>15-16</td><td>Grade 10</td></tr>
+                <tr><td>Year 12</td><td>16-17</td><td>Grade 11</td></tr>
+                <tr><td>Year 13</td><td>17-18</td><td>Grade 12</td></tr>
+            </table>                    
+        `
+    }
+];
+
+
 const textModel = new TextModel();
 
 export default class DocumentAnalyser extends React.Component {
@@ -178,6 +223,11 @@ export default class DocumentAnalyser extends React.Component {
                 nPolySyllables: 0,
                 nSentences: 0,
                 nParagraphs: 0
+            },
+            readability: {
+                readingTime: 0,
+                smogIndex: 0,
+                ukReadingAge: 0
             }
         };
     }
@@ -191,9 +241,17 @@ export default class DocumentAnalyser extends React.Component {
                             inlineToolbar={true}
                             onChange={ (newState) => {
                                 textModel.stateUpdate(newState);
+                                /* Set basic document metrics */
                                 const newMetrics = textModel.getMetrics();
                                 console.log(newMetrics);
                                 this.setState({ 'metrics': newMetrics });
+                                /* Set readability metrics */
+                                const smog = textModel.smogIndex();
+                                this.setState({'readability': {
+                                    readingTime: textModel.averageReadingTime(),
+                                    smogIndex: smog,
+                                    ukReadingAge: textModel.toUKReadingAge(smog)
+                                }});
                             } }
                         />
                     </WhitePaper>
@@ -210,6 +268,13 @@ export default class DocumentAnalyser extends React.Component {
                         <List sx={{ width: '100%' }} subheader={<PanelListSubheader caption="Current Document Metrics" />}>
                             {metricListItems.map((mli) => (
                                 <MetricListItem key={mli.key} id={mli.id} primary={mli.primary} value={this.state.metrics[mli.id]} />
+                            ))}
+                        </List>
+                    </WhitePaper>
+                    <WhitePaper elevation={5}>
+                        <List sx={{ width: '100%' }} subheader={<PanelListSubheader caption="Readability Metrics" />}>
+                            {readabilityListItems.map((rli) => (
+                                <MetricListItem key={rli.key} id={rli.id} primary={rli.primary} value={this.state.readability[rli.id]} />
                             ))}
                         </List>
                     </WhitePaper>

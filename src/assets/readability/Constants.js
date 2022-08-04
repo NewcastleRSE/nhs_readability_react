@@ -13,6 +13,9 @@ const localeLang = "en-UK";
 /* Sentence complexity threshold (SMOG value > which sentence is deemed complex) */
 const sentenceComplexityThreshold = 4.0;
 
+/* Average words per minute reading time */
+const averageReadingWordsPerMinute = 250;
+
 /* Conversion from US grade level to UK reading age */
 const ukReadingAgeCorrection = 5;
 
@@ -2969,5 +2972,5 @@ const easyWords = [
   "you've",
 ];
 
-export { punctuationRe, singleWhitespaceRe, multiWhitespaceRe, localeLang, sentenceComplexityThreshold, ukReadingAgeCorrection, easyWords };
+export { punctuationRe, singleWhitespaceRe, multiWhitespaceRe, localeLang, sentenceComplexityThreshold, ukReadingAgeCorrection, averageReadingWordsPerMinute, easyWords };
 

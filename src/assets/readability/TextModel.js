@@ -4,7 +4,7 @@
 
 import { syllable } from 'syllable';
 import pluralize from 'pluralize';
-import { localeLang, easyWords, ukReadingAgeCorrection } from './Constants';
+import { localeLang, easyWords, ukReadingAgeCorrection, averageReadingWordsPerMinute } from './Constants';
 import { ContentState, EditorState } from 'draft-js';
 import ParagraphRecord from './ParagraphRecord';
 
@@ -19,9 +19,6 @@ const GLOBAL_COUNT_INITIALISER = {
     nSentences: 0,
     nParagraphs: 0
 };
-
-/* Conversion from US grade level to UK reading age */
-const UK_READING_AGE_CORRECTION = 5;
 
 /** 
  * @classdesc Class to model text a sequence of queryable sentences
@@ -60,6 +57,7 @@ export default class TextModel {
         let changeType = newEditorState.getLastChangeType();
         switch(changeType) {
 
+            case null:
             case 'adjust-depth':
             case 'apply-entity':
             case 'change-block-data':
@@ -89,7 +87,8 @@ export default class TextModel {
                         let paraRecord = this._paragraphRecord(blockKey, blockText);
                         console.log('Check block', blockKey, 'for changes...');
                         console.log('Existing state record:\n', paraRecord);
-                                                
+                                        
+                        /* Basic metrics */
                         this.nCharacters += paraRecord.nChars;
                         this.nSpaces += paraRecord.nSpaces;
                         this.nPunctuation += paraRecord.nPunctuation;
@@ -104,12 +103,18 @@ export default class TextModel {
                         liveKeys.push(blockKey);
                     });
 
+                    console.log('Model state', JSON.stringify(this.modelState));
+                    console.log('Currently live block keys', liveKeys);
+
                     /* Delete all paragraph records for dead blocks */
+                    console.log('Cleaning up dead block keys...');
                     Object.keys(this.modelState).forEach(k => {
-                        if (!(k in liveKeys)) {
+                        if (!liveKeys.includes(k)) {
+                            console.log('Key', k, 'is dead - removing');
                             delete this.modelState[k];
                         }
                     });
+                    console.log('Finished');
                 } else {
                     console.log('Content state has not changed');
                 }
@@ -228,6 +233,26 @@ export default class TextModel {
             sentencesPerWord = this._roundFloat((this.nSentences / this.nWords), 2);
         }
         return(sentencesPerWord);
+    }
+
+    /**
+     * Output a formatted estimated reading time for a document
+     * @returns reading time in minutes
+     */
+    averageReadingTime() {
+        let art = 'Unknown';
+        const wordsPerSec = averageReadingWordsPerMinute / 60.0;
+        let date = new Date(0);
+        date.setSeconds(Math.ceil(this.nWords / wordsPerSec));
+        let [h, m, s] = date.toISOString().substring(11, 19).split(':').map(c => parseInt(c));
+        if (h == 0) {
+            /* Minutes/seconds */
+            art = `${m} min ${s} sec`;
+        } else {
+            /* Hours/minutes */
+            art = `${h} hr ${m} min`;
+        }
+        return(art);
     }
 
     /**
