@@ -20,8 +20,9 @@ export default class ParagraphRecord {
      *     sentences    -- array of Sentence objects representing the sentences contained in paragraph block
      * }
      * @param {String} initialText model initialisation text
+     * @param {Object} switchStates checkbox states for highlighting
      */
-    constructor(initialText = '') {
+    constructor(initialText = '', switchStates) {
         Object.assign(this, {
             hashCode: 0,
             nChars: 0,
@@ -30,7 +31,7 @@ export default class ParagraphRecord {
             sentences: [] 
         });
         if (initialText != '') {
-            this.setText(initialText);
+            this.setText(initialText, switchStates);
         }
     }
 
@@ -41,8 +42,9 @@ export default class ParagraphRecord {
     /**
      * Initialise the state record to given text
      * @param {String} text 
+     * @param {Object} switchStates checkbox states for highlighting
      */
-    setText(text) {
+    setText(text, switchStates) {
 
         console.group('setText()');
         console.log('Initialise paragraph record to', text);
@@ -56,10 +58,9 @@ export default class ParagraphRecord {
                 nChars: text.length,
                 nSpaces: (text.match(singleWhitespaceRe) || []).length,
                 nPunctuation: (text.match(punctuationRe) || []).length,
-                sentences: this._splitIntoSentences(text)
+                sentences: this._splitIntoSentences(text, switchStates)
             })
         } else {
-            //TODO this is never happening, so wonder why?
             console.log('Hash codes equal => no change');
         }
 
@@ -104,9 +105,10 @@ export default class ParagraphRecord {
     /**
      * Decompose text into individual (trimmed) sentences
      * @param {String} text
+     * @param {Object} switchStates checkbox states for highlighting
      * @return {Array<Sentence>}
      */
-    _splitIntoSentences(text) {
+    _splitIntoSentences(text, switchStates) {
         let sentences = [];
         let trimmed = text.trim();
         if (trimmed != '') {

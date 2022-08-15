@@ -1,21 +1,21 @@
 const switchListItems = [
     {
         key: 1,
-        id: 'show-complex-sentences',
+        id: 'showComplexSentences',
         primary: 'Show complex sentences',
         help: 'Highlight sentences which are too complex and show potential alternatives',
         defaultChecked: true
     },
     {
         key: 2,
-        id: 'show-medical-terms',
-        primary: 'Highlight harder words',
+        id: 'highlightPrismWords',
+        primary: 'Highlight PRISM-listed words',
         help: 'Highlight words in the PRISM readability Toolkit having a simpler alternative word or phrase',
         defaultChecked: true
     },
     {
         key: 3,
-        id: 'include-medical-terms',
+        id: 'includeMedicalTerms',
         primary: 'Include medical terms in grading',
         help: 'Compute the SMOG Index and Reading Age including all the medical terms',
         defaultChecked: true

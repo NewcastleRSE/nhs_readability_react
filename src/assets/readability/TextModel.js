@@ -5,7 +5,7 @@
 import { syllable } from 'syllable';
 import pluralize from 'pluralize';
 import { localeLang, easyWords, ukReadingAgeCorrection, averageReadingWordsPerMinute } from './Constants';
-import { ContentState, EditorState } from 'draft-js';
+import { CompositeDecorator, ContentState, EditorState } from 'draft-js';
 import ParagraphRecord from './ParagraphRecord';
 
 /* Document-level counts */
@@ -28,11 +28,12 @@ export default class TextModel {
     /**
      * Creates analysis record of paragraph text indexed by ContentBlock key, containing individual StateRecords
      * @param {String} initialText model initialisation text
+     * @param {CompositeDecorator} compDecorator
      */
-    constructor(initialText = '') {
-        let state = EditorState.createEmpty();
+    constructor(initialText = '', compDecorator) {
+        let state = EditorState.createEmpty(compDecorator);
         if (initialText != '') {
-            state = EditorState.createWithContent(ContentState.createFromText(initialText));
+            state = EditorState.createWithContent(ContentState.createFromText(initialText),);
         }
         Object.assign(this, GLOBAL_COUNT_INITIALISER, {
             lang: localeLang,
@@ -47,12 +48,14 @@ export default class TextModel {
 
     /**
      * Update the text model state based on a new EditorState
-     * @param {EditorState} newEditorState 
+     * @param {EditorState} newEditorState
+     * @param {Object} switchStates
      */
-    stateUpdate(newEditorState) {
+    stateUpdate(newEditorState, switchStates) {
 
         console.group('stateUpdate()');
         console.log('New editor state:\n', newEditorState);
+        console.log('Current switch states:\n', switchStates);
 
         let changeType = newEditorState.getLastChangeType();
         switch(changeType) {
@@ -84,7 +87,7 @@ export default class TextModel {
 
                         let blockKey = bm.getKey();
                         let blockText = bm.getText();
-                        let paraRecord = this._paragraphRecord(blockKey, blockText);
+                        let paraRecord = this._paragraphRecord(blockKey, blockText, switchStates);
                         console.log('Check block', blockKey, 'for changes...');
                         console.log('Existing state record:\n', paraRecord);
                                         
@@ -153,13 +156,14 @@ export default class TextModel {
      * Return existing paragraph state record for key, or create a new one if not present
      * @param {String} key 
      * @param {String} text
+     * @param {Object} switchStates
      * @return {Object}
      */
-     _paragraphRecord(key, text) {
+     _paragraphRecord(key, text, switchStates) {
         if (!(key in this.modelState)) {
-            this.modelState[key] = new ParagraphRecord(text);
+            this.modelState[key] = new ParagraphRecord(text, switchStates);
         } else {
-            this.modelState[key].setText(text);
+            this.modelState[key].setText(text, switchStates);
         }
         return(this.modelState[key]);
     }

@@ -4,13 +4,14 @@ import { Grid, Paper, List, ListSubheader, ListItem, ListItemIcon, ListItemText 
 import { styled } from '@mui/material/styles';
 import { grey } from '@mui/material/colors';
 import Switch from '@mui/material/Switch';
-import { Help } from '@mui/icons-material';
+import { Help, ThreeSixty } from '@mui/icons-material';
 import TextModel from '../assets/readability/TextModel';
 import { switchListItems, metricListItems, readabilityListItems } from '../assets/readability/PanelItems';
 import tippy from 'tippy.js';
 import "tippy.js/dist/tippy.css";
 import "tippy.js/animations/scale.css";
 import 'tippy.js/themes/material.css';
+import { CompositeDecorator, EditorState } from 'draft-js';
 
 const darkGrey = grey.A700;
 const lightGrey = grey.A100;
@@ -85,21 +86,23 @@ const HelpIcon = props => {
     const { help, ...other } = props;
     return (
         <HelpListitem>
-            <Help data-tippy-content={help} data-tippy-placement="top" />
+            <Help data-tippy-content={help} data-tippy-placement="left" />
         </HelpListitem>
     );
 }
 
 const SwitchListItem = props => {
-    const { id, primary, help, defaultChecked } = props;
+    const { id, primary, help, defaultChecked, onChange } = props;
     const sx = { color: darkGrey, background: lightGrey };
     return (
         <ListItem>
             <HelpIcon help={help} />
-            <ListItemText id={id} primary={primary} sx={sx} />
+            <ListItemText primary={primary} sx={sx} />
             <AntSwitch
+                id={id}
                 color='default'
                 defaultChecked={defaultChecked}
+                onChange={onChange}
             />
         </ListItem>
     );
@@ -117,12 +120,33 @@ const MetricListItem = props => {
     );
 };
 
-const textModel = new TextModel();
+const Highlighter = props => {
+    return (
+        <span {...props} style={{background:'#ff0000'}}>{props.children}</span>
+    );
+};
+
+const highlightingModel = new CompositeDecorator([
+    {
+        strategy: (contentBlock, callback, contentState) => {
+            console.log('**** In decorator strategy',contentBlock, contentState);
+        }, 
+        component: Highlighter
+    }
+]);
+
+//TODO - move all the components into PanelItems
 
 export default class DocumentAnalyser extends React.Component {
     constructor(props) {
         super(props);
-        this.state = { 
+        this.state = {
+            editorState: EditorState.createEmpty(highlightingModel),         
+            switches: {
+                showComplexSentences: (switchListItems.find(item => item.id == 'showComplexSentences') || {}).defaultChecked,
+                highlightPrismWords: (switchListItems.find(item => item.id == 'highlightPrismWords') || {}).defaultChecked,
+                includeMedicalTerms: (switchListItems.find(item => item.id == 'includeMedicalTerms') || {}).defaultChecked
+            },
             metrics: {
                 nCharacters: 0,
                 nSpaces: 0,
@@ -139,6 +163,8 @@ export default class DocumentAnalyser extends React.Component {
                 ukReadingAge: 0
             }
         };
+        this.editor = React.createRef();
+        this.textModel = new TextModel();
     }
     componentDidMount() {
         tippy.setDefaultProps({
@@ -150,6 +176,15 @@ export default class DocumentAnalyser extends React.Component {
             maxWidth: '20rem'
         });
         tippy('[data-tippy-content]');
+        /* Enable click anywhere in editor to give focus initially - eliminates unintuitive behaviour which focusses only on click over placeholder text */
+        document.querySelector('div#mui-rte-root').addEventListener('click', () => this.editor.current.focus());
+
+    }
+    onSwitchChange(evt) {
+        let currentSwitchState = this.state.switches;
+        currentSwitchState[evt.target.id] = evt.target.checked;
+        this.setState({'switches': currentSwitchState});
+        console.log('Current switch state', this.state.switches);
     }
     render() {
         return (
@@ -157,13 +192,14 @@ export default class DocumentAnalyser extends React.Component {
                 <Grid item xs={12} sm={12} md={9}>
                     <WhitePaper elevation={5}>
                         <MUIRichTextEditor
+                            ref={ this.editor }
                             label='&nbsp;Type or paste document here'
                             inlineToolbar={true}
                             onChange={ (newState) => {
-                                textModel.stateUpdate(newState);
+                                textModel.stateUpdate(newState, this.state.switches);
                                 /* Set basic document metrics */
                                 const newMetrics = textModel.getMetrics();
-                                console.log(newMetrics);
+                                console.log(newMetrics);                                
                                 this.setState({ 'metrics': newMetrics });
                                 /* Set readability metrics */
                                 const smog = textModel.smogIndex();
@@ -173,6 +209,7 @@ export default class DocumentAnalyser extends React.Component {
                                     ukReadingAge: textModel.toUKReadingAge(smog)
                                 }});
                             } }
+                            onFocus={ () => { console.log('Focus') } }
                         />
                     </WhitePaper>
                 </Grid>
@@ -180,7 +217,13 @@ export default class DocumentAnalyser extends React.Component {
                     <WhitePaper elevation={5}>
                         <List sx={{ width: '100%' }} subheader={<PanelListSubheader caption="Document Analysis Options" />}>
                             {switchListItems.map((sli) => (
-                                <SwitchListItem key={sli.key} id={sli.id} primary={sli.primary} help={sli.help} defaultChecked={sli.defaultChecked} />
+                                <SwitchListItem 
+                                    key={sli.key} 
+                                    id={sli.id} 
+                                    primary={sli.primary} 
+                                    help={sli.help} 
+                                    defaultChecked={sli.defaultChecked} 
+                                    onChange={this.onSwitchChange.bind(this)} />
                             ))}
                         </List>
                     </WhitePaper>
