@@ -13,26 +13,23 @@ export default class ParagraphRecord {
     /**
      * Create a new state record containing the data:
      * {
+     *     block        -- ContentBlock
      *     hashCode     -- simple checksum on plain text of ContentBlock, used to quickly ascertain if block has changed
      *     nChars       -- number of characters in block text
      *     nSpaces      -- number of whitespace characters in block text
      *     nPunctuation -- number of punctuation characters in block text
      *     sentences    -- array of Sentence objects representing the sentences contained in paragraph block
      * }
-     * @param {String} initialText model initialisation text
-     * @param {Object} switchStates checkbox states for highlighting
      */
-    constructor(initialText = '', switchStates) {
+    constructor() {
         Object.assign(this, {
+            block: null,
             hashCode: 0,
             nChars: 0,
             nSpaces: 0,
             nPunctuation: 0,
             sentences: [] 
         });
-        if (initialText != '') {
-            this.setText(initialText, switchStates);
-        }
     }
 
     getSentences() {
@@ -41,30 +38,34 @@ export default class ParagraphRecord {
 
     /**
      * Initialise the state record to given text
-     * @param {String} text 
-     * @param {Object} switchStates checkbox states for highlighting
+     * @param {ContentBlock} block 
      */
-    setText(text, switchStates) {
+    stateUpdate(block) {
 
         console.group('setText()');
-        console.log('Initialise paragraph record to', text);
+        console.log('Paragraph state record before update:\n', this);
+
+        const key = block.getKey();
+        const text = block.getText();
+        console.log('Check block', key, 'for changes...');
 
         let newHash = this._hashCode(text);
-        if (newHash != this.hashCode) {
+        if (newHash != this.hashCode) {            
             /* Text has changed => recompute all fields */
             console.log('Hash code discrepancy - new: ', newHash, 'old: ', this.hashCode, '=> changes have occurred');
             Object.assign(this, {
+                block: block,
                 hashCode: newHash,
                 nChars: text.length,
                 nSpaces: (text.match(singleWhitespaceRe) || []).length,
                 nPunctuation: (text.match(punctuationRe) || []).length,
-                sentences: this._splitIntoSentences(text, switchStates)
+                sentences: this._splitIntoSentences(text)
             })
         } else {
             console.log('Hash codes equal => no change');
         }
 
-        console.log(JSON.stringify(this));
+        console.log('Paragraph state record after update:\n', this);
         console.groupEnd();
     }
 
@@ -103,12 +104,24 @@ export default class ParagraphRecord {
     }
 
     /**
+     * Check for a trivial and ultimately pointless paragraph created by draft-js (e.g. contains only carriage return)
+     * @returns boolean true if paragraph block is null, or text only contains whitespace
+     */
+    isNullParagraph() {
+        let trivial = true;
+        if (this.block != null) {
+            const text = this.block.getText();
+            trivial = text.trim().length == 0;
+        }
+        return(trivial);
+    }
+
+    /**
      * Decompose text into individual (trimmed) sentences
      * @param {String} text
-     * @param {Object} switchStates checkbox states for highlighting
      * @return {Array<Sentence>}
      */
-    _splitIntoSentences(text, switchStates) {
+    _splitIntoSentences(text) {
         let sentences = [];
         let trimmed = text.trim();
         if (trimmed != '') {

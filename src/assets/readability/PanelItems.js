@@ -1,3 +1,9 @@
+import { styled } from '@mui/material/styles';
+import { grey } from '@mui/material/colors';
+import Switch from '@mui/material/Switch';
+import { Help } from '@mui/icons-material';
+import { Paper, ListSubheader, ListItem, ListItemIcon, ListItemText } from '@mui/material';
+
 const switchListItems = [
     {
         key: 1,
@@ -99,4 +105,124 @@ const readabilityListItems = [
     }
 ];
 
-export { switchListItems, metricListItems, readabilityListItems };
+const darkGrey = grey.A700;
+const lightGrey = grey.A100;
+
+const WhitePaper = props => {
+    const { elevation, ...other } = props;
+    return <Paper elevation={elevation} sx={{ background: lightGrey }} {...other} />
+};
+
+const PanelListSubheader = props => {
+    const { caption, ...other } = props;
+    return (
+        <ListSubheader sx={{
+            background: darkGrey,
+            color: lightGrey,
+            fontSize: 'large',
+            marginTop: '8px',
+            height: '40px',
+            lineHeight: '40px'
+        }} {...other}>{caption}
+        </ListSubheader>
+    );
+};
+
+/* Thanks to: https://mui.com/material-ui/react-switch/ */
+const AntSwitch = styled(Switch)(({ theme }) => ({
+    width: 28,
+    height: 16,
+    padding: 0,
+    display: 'flex',
+    '&:active': {
+        '& .MuiSwitch-thumb': {
+            width: 15,
+        },
+        '& .MuiSwitch-switchBase.Mui-checked': {
+            transform: 'translateX(9px)',
+        },
+    },
+    '& .MuiSwitch-switchBase': {
+        padding: 2,
+        '&.Mui-checked': {
+            transform: 'translateX(12px)',
+            color: '#fff',
+            '& + .MuiSwitch-track': {
+                opacity: 1,
+                backgroundColor: theme.palette.primary.dark,
+            },
+        },
+    },
+    '& .MuiSwitch-thumb': {
+        boxShadow: '0 2px 4px 0 rgb(0 35 11 / 20%)',
+        width: 12,
+        height: 12,
+        borderRadius: 6,
+        transition: theme.transitions.create(['width'], {
+            duration: 200,
+        }),
+    },
+    '& .MuiSwitch-track': {
+        borderRadius: 16 / 2,
+        opacity: 1,
+        backgroundColor: theme.palette.grey[500],
+        boxSizing: 'border-box',
+    },
+}));
+
+const HelpListitem = styled(ListItemIcon)(({theme}) => ({
+    color: theme.palette.info.dark
+}));
+
+const HelpIcon = props => {
+    const { help, ...other } = props;
+    return (
+        <HelpListitem>
+            <Help data-tippy-content={help} data-tippy-placement="left" />
+        </HelpListitem>
+    );
+}
+
+const SwitchListItem = props => {
+    const { id, primary, help, defaultChecked, onChange } = props;
+    const sx = { color: darkGrey, background: lightGrey };
+    return (
+        <ListItem>
+            <HelpIcon help={help} />
+            <ListItemText primary={primary} sx={sx} />
+            <AntSwitch
+                id={id}
+                color='default'
+                defaultChecked={defaultChecked}
+                onChange={onChange}
+            />
+        </ListItem>
+    );
+};
+
+const MetricListItem = props => {
+    const { id, primary, help, value } = props;
+    const sx = { color: darkGrey, background: lightGrey };
+    return (
+        <ListItem>
+            <HelpIcon help={help} />
+            <ListItemText id={id} primary={primary} sx={sx} />
+            <ListItemText primary={value} sx={ Object.assign({}, sx, { textAlign: 'right', paddingRight: '1em' }) } />
+        </ListItem>
+    );
+};
+
+const getSwitchByName = (id) => {
+    return(switchListItems.find(item => item.id == id) || {});
+};
+
+export { 
+    switchListItems, 
+    metricListItems, 
+    readabilityListItems,
+    WhitePaper,
+    PanelListSubheader,
+    SwitchListItem,
+    MetricListItem,
+    getSwitchByName
+};

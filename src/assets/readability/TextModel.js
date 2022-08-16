@@ -5,7 +5,7 @@
 import { syllable } from 'syllable';
 import pluralize from 'pluralize';
 import { localeLang, easyWords, ukReadingAgeCorrection, averageReadingWordsPerMinute } from './Constants';
-import { CompositeDecorator, ContentState, EditorState } from 'draft-js';
+import { EditorState } from 'draft-js';
 import ParagraphRecord from './ParagraphRecord';
 
 /* Document-level counts */
@@ -28,34 +28,24 @@ export default class TextModel {
     /**
      * Creates analysis record of paragraph text indexed by ContentBlock key, containing individual StateRecords
      * @param {String} initialText model initialisation text
-     * @param {CompositeDecorator} compDecorator
      */
-    constructor(initialText = '', compDecorator) {
-        let state = EditorState.createEmpty(compDecorator);
-        if (initialText != '') {
-            state = EditorState.createWithContent(ContentState.createFromText(initialText),);
-        }
+    constructor() {
         Object.assign(this, GLOBAL_COUNT_INITIALISER, {
             lang: localeLang,
-            editorState: state,  
+            editorState: null,  
             modelState: {},         
             easyWordSet: new Set(easyWords)            
-        });
-        if (initialText != '') {
-            this.stateUpdate(state);
-        }
+        });        
     }
 
     /**
      * Update the text model state based on a new EditorState
      * @param {EditorState} newEditorState
-     * @param {Object} switchStates
      */
-    stateUpdate(newEditorState, switchStates) {
+    stateUpdate(newEditorState) {
 
         console.group('stateUpdate()');
         console.log('New editor state:\n', newEditorState);
-        console.log('Current switch states:\n', switchStates);
 
         let changeType = newEditorState.getLastChangeType();
         switch(changeType) {
@@ -73,7 +63,7 @@ export default class TextModel {
             default:
                 /* Text changes may have occurred */
                 console.log('Change type', changeType, '=> further checks for text changes required');
-                const currentContentState = this.editorState.getCurrentContent();
+                const currentContentState = this._getCurrentEditorContent();
                 const newContentState = newEditorState.getCurrentContent();
                 if (currentContentState != newContentState) {  
 
@@ -83,30 +73,30 @@ export default class TextModel {
 
                     /* Content has changed => update all metrics */
                     console.log('Text changes have occurred');
-                    newContentState.getBlockMap().forEach(bm => {
+                    newContentState.getBlockMap().forEach(block => {
 
-                        let blockKey = bm.getKey();
-                        let blockText = bm.getText();
-                        let paraRecord = this._paragraphRecord(blockKey, blockText, switchStates);
-                        console.log('Check block', blockKey, 'for changes...');
-                        console.log('Existing state record:\n', paraRecord);
-                                        
-                        /* Basic metrics */
-                        this.nCharacters += paraRecord.nChars;
-                        this.nSpaces += paraRecord.nSpaces;
-                        this.nPunctuation += paraRecord.nPunctuation;
-                        this.nWords += paraRecord.wordCount(1);
-                        this.nSyllables += paraRecord.syllableCount();
-                        this.nPolySyllables += paraRecord.wordCount(3);
-                        this.nSentences += paraRecord.getSentences().length;
-                        if (blockText.trim().length > 0) {
-                            /* draft-js will create paragraphs containing a single carriage return, not very useful */
+                        /* Determine if existing paragraph record for this block */
+                        let blockKey = block.getKey();
+                        this.modelState[blockKey] = this.modelState[blockKey] || new ParagraphRecord();     
+                        const paraRecord = this.modelState[blockKey];                   
+                        paraRecord.stateUpdate(block);
+
+                        /* draft-js will create paragraphs containing a single carriage return, not very useful */
+                        if (!this.modelState[blockKey].isNullParagraph()) {                            
+                            /* Update basic metrics */                            
+                            this.nCharacters += paraRecord.nChars;
+                            this.nSpaces += paraRecord.nSpaces;
+                            this.nPunctuation += paraRecord.nPunctuation;
+                            this.nWords += paraRecord.wordCount(1);
+                            this.nSyllables += paraRecord.syllableCount();
+                            this.nPolySyllables += paraRecord.wordCount(3);
+                            this.nSentences += paraRecord.getSentences().length;
                             this.nParagraphs++;
-                        }
+                        }                        
                         liveKeys.push(blockKey);
                     });
 
-                    console.log('Model state', JSON.stringify(this.modelState));
+                    console.log('Model state', this.modelState);
                     console.log('Currently live block keys', liveKeys);
 
                     /* Delete all paragraph records for dead blocks */
@@ -150,32 +140,6 @@ export default class TextModel {
             }
         }
         return(true);
-    }
-
-    /**
-     * Return existing paragraph state record for key, or create a new one if not present
-     * @param {String} key 
-     * @param {String} text
-     * @param {Object} switchStates
-     * @return {Object}
-     */
-     _paragraphRecord(key, text, switchStates) {
-        if (!(key in this.modelState)) {
-            this.modelState[key] = new ParagraphRecord(text, switchStates);
-        } else {
-            this.modelState[key].setText(text, switchStates);
-        }
-        return(this.modelState[key]);
-    }
-
-    /**
-     * Round a floating point number to 'dp' decimal places
-     * @param {float} num 
-     * @param {int} dp 
-     */
-    _roundFloat(num, dp = 2) {
-        let conversion = Math.pow(10, dp);
-        return(Math.round((num + Number.EPSILON) * conversion) / conversion);
     }
     
     /**
@@ -437,58 +401,6 @@ export default class TextModel {
     }
 
     /**
-     * Good guess at the present temnse of a verb
-     * @param {String} word 
-     * @returns present tense of verb
-     */
-    presentTense(word) {
-        let present = word;
-        if (word.length >= 6) {
-            if (word.endsWith('ed')) {
-                if (this.easyWordSet.has(word.slice(0, -1))) {
-                    /* 'easy' word ending in e */
-                    present = word.slice(0, -1); 
-                } else {
-                    /* Assume we remove 'ed' */
-                    present = word.slice(0, -2); 
-                }
-            }
-            if (word.endsWith('ing')) {
-                /* E.g. forcing -> force */
-                let suffixIngToE = word.slice(0, -3) + 'e';
-                if (this.easyWordSet.has(suffixIngToE))
-                    present = suffixIngToE;
-                else
-                    present = word.slice(0, -3);
-            }
-        }
-        return(present);
-    }
-
-    /**
-     * Dale-Chall readability computation
-     * @param {int} syllableThreshold 
-     * @returns 
-     */
-    _daleChallDifficultWords(syllableThreshold = 2) {
-        let ret = {
-            total: 0,
-            difficult: 0
-        };
-        this.forAllSentences(s => {
-            let sentenceWords = s.getWords();
-            ret.total += sentenceWords.length;
-            sentenceWords.forEach(word => {
-                let normalised = this.presentTense(pluralize(word.toLocaleLowerCase(), 1));
-                if (!this.easyWordSet.has(normalised) && syllable(word >= syllableThreshold)) {
-                    ret.difficult++;
-                }
-            });
-        });        
-        return(ret);
-    }
-
-    /**
      * Compute Dale-Chall readability score on current text
      * @returns Dale-Chall readability score
      */
@@ -537,6 +449,76 @@ export default class TextModel {
         console.debug('Gunning Fog Index', gfi);
         console.groupEnd();
         return(gfi);
+    }
+
+    /**
+     * Safe access to current editor state content
+     * @returns editor content
+     */
+    _getCurrentEditorContent() {
+        return(this.editorState == null ? null : this.editorState.getCurrentContent());
+    }
+
+    /**
+     * Good guess at the present tense of a verb
+     * @param {String} word 
+     * @returns present tense of verb
+     */
+     _presentTense(word) {
+        let present = word;
+        if (word.length >= 6) {
+            if (word.endsWith('ed')) {
+                if (this.easyWordSet.has(word.slice(0, -1))) {
+                    /* 'easy' word ending in e */
+                    present = word.slice(0, -1); 
+                } else {
+                    /* Assume we remove 'ed' */
+                    present = word.slice(0, -2); 
+                }
+            }
+            if (word.endsWith('ing')) {
+                /* E.g. forcing -> force */
+                let suffixIngToE = word.slice(0, -3) + 'e';
+                if (this.easyWordSet.has(suffixIngToE))
+                    present = suffixIngToE;
+                else
+                    present = word.slice(0, -3);
+            }
+        }
+        return(present);
+    }
+
+    /**
+     * Dale-Chall readability computation
+     * @param {int} syllableThreshold 
+     * @returns 
+     */
+    _daleChallDifficultWords(syllableThreshold = 2) {
+        let ret = {
+            total: 0,
+            difficult: 0
+        };
+        this.forAllSentences(s => {
+            let sentenceWords = s.getWords();
+            ret.total += sentenceWords.length;
+            sentenceWords.forEach(word => {
+                let normalised = this._presentTense(pluralize(word.toLocaleLowerCase(), 1));
+                if (!this.easyWordSet.has(normalised) && syllable(word >= syllableThreshold)) {
+                    ret.difficult++;
+                }
+            });
+        });        
+        return(ret);
+    }
+
+    /**
+     * Round a floating point number to 'dp' decimal places
+     * @param {float} num 
+     * @param {int} dp 
+     */
+    _roundFloat(num, dp = 2) {
+        let conversion = Math.pow(10, dp);
+        return(Math.round((num + Number.EPSILON) * conversion) / conversion);
     }
 
 }
