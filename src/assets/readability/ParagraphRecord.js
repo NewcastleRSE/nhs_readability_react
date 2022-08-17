@@ -4,6 +4,7 @@
 
 import Sentence from './Sentence';
 import { punctuationRe, singleWhitespaceRe } from './Constants';
+import { CharacterMetadata } from 'draft-js';
  
 /** 
  * @classdesc Class to model a ContentBlock state record
@@ -39,8 +40,9 @@ export default class ParagraphRecord {
     /**
      * Initialise the state record to given text
      * @param {ContentBlock} block 
+     * @param {Object} highlightStates -- { <switch_name>: { switchState : t|f, highlightEntity: <entity_key> }, ... }
      */
-    stateUpdate(block) {
+    stateUpdate(block, highlightStates) {
 
         console.group('setText()');
         console.log('Paragraph state record before update:\n', this);
@@ -60,7 +62,16 @@ export default class ParagraphRecord {
                 nSpaces: (text.match(singleWhitespaceRe) || []).length,
                 nPunctuation: (text.match(punctuationRe) || []).length,
                 sentences: this._splitIntoSentences(text)
-            })
+            });
+            /* Update character metadata */
+            console.log('--- Character metadata:');
+            this.block.getCharacterList().forEach(cm => {
+                console.log(cm);
+                //CharacterMetadata.applyEntity();
+                CharacterMetadata.applyStyle(cm, 'BOLD');
+                console.log(cm.getStyle());
+            });
+            console.log('---End');
         } else {
             console.log('Hash codes equal => no change');
         }
@@ -123,6 +134,10 @@ export default class ParagraphRecord {
      */
     _splitIntoSentences(text) {
         let sentences = [];
+        let offset = text.search(/\S/);
+        if (offset >= 0) {
+            
+        }
         let trimmed = text.trim();
         if (trimmed != '') {
             let sentenceTexts = trimmed.split(punctuationRe).map(s => s.trim());
