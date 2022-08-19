@@ -3,16 +3,17 @@ import * as React from 'react';
 import { Grid, List } from '@mui/material';
 import TextModel from '../assets/readability/TextModel';
 import * as Panel from '../assets/readability/PanelItems';
+import { EditorState, ContentState, RichUtils, SelectionState } from 'draft-js';
 import tippy from 'tippy.js';
 import "tippy.js/dist/tippy.css";
 import "tippy.js/animations/scale.css";
 import 'tippy.js/themes/material.css';
-import { EditorState } from 'draft-js';
 
 export default class DocumentAnalyser extends React.Component {
     constructor(props) {
         super(props);
-        this.state = {            
+        this.state = {
+            editorState: EditorState.createEmpty(),          
             switches: {
                 showComplexSentences: Panel.getSwitchByName('showComplexSentences').defaultChecked,
                 highlightPrismWords: Panel.getSwitchByName('highlightPrismWords').defaultChecked,
@@ -35,10 +36,9 @@ export default class DocumentAnalyser extends React.Component {
             }
         };
         this.editor = React.createRef();
-        this.textModel = new TextModel();
+        this.textModel = new TextModel(this.state.switches);
     }
     componentDidMount() {
-        EditorState.createEmpty();
         tippy.setDefaultProps({
             theme: 'material',
             arrow: true,
@@ -53,10 +53,13 @@ export default class DocumentAnalyser extends React.Component {
 
     }
     onSwitchChange(evt) {
+        const changedSwitchName = evt.target.id;
+        const changedSwitchValue = evt.target.checked;
         let currentSwitchState = this.state.switches;
-        currentSwitchState[evt.target.id] = evt.target.checked;
+        currentSwitchState[changedSwitchName] = changedSwitchValue;
         this.setState({'switches': currentSwitchState});
-        console.log('Current switch state', this.state.switches);
+        console.log('Updated switch state', this.state.switches);
+        this.textModel.switchStateUpdate(changedSwitchName, changedSwitchValue);
     }
     render() {
         return (
@@ -67,17 +70,24 @@ export default class DocumentAnalyser extends React.Component {
                             ref={ this.editor }
                             label='&nbsp;Type or paste document here'
                             inlineToolbar={true}
+                            editorState={ this.state.editorState }
+                            customStyleMap={ {
+                                BOLD: {
+                                    fontWeight: 'bold'
+                                }
+                            }}
                             onChange={ (newState) => {
+                                this.setState({ 'editorState': newState } );
                                 this.textModel.stateUpdate(newState, this.state.switches);
                                 /* Set basic document metrics */
                                 this.setState({ 'metrics': this.textModel.getMetrics() });
                                 /* Set readability metrics */
                                 const smog = this.textModel.smogIndex();
-                                this.setState({'readability': {
+                                this.setState({ 'readability': {
                                     readingTime: this.textModel.averageReadingTime(),
                                     smogIndex: smog,
                                     ukReadingAge: this.textModel.toUKReadingAge(smog)
-                                }});
+                                }});                                                                          
                             } }
                             onFocus={ () => { console.log('Focus') } }
                         />

@@ -27,13 +27,21 @@ export default class TextModel {
 
     /**
      * Creates analysis record of paragraph text indexed by ContentBlock key, containing individual StateRecords
-     * @param {String} initialText model initialisation text
+     * @param {Object} switchState initial switch values { <switch_name1>: t|f, <switch_name2>: t|f,... }
      */
-    constructor() {
-        Object.assign(this, GLOBAL_COUNT_INITIALISER, {
+    constructor(switchState = {}) {
+        let highlightState = {};
+        for (let name in switchState) {
+            highlightState[name] = {
+                switchState: switchState[name],
+                highlightEntity: null
+            }
+        }
+        Object.assign(this, GLOBAL_COUNT_INITIALISER, {            
             lang: localeLang,
             editorState: null,  
-            modelState: {},         
+            modelState: {},
+            highlightState: highlightState,
             easyWordSet: new Set(easyWords)            
         });        
     }
@@ -64,7 +72,16 @@ export default class TextModel {
                 /* Text changes may have occurred */
                 console.log('Change type', changeType, '=> further checks for text changes required');
                 const currentContentState = this._getCurrentEditorContent();
-                const newContentState = newEditorState.getCurrentContent();
+                let newContentState = newEditorState.getCurrentContent();
+
+                /* Create persistent entities for the highlighting */
+                for (let name in this.highlightState) {
+                    if (this.highlightState[name].highlightEntity == null) {
+                        newContentState = newContentState.createEntity(name, 'MUTABLE', name);
+                        this.highlightState[name].highlightEntity = newContentState.getLastCreatedEntityKey();
+                    }
+                }
+
                 if (currentContentState != newContentState) {  
 
                     /* Recompute all global counts */
@@ -79,7 +96,7 @@ export default class TextModel {
                         let blockKey = block.getKey();
                         this.modelState[blockKey] = this.modelState[blockKey] || new ParagraphRecord();     
                         const paraRecord = this.modelState[blockKey];                   
-                        paraRecord.stateUpdate(block);
+                        paraRecord.stateUpdate(block, this.highlightState);
 
                         /* draft-js will create paragraphs containing a single carriage return, not very useful */
                         if (!this.modelState[blockKey].isNullParagraph()) {                            
@@ -118,6 +135,16 @@ export default class TextModel {
             
         console.dir('Updated model:\n', this);
         console.groupEnd();   
+    }
+
+    /**
+     * Act on change to switch state
+     * @param {String} switchName
+     * @param {boolean} switchValue
+     */
+    switchStateUpdate(switchName, switchValue) {
+        this.switchState[switchName] = switchValue;
+
     }
 
     /**

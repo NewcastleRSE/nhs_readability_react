@@ -7,11 +7,16 @@ import { localeLang, multiWhitespaceRe, sentenceComplexityThreshold } from './Co
 
 /** 
  * @classdesc Class to model a sentence
+ * @param {String} Text         -- sentence text
+ * @param {int} paraOffsetStart -- start offset within owning paragraph (ContentBlock)
+ * @param {int} paraOffsetEnd   -- end offset within owning paragraph (ContentBlock)
  */
 export default class Sentence {
 
-    constructor(text) {
+    constructor(text, paraOffsetStart, paraOffsetEnd) {
         this.text = text;
+        this.paraOffsetStart = paraOffsetStart;
+        this.paraOffsetEnd = paraOffsetEnd;
     }
 
     /**
@@ -24,8 +29,10 @@ export default class Sentence {
         let trimmed = this.text.trim().toLocaleLowerCase(localeLang);
         if (trimmed != '') {
             words = trimmed.split(multiWhitespaceRe);
+            console.log('words.length', words.length);
             if (syllableThreshold > 1) {                
                 words = words.filter(w => syllable(w) >= syllableThreshold);
+                console.log('words.length after', syllableThreshold, 'syllable filter', words.length);
             }
         }
         return(words);

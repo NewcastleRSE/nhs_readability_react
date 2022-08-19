@@ -29,7 +29,7 @@ export default class ParagraphRecord {
             nChars: 0,
             nSpaces: 0,
             nPunctuation: 0,
-            sentences: [] 
+            sentences: []
         });
     }
 
@@ -46,6 +46,7 @@ export default class ParagraphRecord {
 
         console.group('setText()');
         console.log('Paragraph state record before update:\n', this);
+        console.log(highlightStates);
 
         const key = block.getKey();
         const text = block.getText();
@@ -63,15 +64,34 @@ export default class ParagraphRecord {
                 nPunctuation: (text.match(punctuationRe) || []).length,
                 sentences: this._splitIntoSentences(text)
             });
-            /* Update character metadata */
-            console.log('--- Character metadata:');
-            this.block.getCharacterList().forEach(cm => {
-                console.log(cm);
-                //CharacterMetadata.applyEntity();
-                CharacterMetadata.applyStyle(cm, 'BOLD');
-                console.log(cm.getStyle());
-            });
-            console.log('---End');
+
+            /* Mark complex sentences and harder words as entity ranges */
+            const characterMdArray = Array.from(this.block.getCharacterList());
+            const complexState = highlightStates['showComplexSentences'];
+            console.assert(text.length == characterMdArray.length, 'Text and metadata lengths unequal', text.length, characterMdArray.length);
+
+            this.sentences.forEach(s => {
+                console.log('Sentence', s);
+                if (s.isComplex()) {
+                    console.log(s, 'is complex');
+                    for (let i = s.paraOffsetStart; i < s.paraOffsetEnd; i++) {
+                        if (complexState.switchState) {
+                            CharacterMetadata.applyEntity(characterMdArray[i], complexState.highlightEntity);
+                            CharacterMetadata.applyStyle(characterMdArray[i], 'BOLD');
+                        } else {
+                            CharacterMetadata.applyEntity(characterMdArray[i], null);
+                            CharacterMetadata.removeStyle(characterMdArray[i], 'BOLD');
+                        }                        
+                    }
+                }
+            });          
+
+            console.debug('Character metadata after...');
+            this.block.findEntityRanges(md => {
+                console.log(md.getStyle(), md.getEntity());
+            })
+            console.debug('End');
+
         } else {
             console.log('Hash codes equal => no change');
         }
@@ -133,20 +153,27 @@ export default class ParagraphRecord {
      * @return {Array<Sentence>}
      */
     _splitIntoSentences(text) {
+
+        console.group('_splitIntoSentences()');
+        console.log('Paragraph text:\n', text);
+
         let sentences = [];
-        let offset = text.search(/\S/);
-        if (offset >= 0) {
-            
+        let offset = 0;
+        const matches = text.matchAll(punctuationRe);
+        
+        for (const match of matches) {
+            if (match.index != offset) {
+                sentences.push(new Sentence(text.substring(offset, match.index), offset, match.index - 1));
+            }
+            offset = match.index + match[0].length;            
         }
-        let trimmed = text.trim();
-        if (trimmed != '') {
-            let sentenceTexts = trimmed.split(punctuationRe).map(s => s.trim());
-            sentenceTexts.forEach(st => {
-                if (st != '') {
-                    sentences.push(new Sentence(st));
-                }                
-            });
+        if (offset < text.length) {
+            sentences.push(new Sentence(text.substring(offset, text.length), offset, text.length - 1));
         }
+
+        console.log('Created sentences:\n', sentences);
+        console.groupEnd();
+
         return(sentences);
     }
 
