@@ -128,16 +128,16 @@ export default class TextModel {
                     });
 
                     /* Mark complex sentences if necessary */
-                    let contentState = newContentState;
-                    Object.keys(this.modelState).forEach(k => {
-                        console.log('Marking complex sentences...');                        
-                        this.modelState[k].markComplex().forEach(cr => {
-                            console.log(cr);
-                            contentState = Modifier.applyInlineStyle(contentState, cr, 'BOLD');                            
-                        });                            
-                        console.log('Done');
-                    });
-                    newEditorState = EditorState.push(newEditorState, contentState, 'change-inline-style');
+                    // let contentState = newContentState;
+                    // Object.keys(this.modelState).forEach(k => {
+                    //     console.log('Marking complex sentences...');                        
+                    //     this.modelState[k].markComplex().forEach(cr => {
+                    //         console.log(cr);
+                    //         contentState = Modifier.applyInlineStyle(contentState, cr, 'BOLD');                            
+                    //     });                            
+                    //     console.log('Done');
+                    // });
+                    // newEditorState = EditorState.push(newEditorState, contentState, 'change-inline-style');
                     console.log('Finished');
                 } else {
                     console.log('Content state has not changed');

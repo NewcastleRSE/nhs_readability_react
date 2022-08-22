@@ -12,6 +12,7 @@ export default class DocumentAnalyser extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
+            placeholderVisible: true,
             editorState: EditorState.createEmpty(),          
             switches: {
                 showComplexSentences: Panel.getSwitchByName('showComplexSentences').defaultChecked,
@@ -48,7 +49,15 @@ export default class DocumentAnalyser extends React.Component {
         });
         tippy('[data-tippy-content]');
         /* Enable click anywhere in editor to give focus initially - eliminates unintuitive behaviour which focusses only on click over placeholder text */
-        //document.querySelector('div#mui-rte-root').addEventListener('click', () => this.editor.current.focus());
+        console.log(this.editor);
+        const editorRoot = document.querySelector('div.DraftEditor-root');
+        editorRoot.addEventListener('click', () => {
+            if (this.placeholderVisible) {
+                editorRoot.querySelector('div.public-DraftEditorPlaceholder-root').style.display = 'none';
+                this.placeholderVisible = false;
+            }            
+            this.editor.current.focus();
+        });
 
     }
     onSwitchChange(evt) {
@@ -66,6 +75,7 @@ export default class DocumentAnalyser extends React.Component {
                 <Grid item xs={12} sm={12} md={9}>
                     <Panel.WhitePaper elevation={5}>
                         <Editor
+                            ref={ this.editor }
                             placeholder='&nbsp;Type or paste document here'
                             editorState={ this.state.editorState }
                             onChange={ (newState) => {
