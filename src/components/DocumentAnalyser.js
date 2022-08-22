@@ -52,9 +52,9 @@ export default class DocumentAnalyser extends React.Component {
         console.log(this.editor);
         const editorRoot = document.querySelector('div.DraftEditor-root');
         editorRoot.addEventListener('click', () => {
-            if (this.placeholderVisible) {
+            if (this.state.placeholderVisible) {
                 editorRoot.querySelector('div.public-DraftEditorPlaceholder-root').style.display = 'none';
-                this.placeholderVisible = false;
+                this.setState({ 'placeholderVisible': false });
             }            
             this.editor.current.focus();
         });
@@ -94,7 +94,6 @@ export default class DocumentAnalyser extends React.Component {
                                 STRIKEOUT: { textDecoration: 'line-through' },
                                 BOLD: { fontWeight: 'bold' }
                             }}
-                            onFocus={ () => { console.log('Focus') } }
                         />                  
                     </Panel.WhitePaper>
                 </Grid>
