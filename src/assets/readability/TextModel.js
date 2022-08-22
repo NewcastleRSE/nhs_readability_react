@@ -5,7 +5,7 @@
 import { syllable } from 'syllable';
 import pluralize from 'pluralize';
 import { localeLang, easyWords, ukReadingAgeCorrection, averageReadingWordsPerMinute } from './Constants';
-import { EditorState } from 'draft-js';
+import { EditorState, Modifier, RichUtils, SelectionState } from 'draft-js';
 import ParagraphRecord from './ParagraphRecord';
 
 /* Document-level counts */
@@ -66,6 +66,7 @@ export default class TextModel {
             case 'change-inline-style':
                 /* No changes to actual text have occurred */
                 console.log('Change type', changeType, '=> no text changes have occurred');
+                this.editorState = newEditorState;
                 break;
 
             default:
@@ -96,10 +97,11 @@ export default class TextModel {
                         let blockKey = block.getKey();
                         this.modelState[blockKey] = this.modelState[blockKey] || new ParagraphRecord();     
                         const paraRecord = this.modelState[blockKey];                   
-                        paraRecord.stateUpdate(block, this.highlightState);
+                        paraRecord.stateUpdate(block);
 
                         /* draft-js will create paragraphs containing a single carriage return, not very useful */
-                        if (!this.modelState[blockKey].isNullParagraph()) {                            
+                        if (!this.modelState[blockKey].isNullParagraph()) {
+
                             /* Update basic metrics */                            
                             this.nCharacters += paraRecord.nChars;
                             this.nSpaces += paraRecord.nSpaces;
@@ -108,7 +110,7 @@ export default class TextModel {
                             this.nSyllables += paraRecord.syllableCount();
                             this.nPolySyllables += paraRecord.wordCount(3);
                             this.nSentences += paraRecord.getSentences().length;
-                            this.nParagraphs++;
+                            this.nParagraphs++;                            
                         }                        
                         liveKeys.push(blockKey);
                     });
@@ -124,17 +126,30 @@ export default class TextModel {
                             delete this.modelState[k];
                         }
                     });
+
+                    /* Mark complex sentences if necessary */
+                    let contentState = newContentState;
+                    Object.keys(this.modelState).forEach(k => {
+                        console.log('Marking complex sentences...');                        
+                        this.modelState[k].markComplex().forEach(cr => {
+                            console.log(cr);
+                            contentState = Modifier.applyInlineStyle(contentState, cr, 'BOLD');                            
+                        });                            
+                        console.log('Done');
+                    });
+                    newEditorState = EditorState.push(newEditorState, contentState, 'change-inline-style');
                     console.log('Finished');
                 } else {
                     console.log('Content state has not changed');
                 }
+                this.editorState = newEditorState;
                 break;
         }
+                
+        console.log('Updated model:\n', this);
+        console.groupEnd();
 
-        this.editorState = newEditorState;
-            
-        console.dir('Updated model:\n', this);
-        console.groupEnd();   
+        return(this.editorState);
     }
 
     /**

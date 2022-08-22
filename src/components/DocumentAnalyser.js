@@ -1,9 +1,8 @@
-import MUIRichTextEditor from 'mui-rte';
 import * as React from 'react';
 import { Grid, List } from '@mui/material';
 import TextModel from '../assets/readability/TextModel';
 import * as Panel from '../assets/readability/PanelItems';
-import { EditorState, ContentState, RichUtils, SelectionState } from 'draft-js';
+import { Editor, EditorState } from 'draft-js';
 import tippy from 'tippy.js';
 import "tippy.js/dist/tippy.css";
 import "tippy.js/animations/scale.css";
@@ -49,7 +48,7 @@ export default class DocumentAnalyser extends React.Component {
         });
         tippy('[data-tippy-content]');
         /* Enable click anywhere in editor to give focus initially - eliminates unintuitive behaviour which focusses only on click over placeholder text */
-        document.querySelector('div#mui-rte-root').addEventListener('click', () => this.editor.current.focus());
+        //document.querySelector('div#mui-rte-root').addEventListener('click', () => this.editor.current.focus());
 
     }
     onSwitchChange(evt) {
@@ -66,19 +65,11 @@ export default class DocumentAnalyser extends React.Component {
             <Grid container spacing={1}>
                 <Grid item xs={12} sm={12} md={9}>
                     <Panel.WhitePaper elevation={5}>
-                        <MUIRichTextEditor
-                            ref={ this.editor }
-                            label='&nbsp;Type or paste document here'
-                            inlineToolbar={true}
+                        <Editor
+                            placeholder='&nbsp;Type or paste document here'
                             editorState={ this.state.editorState }
-                            customStyleMap={ {
-                                BOLD: {
-                                    fontWeight: 'bold'
-                                }
-                            }}
                             onChange={ (newState) => {
-                                this.setState({ 'editorState': newState } );
-                                this.textModel.stateUpdate(newState, this.state.switches);
+                                this.setState({ 'editorState': this.textModel.stateUpdate(newState, this.state.switches) } );
                                 /* Set basic document metrics */
                                 this.setState({ 'metrics': this.textModel.getMetrics() });
                                 /* Set readability metrics */
@@ -89,8 +80,12 @@ export default class DocumentAnalyser extends React.Component {
                                     ukReadingAge: this.textModel.toUKReadingAge(smog)
                                 }});                                                                          
                             } }
+                            customStyleMap={{
+                                STRIKEOUT: { textDecoration: 'line-through' },
+                                BOLD: { fontWeight: 'bold' }
+                            }}
                             onFocus={ () => { console.log('Focus') } }
-                        />
+                        />                  
                     </Panel.WhitePaper>
                 </Grid>
                 <Grid item xs={12} sm={12} md={3}>

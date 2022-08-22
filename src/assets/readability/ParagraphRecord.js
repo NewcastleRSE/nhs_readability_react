@@ -4,7 +4,7 @@
 
 import Sentence from './Sentence';
 import { punctuationRe, singleWhitespaceRe } from './Constants';
-import { CharacterMetadata } from 'draft-js';
+import { SelectionState } from 'draft-js';
  
 /** 
  * @classdesc Class to model a ContentBlock state record
@@ -40,13 +40,11 @@ export default class ParagraphRecord {
     /**
      * Initialise the state record to given text
      * @param {ContentBlock} block 
-     * @param {Object} highlightStates -- { <switch_name>: { switchState : t|f, highlightEntity: <entity_key> }, ... }
      */
-    stateUpdate(block, highlightStates) {
+    stateUpdate(block) {
 
         console.group('setText()');
         console.log('Paragraph state record before update:\n', this);
-        console.log(highlightStates);
 
         const key = block.getKey();
         const text = block.getText();
@@ -65,31 +63,6 @@ export default class ParagraphRecord {
                 sentences: this._splitIntoSentences(text)
             });
 
-            /* Mark complex sentences and harder words as entity ranges */
-            const characterMdArray = Array.from(this.block.getCharacterList());
-            const complexState = highlightStates['showComplexSentences'];
-            console.assert(text.length == characterMdArray.length, 'Text and metadata lengths unequal', text.length, characterMdArray.length);
-
-            this.sentences.forEach(s => {
-                console.log('Sentence', s);
-                if (s.isComplex()) {
-                    console.log(s, 'is complex');
-                    for (let i = s.paraOffsetStart; i < s.paraOffsetEnd; i++) {
-                        if (complexState.switchState) {
-                            CharacterMetadata.applyEntity(characterMdArray[i], complexState.highlightEntity);
-                            CharacterMetadata.applyStyle(characterMdArray[i], 'BOLD');
-                        } else {
-                            CharacterMetadata.applyEntity(characterMdArray[i], null);
-                            CharacterMetadata.removeStyle(characterMdArray[i], 'BOLD');
-                        }                        
-                    }
-                }
-            });          
-
-            console.debug('Character metadata after...');
-            this.block.findEntityRanges(md => {
-                console.log(md.getStyle(), md.getEntity());
-            })
             console.debug('End');
 
         } else {
@@ -98,6 +71,34 @@ export default class ParagraphRecord {
 
         console.log('Paragraph state record after update:\n', this);
         console.groupEnd();
+    }
+
+    /**
+     * Return array of selection states representing complex sentences
+     * @return {Array<SelectionState>} ranges
+     */
+    markComplex() {
+
+        console.group('markComplex()');
+        
+        let ranges = [];
+        const key = this.block.getKey();
+
+        ranges = this.sentences.filter(s1 => s1.isComplex()).map(s2 => {
+            console.log('Sentence', s2);
+            let ss = SelectionState.createEmpty(key);
+            ss = ss.merge({
+                'anchorKey': key,
+                'anchorOffset': s2.paraOffsetStart,
+                'focusKey': key,
+                'focusOffset': s2.paraOffsetEnd + 1
+            });
+            return(ss);
+        });
+
+        console.groupEnd();
+
+        return(ranges);
     }
 
     /**

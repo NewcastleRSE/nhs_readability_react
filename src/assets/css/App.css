@@ -1,6 +1,19 @@
+div.DraftEditor-root {
+    border: none;
+    background-color: white;
+    color: black;
+    height: calc(100vh - 100px);
+    width: 100%;
+}
+
+div.DraftEditor-editorContainer,
+div.public-DraftEditor-content {
+    height: 100%;
+}
+
 .tippy-box {
     background-color: #0185c7 !important;
-    font-family: Arial, Helvetica, sans-serif; 
+    font-family: Arial, Helvetica, sans-serif;
     font-weight: normal !important;
 }
 
@@ -14,15 +27,18 @@
     color: white;
 }
 
-.tippy-box[data-placement^='top'] > .tippy-arrow::before {
+.tippy-box[data-placement^='top']>.tippy-arrow::before {
     border-top-color: #0185c7 !important;
-  }
-  .tippy-box[data-placement^='bottom'] > .tippy-arrow::before {
+}
+
+.tippy-box[data-placement^='bottom']>.tippy-arrow::before {
     border-bottom-color: #0185c7 !important;
-  }
-  .tippy-box[data-placement^='left'] > .tippy-arrow::before {
+}
+
+.tippy-box[data-placement^='left']>.tippy-arrow::before {
     border-left-color: #0185c7 !important;
-  }
-  .tippy-box[data-placement^='right'] > .tippy-arrow::before {
+}
+
+.tippy-box[data-placement^='right']>.tippy-arrow::before {
     border-right-color: #0185c7 !important;
-  }
+}
