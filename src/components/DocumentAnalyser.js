@@ -49,7 +49,6 @@ export default class DocumentAnalyser extends React.Component {
         });
         tippy('[data-tippy-content]');
         /* Enable click anywhere in editor to give focus initially - eliminates unintuitive behaviour which focusses only on click over placeholder text */
-        console.log(this.editor);
         const editorRoot = document.querySelector('div.DraftEditor-root');
         editorRoot.addEventListener('click', () => {
             if (this.state.placeholderVisible) {

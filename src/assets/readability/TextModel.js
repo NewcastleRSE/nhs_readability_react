@@ -128,16 +128,22 @@ export default class TextModel {
                     });
 
                     /* Mark complex sentences if necessary */
-                    // let contentState = newContentState;
-                    // Object.keys(this.modelState).forEach(k => {
-                    //     console.log('Marking complex sentences...');                        
-                    //     this.modelState[k].markComplex().forEach(cr => {
-                    //         console.log(cr);
-                    //         contentState = Modifier.applyInlineStyle(contentState, cr, 'BOLD');                            
-                    //     });                            
-                    //     console.log('Done');
-                    // });
-                    // newEditorState = EditorState.push(newEditorState, contentState, 'change-inline-style');
+                    let existingSelectionState = newEditorState.getSelection();
+                    let contentState = newContentState;
+                    Object.keys(this.modelState).forEach(k => {
+                        console.log('Marking complex sentences...');                        
+                        this.modelState[k].markComplex().forEach(cr => {
+                            console.log(cr);
+                            contentState = Modifier.applyInlineStyle(contentState, cr, 'BOLD');                            
+                        });                            
+                        console.log('Done');
+                    });
+                    newEditorState = EditorState.push(newEditorState, contentState, 'change-inline-style');
+
+                    /* Restore selection */
+                    newEditorState = EditorState.forceSelection(newEditorState, existingSelectionState);
+                    newEditorState = EditorState.push(newEditorState, contentState, 'change-inline-style');
+
                     console.log('Finished');
                 } else {
                     console.log('Content state has not changed');
