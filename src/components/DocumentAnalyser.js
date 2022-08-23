@@ -2,18 +2,19 @@ import * as React from 'react';
 import { Grid, List } from '@mui/material';
 import TextModel from '../assets/readability/TextModel';
 import * as Panel from '../assets/readability/PanelItems';
-import { Editor, EditorState } from 'draft-js';
+import highlightingStyles from '../assets/readability/Styles';
+import { CompositeDecorator, Editor, EditorState } from 'draft-js';
 import tippy from 'tippy.js';
 import "tippy.js/dist/tippy.css";
 import "tippy.js/animations/scale.css";
 import 'tippy.js/themes/material.css';
 
 export default class DocumentAnalyser extends React.Component {
+
     constructor(props) {
-        super(props);
+        super(props);            
         this.state = {
-            placeholderVisible: true,
-            editorState: EditorState.createEmpty(),          
+            editorState: EditorState.createEmpty(),
             switches: {
                 showComplexSentences: Panel.getSwitchByName('showComplexSentences').defaultChecked,
                 highlightPrismWords: Panel.getSwitchByName('highlightPrismWords').defaultChecked,
@@ -36,9 +37,36 @@ export default class DocumentAnalyser extends React.Component {
             }
         };
         this.editor = React.createRef();
-        this.textModel = new TextModel(this.state.switches);
+        this.textModel = new TextModel(this.state.switches);              
     }
-    componentDidMount() {
+
+    /**
+     * Return the required list of decorators based on switch settings
+     * @returns CompositeDecorator
+     */
+    getDecorators() {
+        const complexStyle = this.state.switches['showComplexSentences'] ? highlightingStyles['showComplexSentences'] : highlightingStyles['normalText'];
+        const prismStyle = this.state.switches['highlightPrismWords'] ? highlightingStyles['highlightPrismWords'] : highlightingStyles['normalText'];
+        return(new CompositeDecorator([
+            {
+                strategy: function(contentBlock, callback, contentState) { this.textModel.findComplexSentences(...arguments) }.bind(this),
+                component: (props) => {
+                    return ( <span style={complexStyle} data-offset-key={props.offsetKey}>{props.children}</span>)
+                }
+            }, {
+                strategy: function(contentBlock, callback, contentState) { this.textModel.findPrismWords(...arguments) }.bind(this),
+                component: (props) => {
+                    return ( <span style={prismStyle} data-offset-key={props.offsetKey}>{props.children}</span>)
+                }
+            }
+        ]));
+    }
+
+    componentDidMount() {        
+        
+        this.setState({ 'editorState': EditorState.createEmpty(this.getDecorators()) });
+
+        /* Settings for tooltips */     
         tippy.setDefaultProps({
             theme: 'material',
             arrow: true,
@@ -48,27 +76,30 @@ export default class DocumentAnalyser extends React.Component {
             maxWidth: '20rem'
         });
         tippy('[data-tippy-content]');
+
         /* Enable click anywhere in editor to give focus initially - eliminates unintuitive behaviour which focusses only on click over placeholder text */
-        console.log(this.editor);
         const editorRoot = document.querySelector('div.DraftEditor-root');
         editorRoot.addEventListener('click', () => {
-            if (this.state.placeholderVisible) {
-                editorRoot.querySelector('div.public-DraftEditorPlaceholder-root').style.display = 'none';
-                this.setState({ 'placeholderVisible': false });
-            }            
+            editorRoot.querySelector('div.public-DraftEditorPlaceholder-root').style.display = 'none';
             this.editor.current.focus();
         });
+    }
 
-    }
+    /**
+     * Handler for a switch change
+     * @param {Event} evt 
+     */
     onSwitchChange(evt) {
-        const changedSwitchName = evt.target.id;
-        const changedSwitchValue = evt.target.checked;
+        const { id, checked } = evt.target;
         let currentSwitchState = this.state.switches;
-        currentSwitchState[changedSwitchName] = changedSwitchValue;
+        currentSwitchState[id] = checked;
         this.setState({'switches': currentSwitchState});
-        console.log('Updated switch state', this.state.switches);
-        this.textModel.switchStateUpdate(changedSwitchName, changedSwitchValue);
+        console.log('Updated switch state', this.state.switches, 'editor state', this.state.editorState);
+        this.textModel.switchStateUpdate(id, checked);
+        let newEditorState = EditorState.createWithContent(this.state.editorState.getCurrentContent(), this.getDecorators());
+        this.setState({editorState: EditorState.push(newEditorState, newEditorState.getCurrentContent(), 'change-inline-style')});
     }
+
     render() {
         return (
             <Grid container spacing={1}>
@@ -89,11 +120,7 @@ export default class DocumentAnalyser extends React.Component {
                                     smogIndex: smog,
                                     ukReadingAge: this.textModel.toUKReadingAge(smog)
                                 }});                                                                          
-                            } }
-                            customStyleMap={{
-                                STRIKEOUT: { textDecoration: 'line-through' },
-                                BOLD: { fontWeight: 'bold' }
-                            }}
+                            } }                            
                         />                  
                     </Panel.WhitePaper>
                 </Grid>

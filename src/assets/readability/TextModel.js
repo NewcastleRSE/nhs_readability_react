@@ -5,7 +5,7 @@
 import { syllable } from 'syllable';
 import pluralize from 'pluralize';
 import { localeLang, easyWords, ukReadingAgeCorrection, averageReadingWordsPerMinute } from './Constants';
-import { EditorState, Modifier, RichUtils, SelectionState } from 'draft-js';
+import { EditorState } from 'draft-js';
 import ParagraphRecord from './ParagraphRecord';
 
 /* Document-level counts */
@@ -29,19 +29,12 @@ export default class TextModel {
      * Creates analysis record of paragraph text indexed by ContentBlock key, containing individual StateRecords
      * @param {Object} switchState initial switch values { <switch_name1>: t|f, <switch_name2>: t|f,... }
      */
-    constructor(switchState = {}) {
-        let highlightState = {};
-        for (let name in switchState) {
-            highlightState[name] = {
-                switchState: switchState[name],
-                highlightEntity: null
-            }
-        }
+    constructor(switchState = {}) {        
         Object.assign(this, GLOBAL_COUNT_INITIALISER, {            
             lang: localeLang,
             editorState: null,  
             modelState: {},
-            highlightState: highlightState,
+            switchState: switchState,
             easyWordSet: new Set(easyWords)            
         });        
     }
@@ -66,7 +59,6 @@ export default class TextModel {
             case 'change-inline-style':
                 /* No changes to actual text have occurred */
                 console.log('Change type', changeType, '=> no text changes have occurred');
-                this.editorState = newEditorState;
                 break;
 
             default:
@@ -74,14 +66,6 @@ export default class TextModel {
                 console.log('Change type', changeType, '=> further checks for text changes required');
                 const currentContentState = this._getCurrentEditorContent();
                 let newContentState = newEditorState.getCurrentContent();
-
-                /* Create persistent entities for the highlighting */
-                for (let name in this.highlightState) {
-                    if (this.highlightState[name].highlightEntity == null) {
-                        newContentState = newContentState.createEntity(name, 'MUTABLE', name);
-                        this.highlightState[name].highlightEntity = newContentState.getLastCreatedEntityKey();
-                    }
-                }
 
                 if (currentContentState != newContentState) {  
 
@@ -125,26 +109,15 @@ export default class TextModel {
                             console.log('Key', k, 'is dead - removing');
                             delete this.modelState[k];
                         }
-                    });
-
-                    /* Mark complex sentences if necessary */
-                    // let contentState = newContentState;
-                    // Object.keys(this.modelState).forEach(k => {
-                    //     console.log('Marking complex sentences...');                        
-                    //     this.modelState[k].markComplex().forEach(cr => {
-                    //         console.log(cr);
-                    //         contentState = Modifier.applyInlineStyle(contentState, cr, 'BOLD');                            
-                    //     });                            
-                    //     console.log('Done');
-                    // });
-                    // newEditorState = EditorState.push(newEditorState, contentState, 'change-inline-style');
+                    });                    
                     console.log('Finished');
                 } else {
                     console.log('Content state has not changed');
-                }
-                this.editorState = newEditorState;
+                }                
                 break;
         }
+
+        this.editorState = newEditorState;
                 
         console.log('Updated model:\n', this);
         console.groupEnd();
@@ -159,7 +132,62 @@ export default class TextModel {
      */
     switchStateUpdate(switchName, switchValue) {
         this.switchState[switchName] = switchValue;
+    }
 
+    /**
+     * Strategy method for determining complex sentences
+     * @param {ContentBlock} contentBlock 
+     * @param {Function} callback 
+     * @param {ContentState} contentState 
+     */
+     findComplexSentences(contentBlock, callback, contentState) {
+
+        console.group('findComplexSentences()');
+        console.log('Determine complex decorations in block', contentBlock.getKey());
+        console.log('Model state', this.modelState);
+
+        if (this.switchState['showComplexSentences'] && this.modelState) {
+            let paraRecordKey = Object.keys(this.modelState).find(key => key == contentBlock.getKey());
+            if (!paraRecordKey) {
+                this.modelState[paraRecordKey] = new ParagraphRecord();     
+                this.modelState[paraRecordKey].stateUpdate(contentBlock);
+            }           
+            console.log('Found paragraph record', this.modelState[paraRecordKey], 'with key', paraRecordKey);
+            let complexRanges = this.modelState[paraRecordKey].markComplex();
+            complexRanges.forEach(cr => {
+                callback(cr.start, cr.end);
+            });
+        }
+
+        console.groupEnd();
+    }
+
+    /**
+     * Strategy method for finding PRISM words in a content block (paragraph)
+     * @param {ContentBlock} contentBlock 
+     * @param {Function} callback 
+     * @param {ContentState} contentState 
+     */
+    findPrismWords(contentBlock, callback, contentState) {
+
+        console.group('findPrismWords()');
+        console.log('Determine PRISM words in block', contentBlock.getKey());
+        console.log('Model state', this.modelState);
+
+        if (this.switchState['highlightPrismWords'] && this.modelState) {
+            let paraRecordKey = Object.keys(this.modelState).find(key => key == contentBlock.getKey());
+            if (!paraRecordKey) {
+                this.modelState[paraRecordKey] = new ParagraphRecord();     
+                this.modelState[paraRecordKey].stateUpdate(contentBlock);
+            }           
+            console.log('Found paragraph record', this.modelState[paraRecordKey], 'with key', paraRecordKey);
+            let complexRanges = this.modelState[paraRecordKey].markPrismWords();
+            complexRanges.forEach(cr => {
+                callback(cr.start, cr.end);
+            });
+        }
+
+        console.groupEnd();
     }
 
     /**

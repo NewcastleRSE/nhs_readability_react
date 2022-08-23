@@ -2592,4 +2592,4 @@ const prismWords = {
     ]
 };
 
-export default prismWords;
+export { prismWords };

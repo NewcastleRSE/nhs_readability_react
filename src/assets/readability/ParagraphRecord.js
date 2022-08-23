@@ -4,6 +4,7 @@
 
 import Sentence from './Sentence';
 import { punctuationRe, singleWhitespaceRe } from './Constants';
+import { prismWords } from './PrismWords';
 import { SelectionState } from 'draft-js';
  
 /** 
@@ -74,28 +75,47 @@ export default class ParagraphRecord {
     }
 
     /**
-     * Return array of selection states representing complex sentences
+     * Return array of text ranges representing complex sentences
      * @return {Array<SelectionState>} ranges
      */
     markComplex() {
 
         console.group('markComplex()');
         
-        let ranges = [];
-        const key = this.block.getKey();
-
-        ranges = this.sentences.filter(s1 => s1.isComplex()).map(s2 => {
-            console.log('Sentence', s2);
-            let ss = SelectionState.createEmpty(key);
-            ss = ss.merge({
-                'anchorKey': key,
-                'anchorOffset': s2.paraOffsetStart,
-                'focusKey': key,
-                'focusOffset': s2.paraOffsetEnd + 1
+        let ranges = this.sentences.filter(s1 => s1.isComplex()).map(s2 => {
+            return({
+                start: s2.paraOffsetStart,
+                end: s2.paraOffsetEnd + 1
             });
-            return(ss);
         });
+        
+        console.groupEnd();
 
+        return(ranges);
+    }
+
+    /**
+     * Return array of text ranges representing PRISM words
+     * @return {Array<SelectionState>} ranges
+     */
+     markPrismWords() {
+
+        console.group('markPrismWords()');
+        
+        let ranges = [];
+
+        this.sentences.forEach(s => {
+            s.getWordRanges().forEach(wr => {
+                if (prismWords[wr.text]) {
+                    ranges.push({
+                        start: s.paraOffsetStart + wr.sentenceOffsetStart,
+                        end: s.paraOffsetStart + wr.sentenceOffsetEnd
+                    });
+                }
+                
+            });
+        });
+        
         console.groupEnd();
 
         return(ranges);

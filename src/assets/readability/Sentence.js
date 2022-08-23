@@ -3,7 +3,7 @@
  */
 
 import { syllable } from "syllable";
-import { localeLang, multiWhitespaceRe, sentenceComplexityThreshold } from './Constants';
+import { localeLang, multiNonWhitespaceRe, multiWhitespaceRe, sentenceComplexityThreshold } from './Constants';
 
 /** 
  * @classdesc Class to model a sentence
@@ -36,6 +36,28 @@ export default class Sentence {
             }
         }
         return(words);
+    }
+
+    /**
+     * Find all the words in the sentence along with their offsets within it
+     * @param {int} syllableThreshold 
+     * @returns {Array<Object>} ranges as { text: <the_word>, sentenceOffsetStart: <int>, sentenceOffsetEnd: <int> }
+     */
+    getWordRanges(syllableThreshold = 1) {
+        let ranges = [];
+        const lcText = this.text.toLocaleLowerCase(localeLang);
+        const matches = lcText.matchAll(multiNonWhitespaceRe);
+        for (const match of matches) {
+            const word = match[0];
+            if (syllable(word) >= syllableThreshold) {
+                ranges.push({
+                    text: match[0],
+                    sentenceOffsetStart: match.index,
+                    sentenceOffsetEnd: match.index + match[0].length
+                });
+            }            
+        }
+        return(ranges);
     }
 
     /**

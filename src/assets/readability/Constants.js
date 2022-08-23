@@ -1,8 +1,11 @@
 /* Punctuation if '?' or '!' or '.' where not part of a floating point number or section number (e.g. 1.2.11) */
 const punctuationRe = /\s*([?!]+|(?<!\d+)\.(?!\d+))\s*/g;
 
-/* Single whitespace match */
+/* Single whitespace match, global (for matchAll) */
 const singleWhitespaceRe = /\s/g;
+
+/* Multiple no-whitespace match, global (for matchAll) */
+const multiNonWhitespaceRe = /\S+/g;
 
 /* Single whitespace match */
 const multiWhitespaceRe = /\s+/;
@@ -2972,5 +2975,15 @@ const easyWords = [
   "you've",
 ];
 
-export { punctuationRe, singleWhitespaceRe, multiWhitespaceRe, localeLang, sentenceComplexityThreshold, ukReadingAgeCorrection, averageReadingWordsPerMinute, easyWords };
+export { 
+    punctuationRe, 
+    singleWhitespaceRe, 
+    multiNonWhitespaceRe, 
+    multiWhitespaceRe, 
+    localeLang, 
+    sentenceComplexityThreshold, 
+    ukReadingAgeCorrection, 
+    averageReadingWordsPerMinute, 
+    easyWords 
+};
 

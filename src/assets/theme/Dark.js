@@ -1,5 +1,5 @@
 import { createTheme } from '@mui/material/styles';
-import { blue, grey } from "@mui/material/colors";
+import { grey } from "@mui/material/colors";
 
 const darkTheme = Object.assign(createTheme({ palette: { mode: 'dark' } }, {
     overrides: {        
