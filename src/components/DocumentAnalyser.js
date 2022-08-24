@@ -96,8 +96,19 @@ export default class DocumentAnalyser extends React.Component {
         this.setState({'switches': currentSwitchState});
         console.log('Updated switch state', this.state.switches, 'editor state', this.state.editorState);
         this.textModel.switchStateUpdate(id, checked);
-        let newEditorState = EditorState.createWithContent(this.state.editorState.getCurrentContent(), this.getDecorators());
-        this.setState({editorState: EditorState.push(newEditorState, newEditorState.getCurrentContent(), 'change-inline-style')});
+        if (id == 'includeMedicalTerms') {
+            /* Update the SMOG index metric */
+            const smog = this.textModel.smogIndex(!checked);
+            this.setState({ 'readability': {
+                readingTime: this.textModel.averageReadingTime(),
+                smogIndex: smog,
+                ukReadingAge: this.textModel.toUKReadingAge(smog)
+            }});      
+        } else {
+            /* Update inline styles representing complexity and chosen terms */
+            let newEditorState = EditorState.createWithContent(this.state.editorState.getCurrentContent(), this.getDecorators());
+            this.setState({editorState: EditorState.push(newEditorState, newEditorState.getCurrentContent(), 'change-inline-style')});
+        }        
     }
 
     render() {

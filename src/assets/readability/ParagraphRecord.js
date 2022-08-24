@@ -123,13 +123,14 @@ export default class ParagraphRecord {
 
     /**
      * Word count for paragraph
-     * @param {int} syllableThreshold only count words > this number of syllables
+     * @param {int} syllableThreshold               -- only count words > this number of syllables
+     * @param {Object<key, value>} filterDictionary -- only count words NOT in this dictionary/vocabulary}
      * @return number of words
      */
-    wordCount(syllableThreshold = 1) {
+    wordCount(syllableThreshold = 1, filterDictionary = null) {
         let nWords = 0;
         if (this.sentences.length > 0) {
-            nWords = this.sentences.map(s => s.wordCount(syllableThreshold)).reduce((partialSum, a) => partialSum + a, 0);
+            nWords = this.sentences.map(s => s.wordCount(syllableThreshold, filterDictionary)).reduce((partialSum, a) => partialSum + a, 0);
         }
         return(nWords);
     }

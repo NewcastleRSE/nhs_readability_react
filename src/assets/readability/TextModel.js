@@ -7,6 +7,7 @@ import pluralize from 'pluralize';
 import { localeLang, easyWords, ukReadingAgeCorrection, averageReadingWordsPerMinute } from './Constants';
 import { EditorState } from 'draft-js';
 import ParagraphRecord from './ParagraphRecord';
+import { prismWords } from './PrismWords';
 
 /* Document-level counts */
 const GLOBAL_COUNT_INITIALISER = {
@@ -375,14 +376,25 @@ export default class TextModel {
     
     /**
      * Compute SMOG index on current text
+     * @param {boolean} filterMedicalTerms  -- whether to compute index minus all medical terms
      * @returns SMOG index as a US grade
      */
-    smogIndex() {
+    smogIndex(filterMedicalTerms = false) {
         console.group('smogIndex()');
         let smog = 0.0;
+        let nPolySyllables = 0;
         if (this.nSentences >= 3) {
-            smog = this._roundFloat(1.043 * (30 * (this.nPolySyllables / this.nSentences)) ** 0.5 + 3.1291, 1);            
-        }
+            if (filterMedicalTerms) {
+                /* Have to compute number of polysyllables minus the filtered words */                
+                for (const [blockKey, paraRecord] of Object.entries(this.modelState)) {
+                    nPolySyllables += paraRecord.wordCount(3, prismWords);  /* Only using PRISM words at present */
+                }
+            } else {
+                /* Can use globally computed value */
+                nPolySyllables = this.nPolySyllables;                            
+            }
+            smog = this._roundFloat(1.043 * (30 * (nPolySyllables / this.nSentences)) ** 0.5 + 3.1291, 1);
+        }       
         console.debug('SMOG Index', smog);
         console.groupEnd();
         return(smog);

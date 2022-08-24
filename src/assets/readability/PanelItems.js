@@ -46,7 +46,7 @@ const switchListItems = [
         id: 'includeMedicalTerms',
         primary: 'Include medical terms in grading',
         help: `
-            Compute the SMOG Index and Reading Age including all the medical terms.  To do this properly requires a set of medical vocabularies, 
+            Compute the SMOG Index and Reading Age including all the medical terms.  To properly filter out medical terms requires a set of medical vocabularies, 
             possibly classified by discipline area.  A comprehensive medical dictionary may work but would likely be very sluggish in operation.
             For the demonstration, if this switch if OFF, the PRISM words are filtered out and the SMOG index and Reading Age computed with the 
             reduced word set.

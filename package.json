@@ -1,4 +1,5 @@
 {
+  "homepage": "https://newcastlerse.github.io/nhs_readability_react",
   "name": "nhs_readability_react",
   "version": "0.1.0",
   "private": true,
@@ -9,6 +10,7 @@
     "@mui/material": "^5.9.0",
     "@mui/styles": "^5.9.0",
     "draft-js": "^0.11.7",
+    "gh-pages": "^4.0.0",
     "mui-rte": "^2.0.1",
     "pluralize": "^8.0.0",
     "react": "^18.2.0",
@@ -19,6 +21,8 @@
     "tippy.js": "^6.3.7"
   },
   "scripts": {
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",

@@ -61,12 +61,22 @@ export default class Sentence {
     }
 
     /**
-     * Count number of words in text
-     * @param {int} syllableThreshold only count words > this number of syllables
-     * @return word count
+     * Count number of words in text 
+     * @param {int} syllableThreshold               -- only count words > this number of syllables
+     * @param {Object<key, value>} filterDictionary -- only count words NOT in this dictionary/vocabulary
      */
-    wordCount(syllableThreshold = 1) {
-        return(this.getWords(syllableThreshold).length);
+    wordCount(syllableThreshold = 1, filterDictionary = null) {
+        let count = 0;
+        if (filterDictionary == null) {
+            count = this.getWords(syllableThreshold).length;
+        } else {
+            this.getWordRanges(syllableThreshold).forEach(wr => {
+                if (!filterDictionary[wr.text]) {
+                    count++;
+                }
+            });
+        }        
+        return(count);
     }
 
     /**
