@@ -1,5 +1,4 @@
-body,
-html {
+html, body {
     height: 100%;
     overflow: hidden;
 }
@@ -9,17 +8,16 @@ div.DraftEditor-root {
     background-color: #f5f5f5;  /* Material grey[100] */
     color: black;
     height: calc(100vh - 100px);
-    width: 100%;
-    margin-top: 8px;
+    overflow-y: auto;
+    width: 100%;    
     line-height: 2em;
     font-family: "Roboto","Helvetica","Arial",sans-serif;
 }
 
 div.DraftEditor-editorContainer,
 div.public-DraftEditor-content {
-    height: 100%;
     padding: 5px;
-}
+}   
 
 div.public-DraftEditorPlaceholder-root {
     padding: 0 5px;
