@@ -1,18 +1,30 @@
 import { red, teal, grey } from "@mui/material/colors";
+import { createTheme } from '@mui/material/styles';
 
 const highlightingStyles = {
     'showComplexSentences': {
         fontWeight: 'bold', 
-        backgroundColor: red[300]
+        color: '#ffffff',
+        padding: '0.2em',
+        margin: '0.2em 0',
+        backgroundColor: red[800]
     },
     'highlightPrismWords': {
-        fontWeight: 'bold', 
-        backgroundColor: teal[300]
+        fontWeight: 'bold',
+        color: '#ffffff',
+        padding: '0.2em',
+        margin: '0.2em 0',
+        backgroundColor: teal[800]
     },
     'normalText': {
         fontWeight: 'normal',
+        color: grey[900],
+        padding: '0.2em',
+        margin: '0.2em 0',
         backgroundColor: grey[100]
     }
 };
 
-export default highlightingStyles;
+const darkTheme = Object.assign(createTheme({ palette: { mode: 'dark' } }));
+
+export { highlightingStyles, darkTheme };

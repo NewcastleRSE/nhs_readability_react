@@ -3,27 +3,54 @@ import { grey } from '@mui/material/colors';
 import Switch from '@mui/material/Switch';
 import { Help } from '@mui/icons-material';
 import { Paper, ListSubheader, ListItem, ListItemIcon, ListItemText } from '@mui/material';
+import { highlightingStyles } from './Styles';
 
 const switchListItems = [
     {
         key: 1,
         id: 'showComplexSentences',
         primary: 'Show complex sentences',
-        help: 'Highlight sentences which are too complex and show potential alternatives',
+        help: `
+            Highlight sentences which are too complex, defined by:
+            <p>
+            SMOG = 3 + &radic;(no_of_3+_syllable_words) > threshold.  
+            </p>
+            <p>
+            NOTE: The threshold for complexity is set artificially low for demonstration purposes (most documents will show up some complexity).
+            </p>
+            <p>
+            QUESTIONS FOR TESTERS: How do we want to measure complexity? How might suggestions to rectify it be communicated?
+            </p>
+            `,
         defaultChecked: true
     },
     {
         key: 2,
         id: 'highlightPrismWords',
         primary: 'Highlight PRISM-listed words',
-        help: 'Highlight words in the PRISM readability Toolkit having a simpler alternative word or phrase',
-        defaultChecked: true
+        help: `
+            <p>
+            Highlight words in the <a href="https://www.nhlbi.nih.gov/files/docs/ghchs_readability_toolkit.pdf" target="_blank">PRISM readability Toolkit</a>
+            having a simpler alternative word or phrase.  Hovering the cursor over a highlighted 
+            word will make some suggestions of simpler alternatives.  It might be possible to click on a suggestion eventually and do an 
+            auto-replace of the complex word by the simpler.  
+            </p>
+            <p>
+            NOTE: You need to turn off the complex sentences to see the PRISM highlights - it does not seem to be possible to have the two together.
+            </p>
+            `,
+        defaultChecked: false
     },
     {
         key: 3,
         id: 'includeMedicalTerms',
         primary: 'Include medical terms in grading',
-        help: 'Compute the SMOG Index and Reading Age including all the medical terms',
+        help: `
+            Compute the SMOG Index and Reading Age including all the medical terms.  To do this properly requires a set of medical vocabularies, 
+            possibly classified by discipline area.  A comprehensive medical dictionary may work but would likely be very sluggish in operation.
+            For the demonstration, if this switch if OFF, the PRISM words are filtered out and the SMOG index and Reading Age computed with the 
+            reduced word set.
+            `,
         defaultChecked: true
     }
 ];
@@ -185,7 +212,13 @@ const HelpIcon = props => {
 
 const SwitchListItem = props => {
     const { id, primary, help, defaultChecked, onChange } = props;
-    const sx = { color: darkGrey, background: lightGrey };
+    let sx;
+    if (highlightingStyles[id]) {
+        /* Shoehorn in a bit of right pad to avoid the coloured label touching the switch element which looks really bad */
+        sx = Object.assign({}, highlightingStyles[id], { marginRight: '2em' });
+    } else {
+        sx = highlightingStyles['normalText'];
+    }    
     return (
         <ListItem>
             <HelpIcon help={help} />

@@ -11,6 +11,7 @@ div.DraftEditor-root {
     height: calc(100vh - 100px);
     width: 100%;
     margin-top: 8px;
+    line-height: 2em;
     font-family: "Roboto","Helvetica","Arial",sans-serif;
 }
 
@@ -21,7 +22,7 @@ div.public-DraftEditor-content {
 }
 
 div.public-DraftEditorPlaceholder-root {
-    padding: 10px 5px;    
+    padding: 0 5px;
 }
 
 .tippy-box {

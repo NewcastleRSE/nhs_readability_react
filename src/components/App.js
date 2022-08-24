@@ -4,7 +4,7 @@ import { ThemeProvider } from '@mui/material/styles';
 import NavigationBar from './NavigationBar';
 import DocumentAnalyser from './DocumentAnalyser';
 
-import darkTheme from '../assets/theme/Dark';
+import { darkTheme } from '../assets/readability/Styles';
 import '../assets/css/App.css';
 
 export default class App extends React.Component {

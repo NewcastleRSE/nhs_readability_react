@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Grid, List } from '@mui/material';
 import TextModel from '../assets/readability/TextModel';
 import * as Panel from '../assets/readability/PanelItems';
-import highlightingStyles from '../assets/readability/Styles';
+import { highlightingStyles } from '../assets/readability/Styles';
 import { CompositeDecorator, Editor, EditorState } from 'draft-js';
 import tippy from 'tippy.js';
 import "tippy.js/dist/tippy.css";
@@ -107,7 +107,7 @@ export default class DocumentAnalyser extends React.Component {
                     <Panel.WhitePaper elevation={5}>
                         <Editor
                             ref={ this.editor }
-                            placeholder='&nbsp;Type or paste document here'
+                            placeholder='&nbsp;Type or paste your document here'
                             editorState={ this.state.editorState }
                             onChange={ (newState) => {
                                 this.setState({ 'editorState': this.textModel.stateUpdate(newState, this.state.switches) } );
