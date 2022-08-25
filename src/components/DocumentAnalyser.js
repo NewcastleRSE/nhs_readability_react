@@ -1,13 +1,102 @@
 import * as React from 'react';
 import { Grid, List } from '@mui/material';
+import { FormatBold, FormatItalic, FormatUnderlined, FormatListBulleted, FormatListNumbered } from '@mui/icons-material';
+import { Box, ButtonGroup, Button } from '@mui/material';
 import TextModel from '../assets/readability/TextModel';
 import * as Panel from '../assets/readability/PanelItems';
-import { highlightingStyles } from '../assets/readability/Styles';
-import { CompositeDecorator, Editor, EditorState } from 'draft-js';
+import { darkGrey, lightGrey, highlightingStyles, toolButtonStyles } from '../assets/readability/Styles';
+import { CompositeDecorator, Editor, EditorState, RichUtils } from 'draft-js';
 import tippy from 'tippy.js';
-import "tippy.js/dist/tippy.css";
-import "tippy.js/animations/scale.css";
+import 'tippy.js/dist/tippy.css';
+import 'tippy.js/animations/scale.css';
 import 'tippy.js/themes/material.css';
+
+const EditorToolbarButton = (props) => {
+    return (
+        <Button 
+            title={ props.title } 
+            variant="text" 
+            sx={{ width: '40px', height: '40px', color: lightGrey, fontWeight: 'bold', fontSize: '1em' }}
+            onClick={ () => {
+                props.onClick(toolButtonStyles[props.name] || 'none'); 
+            } }
+        >            
+            { typeof props.text == 'string' ? props.text  : <props.icon /> }
+        </Button>
+    );
+}
+
+const EditorToolbar = (props) => {
+    return (
+        <Box sx={{
+            background: darkGrey,
+            color: lightGrey,
+            fontSize: 'large',
+            marginTop: '8px',
+            height: '40px',
+            lineHeight: '40px'
+        }}>
+            <ButtonGroup sx={{ borderRadius: 0 }}>
+                <EditorToolbarButton
+                    name={ 'bold' }
+                    title="Make selection bold" 
+                    icon={ FormatBold }
+                    onClick={ props.buttonAction }
+                >
+                </EditorToolbarButton>
+                <EditorToolbarButton 
+                    name={ 'italic' }
+                    title="Italicise selection" 
+                    icon={ FormatItalic }
+                    onClick={ props.buttonAction }
+                >                    
+                </EditorToolbarButton>
+                <EditorToolbarButton 
+                    name={ 'underline' }
+                    title="Underline selection" 
+                    icon={ FormatUnderlined }
+                    onClick={ props.buttonAction }
+                >                    
+                </EditorToolbarButton>
+                <EditorToolbarButton 
+                    name={ 'h1' } 
+                    title="Heading level 1" 
+                    text={ 'H1' }
+                    onClick={ props.buttonAction }
+                >                    
+                </EditorToolbarButton>
+                <EditorToolbarButton 
+                    name={ 'h2' } 
+                    title="Heading level 2" 
+                    text={ 'H2' }
+                    onClick={ props.buttonAction }
+                >                    
+                </EditorToolbarButton>
+                <EditorToolbarButton 
+                    name={ 'h3' } 
+                    title="Heading level 3" 
+                    text={ 'H3' }
+                    onClick={ props.buttonAction }
+                >                    
+                </EditorToolbarButton>
+                <EditorToolbarButton 
+                    name={ 'ul' } 
+                    title="Create bulleted list" 
+                    icon={ FormatListBulleted }
+                    onClick={ props.buttonAction }
+                >                    
+                </EditorToolbarButton>
+                <EditorToolbarButton 
+                    name={ 'ol' } 
+                    title="Create numbered list" 
+                    icon={ FormatListNumbered }
+                    onClick={ props.buttonAction }
+                >                    
+                </EditorToolbarButton>
+            </ButtonGroup>            
+        </Box>
+    );
+};
 
 export default class DocumentAnalyser extends React.Component {
 
@@ -77,10 +166,9 @@ export default class DocumentAnalyser extends React.Component {
         });
         tippy('[data-tippy-content]');
 
-        /* Enable click anywhere in editor to give focus initially - eliminates unintuitive behaviour which focusses only on click over placeholder text */
-        const editorRoot = document.querySelector('div.DraftEditor-root');
-        editorRoot.addEventListener('click', () => {
-            editorRoot.querySelector('div.public-DraftEditorPlaceholder-root').style.display = 'none';
+        /* Cope with some of the issues described in https://github.com/facebook/draft-js/issues/403 - loading Draft.css was impractical here */
+        this.editor.current.focus();
+        document.querySelector('div.DraftEditor-root').addEventListener('click', () => {
             this.editor.current.focus();
         });
     }
@@ -111,27 +199,39 @@ export default class DocumentAnalyser extends React.Component {
         }        
     }
 
+    onToolbarButtonAction(style) { 
+        console.log('onToolbarButtonHandler()', style);
+        let newEditorState = RichUtils.toggleInlineStyle(this.state.editorState, style);
+        this.setState({ editorState: newEditorState });
+    }
+
+    onStateChange(newState) {
+        let textChanged = this.textModel.stateUpdate(newState, this.state.switches);
+        this.setState({ 'editorState': this.textModel.getEditorState() } );
+        if (textChanged) {
+            /* Set basic document metrics */
+            this.setState({ 'metrics': this.textModel.getMetrics() });
+            /* Set readability metrics */
+            const smog = this.textModel.smogIndex();
+            this.setState({ 'readability': {
+                readingTime: this.textModel.averageReadingTime(),
+                smogIndex: smog,
+                ukReadingAge: this.textModel.toUKReadingAge(smog)
+            }});     
+        }     
+    }
+
     render() {
         return (
             <Grid container spacing={1}>
                 <Grid item xs={12} sm={12} md={9}>
-                    <Panel.WhitePaper elevation={5}>
+                    <Panel.WhitePaper elevation={5}>  
+                        <EditorToolbar buttonAction={ this.onToolbarButtonAction.bind(this) }/>
                         <Editor
                             ref={ this.editor }
                             placeholder='&nbsp;Type or paste your document here'
                             editorState={ this.state.editorState }
-                            onChange={ (newState) => {
-                                this.setState({ 'editorState': this.textModel.stateUpdate(newState, this.state.switches) } );
-                                /* Set basic document metrics */
-                                this.setState({ 'metrics': this.textModel.getMetrics() });
-                                /* Set readability metrics */
-                                const smog = this.textModel.smogIndex();
-                                this.setState({ 'readability': {
-                                    readingTime: this.textModel.averageReadingTime(),
-                                    smogIndex: smog,
-                                    ukReadingAge: this.textModel.toUKReadingAge(smog)
-                                }});                                                                          
-                            } }                            
+                            onChange={ this.onStateChange.bind(this) }                            
                         />                  
                     </Panel.WhitePaper>
                 </Grid>

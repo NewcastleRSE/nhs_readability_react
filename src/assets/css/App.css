@@ -7,9 +7,9 @@ div.DraftEditor-root {
     border: none;
     background-color: #f5f5f5;  /* Material grey[100] */
     color: black;
-    height: calc(100vh - 100px);
+    height: calc(100vh - 140px);
     overflow-y: auto;
-    width: 100%;    
+    width: 100%;        
     line-height: 2em;
     font-family: "Roboto","Helvetica","Arial",sans-serif;
 }
@@ -20,7 +20,10 @@ div.public-DraftEditor-content {
 }   
 
 div.public-DraftEditorPlaceholder-root {
-    padding: 0 5px;
+    color: rgb(186, 186, 193);
+    padding-top: 3px;
+    padding-left: 3px;
+    margin-bottom: -20px;
 }
 
 .tippy-box {

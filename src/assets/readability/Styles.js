@@ -25,6 +25,21 @@ const highlightingStyles = {
     }
 };
 
+const toolButtonStyles = {
+    'bold': {
+        fontWeight: 'bold'
+    },
+    'italic': {
+        fontStyle: 'italic'
+    },
+    'underline': {
+        textDecoration: 'underline'
+    }
+};
+
 const darkTheme = Object.assign(createTheme({ palette: { mode: 'dark' } }));
 
-export { highlightingStyles, darkTheme };
+const darkGrey = grey.A700;
+const lightGrey = grey.A100;
+
+export { highlightingStyles, toolButtonStyles, darkTheme, darkGrey, lightGrey };

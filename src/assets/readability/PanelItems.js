@@ -1,9 +1,8 @@
 import { styled } from '@mui/material/styles';
-import { grey } from '@mui/material/colors';
 import Switch from '@mui/material/Switch';
 import { Help } from '@mui/icons-material';
 import { Paper, ListSubheader, ListItem, ListItemIcon, ListItemText } from '@mui/material';
-import { highlightingStyles } from './Styles';
+import { darkGrey, lightGrey, highlightingStyles } from './Styles';
 
 const switchListItems = [
     {
@@ -131,9 +130,6 @@ const readabilityListItems = [
         `
     }
 ];
-
-const darkGrey = grey.A700;
-const lightGrey = grey.A100;
 
 const WhitePaper = props => {
     const { elevation, ...other } = props;

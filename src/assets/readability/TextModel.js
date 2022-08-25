@@ -43,12 +43,14 @@ export default class TextModel {
     /**
      * Update the text model state based on a new EditorState
      * @param {EditorState} newEditorState
+     * @return {boolean} if text has changed (as opposed to selection/inline styles etc)
      */
     stateUpdate(newEditorState) {
 
         console.group('stateUpdate()');
         console.log('New editor state:\n', newEditorState);
 
+        let textChanged = false;
         let changeType = newEditorState.getLastChangeType();
         switch(changeType) {
 
@@ -71,6 +73,7 @@ export default class TextModel {
                 if (currentContentState != newContentState) {  
 
                     /* Recompute all global counts */
+                    textChanged = true;
                     Object.assign(this, GLOBAL_COUNT_INITIALISER);
                     let liveKeys = [];
 
@@ -113,7 +116,7 @@ export default class TextModel {
                     });                    
                     console.log('Finished');
                 } else {
-                    console.log('Content state has not changed');
+                    console.log('Content state has not changed (e.g. a selection)');
                 }                
                 break;
         }
@@ -123,6 +126,10 @@ export default class TextModel {
         console.log('Updated model:\n', this);
         console.groupEnd();
 
+        return(textChanged);
+    }
+
+    getEditorState() {
         return(this.editorState);
     }
 
