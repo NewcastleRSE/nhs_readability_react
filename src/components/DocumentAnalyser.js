@@ -8,6 +8,7 @@ import tippy from 'tippy.js';
 import "tippy.js/dist/tippy.css";
 import "tippy.js/animations/scale.css";
 import 'tippy.js/themes/material.css';
+import { prismWords } from '../assets/readability/PrismWords';
 
 export default class DocumentAnalyser extends React.Component {
 
@@ -45,18 +46,21 @@ export default class DocumentAnalyser extends React.Component {
      * @returns CompositeDecorator
      */
     getDecorators() {
-        const complexStyle = this.state.switches['showComplexSentences'] ? highlightingStyles['showComplexSentences'] : highlightingStyles['normalText'];
-        const prismStyle = this.state.switches['highlightPrismWords'] ? highlightingStyles['highlightPrismWords'] : highlightingStyles['normalText'];
+        const showComplex = this.state.switches['showComplexSentences'];
+        const complexStyle = showComplex ? highlightingStyles['showComplexSentences'] : highlightingStyles['normalText'];
+        const showPrism = this.state.switches['highlightPrismWords'];
+        const prismStyle = showPrism ? highlightingStyles['highlightPrismWords'] : highlightingStyles['normalText'];
         return(new CompositeDecorator([
             {
                 strategy: function(contentBlock, callback, contentState) { this.textModel.findComplexSentences(...arguments) }.bind(this),
                 component: (props) => {
-                    return ( <span style={complexStyle} data-offset-key={props.offsetKey}>{props.children}</span>)
+                    return ( <span className={showComplex ? "sentence-is-complex" : ""} style={complexStyle} data-offset-key={props.offsetKey}>{props.children}</span> )
                 }
             }, {
                 strategy: function(contentBlock, callback, contentState) { this.textModel.findPrismWords(...arguments) }.bind(this),
                 component: (props) => {
-                    return ( <span style={prismStyle} data-offset-key={props.offsetKey}>{props.children}</span>)
+                    console.debug('Re-rendering prism word');
+                    return ( <span className={showPrism ? "prism-word" : ""} style={prismStyle} data-offset-key={props.offsetKey}>{props.children}</span>)
                 }
             }
         ]));
@@ -80,8 +84,26 @@ export default class DocumentAnalyser extends React.Component {
         /* Enable click anywhere in editor to give focus initially - eliminates unintuitive behaviour which focusses only on click over placeholder text */
         const editorRoot = document.querySelector('div.DraftEditor-root');
         editorRoot.addEventListener('click', () => {
-            editorRoot.querySelector('div.public-DraftEditorPlaceholder-root').style.display = 'none';
+            const phRoot = editorRoot.querySelector('div.public-DraftEditorPlaceholder-root');
+            phRoot && (phRoot.style.display = 'none');
             this.editor.current.focus();
+        });
+    }
+
+    componentDidUpdate() {
+
+        /* Highlighting housekeeping */
+        let edContents = document.querySelector('div[data-contents]');
+        Array.from(edContents.querySelectorAll('span.prism-word')).forEach(spw => {
+            let alts = prismWords[spw.innerText.toLowerCase()];
+            if (alts) {
+                /* Add tooltip indicating alternative words/phrases */
+                tippy(spw, {
+                    theme: 'teal',
+                    content: alts.join('<br>'),
+                    allowHTML: true
+                });
+            }
         });
     }
 
@@ -111,6 +133,24 @@ export default class DocumentAnalyser extends React.Component {
         }        
     }
 
+    onStateChange(newState) {
+        console.debug('onStateChange() starting...');
+        let textChanged = this.textModel.stateUpdate(newState, this.state.switches);
+        this.setState({ 'editorState': this.textModel.getEditorState() } );
+        if (textChanged) {
+            /* Set basic document metrics */
+            this.setState({ 'metrics': this.textModel.getMetrics() });
+            /* Set readability metrics */
+            const smog = this.textModel.smogIndex();
+            this.setState({ 'readability': {
+                readingTime: this.textModel.averageReadingTime(),
+                smogIndex: smog,
+                ukReadingAge: this.textModel.toUKReadingAge(smog)
+            }});            
+        } 
+        console.debug('onStateChange() done');        
+    }
+
     render() {
         return (
             <Grid container spacing={1}>
@@ -120,18 +160,7 @@ export default class DocumentAnalyser extends React.Component {
                             ref={ this.editor }
                             placeholder='&nbsp;Type or paste your document here'
                             editorState={ this.state.editorState }
-                            onChange={ (newState) => {
-                                this.setState({ 'editorState': this.textModel.stateUpdate(newState, this.state.switches) } );
-                                /* Set basic document metrics */
-                                this.setState({ 'metrics': this.textModel.getMetrics() });
-                                /* Set readability metrics */
-                                const smog = this.textModel.smogIndex();
-                                this.setState({ 'readability': {
-                                    readingTime: this.textModel.averageReadingTime(),
-                                    smogIndex: smog,
-                                    ukReadingAge: this.textModel.toUKReadingAge(smog)
-                                }});                                                                          
-                            } }                            
+                            onChange={ this.onStateChange.bind(this) }                            
                         />                  
                     </Panel.WhitePaper>
                 </Grid>

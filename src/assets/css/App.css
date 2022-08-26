@@ -20,9 +20,13 @@ div.public-DraftEditor-content {
 }   
 
 div.public-DraftEditorPlaceholder-root {
-    padding: 0 5px;
+    color: rgb(186, 186, 193);
+    padding-top: 3px;
+    padding-left: 3px;
+    margin-bottom: -20px;
 }
 
+/* Default blue tippy theme */
 .tippy-box {
     background-color: #0185c7 !important;
     font-family: Arial, Helvetica, sans-serif;
@@ -53,4 +57,37 @@ div.public-DraftEditorPlaceholder-root {
 
 .tippy-box[data-placement^='right']>.tippy-arrow::before {
     border-right-color: #0185c7 !important;
+}
+
+/* Teal tippy theme for PRSIM words */
+.tippy-box[data-theme~='teal'] {
+    background-color: #00695c !important;
+    font-family: Arial, Helvetica, sans-serif;
+    font-weight: normal !important;
+}
+
+.tippy-box[data-theme~='teal'] a {
+    text-decoration: none;
+    color: white;
+}
+
+.tippy-box[data-theme~='teal'] a:hover {
+    text-decoration: underline;
+    color: white;
+}
+
+.tippy-box[data-theme~='teal'][data-placement^='top']>.tippy-arrow::before {
+    border-top-color: #00695c !important;
+}
+
+.tippy-box[data-theme~='teal'][data-placement^='bottom']>.tippy-arrow::before {
+    border-bottom-color: #00695c !important;
+}
+
+.tippy-box[data-theme~='teal'][data-placement^='left']>.tippy-arrow::before {
+    border-left-color: #00695c !important;
+}
+
+.tippy-box[data-theme~='teal'][data-placement^='right']>.tippy-arrow::before {
+    border-right-color: #00695c !important;
 }

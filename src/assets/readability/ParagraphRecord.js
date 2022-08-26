@@ -64,7 +64,7 @@ export default class ParagraphRecord {
                 sentences: this._splitIntoSentences(text)
             });
 
-            console.debug('End');
+            console.log('End');
 
         } else {
             console.log('Hash codes equal => no change');

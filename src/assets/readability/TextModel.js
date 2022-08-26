@@ -43,12 +43,14 @@ export default class TextModel {
     /**
      * Update the text model state based on a new EditorState
      * @param {EditorState} newEditorState
+     * @return {boolean} if text has changed (as opposed to selection/inline styles etc)
      */
-    stateUpdate(newEditorState) {
+     stateUpdate(newEditorState) {
 
         console.group('stateUpdate()');
         console.log('New editor state:\n', newEditorState);
 
+        let textChanged = false;
         let changeType = newEditorState.getLastChangeType();
         switch(changeType) {
 
@@ -71,6 +73,7 @@ export default class TextModel {
                 if (currentContentState != newContentState) {  
 
                     /* Recompute all global counts */
+                    textChanged = true;
                     Object.assign(this, GLOBAL_COUNT_INITIALISER);
                     let liveKeys = [];
 
@@ -113,7 +116,7 @@ export default class TextModel {
                     });                    
                     console.log('Finished');
                 } else {
-                    console.log('Content state has not changed');
+                    console.log('Content state has not changed (e.g. a selection)');
                 }                
                 break;
         }
@@ -123,6 +126,10 @@ export default class TextModel {
         console.log('Updated model:\n', this);
         console.groupEnd();
 
+        return(textChanged);
+    }
+
+    getEditorState() {
         return(this.editorState);
     }
 
@@ -172,16 +179,16 @@ export default class TextModel {
     findPrismWords(contentBlock, callback, contentState) {
 
         console.group('findPrismWords()');
-        console.log('Determine PRISM words in block', contentBlock.getKey());
-        console.log('Model state', this.modelState);
+        console.debug('Determine PRISM words in block', contentBlock.getKey());
+        console.debug('Model state', this.modelState);
 
         if (this.switchState['highlightPrismWords'] && this.modelState) {
             let paraRecordKey = Object.keys(this.modelState).find(key => key == contentBlock.getKey());
             if (!paraRecordKey) {
-                this.modelState[paraRecordKey] = new ParagraphRecord();     
-                this.modelState[paraRecordKey].stateUpdate(contentBlock);
-            }           
-            console.log('Found paragraph record', this.modelState[paraRecordKey], 'with key', paraRecordKey);
+                this.modelState[paraRecordKey] = new ParagraphRecord();                     
+            }   
+            this.modelState[paraRecordKey].stateUpdate(contentBlock);        
+            console.debug('Found paragraph record', this.modelState[paraRecordKey], 'with key', paraRecordKey);
             let complexRanges = this.modelState[paraRecordKey].markPrismWords();
             complexRanges.forEach(cr => {
                 callback(cr.start, cr.end);
@@ -305,7 +312,7 @@ export default class TextModel {
         if (grade >= 4) {
             ukra = this._roundFloat(grade + ukReadingAgeCorrection, 2);
         }
-        console.debug('UK Reading Age', ukra);
+        console.log('UK Reading Age', ukra);
         console.groupEnd();
         return(ukra);
     }
@@ -333,7 +340,7 @@ export default class TextModel {
         } else if (score < 40 && score >= 30) {
             grade = 15;
         }
-        console.debug('Grade', grade);
+        console.log('Grade', grade);
         console.groupEnd();
         return(grade);
     }
@@ -351,7 +358,7 @@ export default class TextModel {
             flesch = 206.835 - (1.015 * sentenceLength) - (84.6 * syllablesPerWord);
         }  
         let fre = this._roundFloat(flesch, 2); 
-        console.debug('Flesch Reading Ease', fre);
+        console.log('Flesch Reading Ease', fre);
         console.groupEnd();
         return(fre);
     }
@@ -369,7 +376,7 @@ export default class TextModel {
             flesch = 0.39 * sentenceLength + 11.8 * syllablesPerWord - 15.59;
         }
         let fkg = this._roundFloat(flesch, 1);
-        console.debug('Flesch-Kincaid grade', fkg);
+        console.log('Flesch-Kincaid grade', fkg);
         console.groupEnd();
         return(fkg);
     }
@@ -395,7 +402,7 @@ export default class TextModel {
             }
             smog = this._roundFloat(1.043 * (30 * (nPolySyllables / this.nSentences)) ** 0.5 + 3.1291, 1);
         }       
-        console.debug('SMOG Index', smog);
+        console.log('SMOG Index', smog);
         console.groupEnd();
         return(smog);
     }
@@ -409,7 +416,7 @@ export default class TextModel {
         let letters = this._roundFloat(this.averageLettersPerWord() * 100, 2);
         let sentences = this._roundFloat(this.averageSentencesPerWord() * 100, 2);
         let cli = this._roundFloat(0.058 * letters - 0.296 * sentences - 15.8, 2);
-        console.debug('Coleman-Liau Index', cli);
+        console.log('Coleman-Liau Index', cli);
         console.groupEnd();
         return(cli);
     }
@@ -427,7 +434,7 @@ export default class TextModel {
             (0.5 * this._roundFloat(avWordsPerSentence, 2)) -
             21.43
         );
-        console.debug('Automated Readability Index', ari);
+        console.log('Automated Readability Index', ari);
         console.groupEnd();
         return(ari);        
     }
@@ -477,7 +484,7 @@ export default class TextModel {
         let { difficult, easy, sentences } = this._easyAndDifficultWords(sampleSize);        
         let number = (easy + difficult * 3) / sentences;
         let lwf = this._roundFloat(number <= 20 ? (number - 2) / 2 : number / 2, 1);
-        console.debug('Linsear Write Formula', lwf);
+        console.log('Linsear Write Formula', lwf);
         console.groupEnd();
         return(lwf);
     }
@@ -495,7 +502,7 @@ export default class TextModel {
             score += 3.6365;
         }
         let dsrs = this._roundFloat(score, 2);
-        console.debug('Dale-Chall Readability Score', dsrs);
+        console.log('Dale-Chall Readability Score', dsrs);
         console.groupEnd();
         return(dsrs);        
     }
@@ -514,7 +521,7 @@ export default class TextModel {
         if (score < 7.9) grade = 9;
         if (score < 8.9) grade = 11;
         if (score < 9.9) grade = 13;
-        console.debug('Dale-Chall grade', grade);
+        console.log('Dale-Chall grade', grade);
         console.groupEnd();
         return(grade);
     }
@@ -528,7 +535,7 @@ export default class TextModel {
         let { total, difficult } = this._daleChallDifficultWords(3);
         let percentDifficult = 100 * difficult / total;
         let gfi = this._roundFloat(0.4 * (this.averageSentenceLength() + percentDifficult), 2);
-        console.debug('Gunning Fog Index', gfi);
+        console.log('Gunning Fog Index', gfi);
         console.groupEnd();
         return(gfi);
     }
