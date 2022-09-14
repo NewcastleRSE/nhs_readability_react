@@ -116,18 +116,15 @@ export default class DocumentAnalyser extends React.Component {
                     replace.href = 'javascript:void(0)';
                     replace.title = 'Replace highlighted word with this one';
                     replace.text = alt;
+                    replace.style.cursor = 'pointer';
                     replace.addEventListener('click', evt => {
-                        console.debug('Clicked alt word!', evt);
                         let blockSelection = SelectionState.createEmpty(blockKey).merge({
                             anchorOffset: blockAnchorOffset,
                             focusOffset: blockFocusOffset
                         });
-                        let contentState = this.state.editorState.getCurrentContent();
-                        contentState = Modifier.replaceText(contentState, blockSelection, alt);
+                        let contentState = Modifier.replaceText(this.state.editorState.getCurrentContent(), blockSelection, alt);
                         this.setState({editorState: EditorState.push(this.state.editorState, contentState, null)});
-                        console.debug('Replaced');
-                    });
-                    replace.style.cursor = 'pointer';
+                    });                    
                     tipFrag.appendChild(replace);
                     tipFrag.appendChild(document.createElement('br'));
                 });
