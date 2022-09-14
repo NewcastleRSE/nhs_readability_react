@@ -1,11 +1,11 @@
 {
   "files": {
     "main.css": "/nhs_readability_react/static/css/main.c1b90ea7.css",
-    "main.js": "/nhs_readability_react/static/js/main.44353901.js",
+    "main.js": "/nhs_readability_react/static/js/main.b72c6fce.js",
     "index.html": "/nhs_readability_react/index.html"
   },
   "entrypoints": [
     "static/css/main.c1b90ea7.css",
-    "static/js/main.44353901.js"
+    "static/js/main.b72c6fce.js"
   ]
 }
