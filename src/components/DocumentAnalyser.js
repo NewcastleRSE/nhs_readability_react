@@ -3,12 +3,13 @@ import { Grid, List } from '@mui/material';
 import TextModel from '../assets/readability/TextModel';
 import * as Panel from '../assets/readability/PanelItems';
 import { highlightingStyles } from '../assets/readability/Styles';
-import { CompositeDecorator, Editor, EditorState } from 'draft-js';
+import { CompositeDecorator, Editor, EditorState, Modifier } from 'draft-js';
 import tippy from 'tippy.js';
 import "tippy.js/dist/tippy.css";
 import "tippy.js/animations/scale.css";
 import 'tippy.js/themes/material.css';
 import { prismWords } from '../assets/readability/PrismWords';
+import { SelectionState } from 'draft-js';
 
 export default class DocumentAnalyser extends React.Component {
 
@@ -59,8 +60,15 @@ export default class DocumentAnalyser extends React.Component {
             }, {
                 strategy: function(contentBlock, callback, contentState) { this.textModel.findPrismWords(...arguments) }.bind(this),
                 component: (props) => {
-                    console.debug('Re-rendering prism word');
-                    return ( <span className={showPrism ? "prism-word" : ""} style={prismStyle} data-offset-key={props.offsetKey}>{props.children}</span>)
+                    console.debug('Re-rendering prism word', props);
+                    return ( 
+                        <span 
+                            className={showPrism ? "prism-word" : ""} 
+                            style={prismStyle} 
+                            data-anchor-offset={props.start} 
+                            data-focus-offset={props.end} 
+                            data-offset-key={props.offsetKey}
+                        >{props.children}</span>)
                 }
             }
         ]));
@@ -95,12 +103,37 @@ export default class DocumentAnalyser extends React.Component {
         /* Highlighting housekeeping */
         let edContents = document.querySelector('div[data-contents]');
         Array.from(edContents.querySelectorAll('span.prism-word')).forEach(spw => {
+            let blockKey = spw.dataset.offsetKey.substring(0, 5);
+            let blockAnchorOffset = spw.dataset.anchorOffset;
+            let blockFocusOffset = spw.dataset.focusOffset;
+            console.debug('Highlighted word', spw.innerText, 'block key', blockKey, 'anchor offset', blockAnchorOffset, 'focus offset', blockFocusOffset);
             let alts = prismWords[spw.innerText.toLowerCase()];
             if (alts) {
                 /* Add tooltip indicating alternative words/phrases */
+                let tipFrag = document.createDocumentFragment();
+                alts.forEach(alt => {
+                    let replace = document.createElement('a');
+                    replace.href = 'javascript:void(0)';
+                    replace.title = 'Replace highlighted word with this one';
+                    replace.text = alt;
+                    replace.addEventListener('click', evt => {
+                        console.debug('Clicked alt word!', evt);
+                        let blockSelection = SelectionState.createEmpty(blockKey).merge({
+                            anchorOffset: blockAnchorOffset,
+                            focusOffset: blockFocusOffset
+                        });
+                        let contentState = this.state.editorState.getCurrentContent();
+                        contentState = Modifier.replaceText(contentState, blockSelection, alt);
+                        this.setState({editorState: EditorState.push(this.state.editorState, contentState, null)});
+                        console.debug('Replaced');
+                    });
+                    replace.style.cursor = 'pointer';
+                    tipFrag.appendChild(replace);
+                    tipFrag.appendChild(document.createElement('br'));
+                });
                 tippy(spw, {
                     theme: 'teal',
-                    content: alts.join('<br>'),
+                    content: tipFrag,
                     allowHTML: true
                 });
             }
