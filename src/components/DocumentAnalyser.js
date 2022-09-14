@@ -3,13 +3,12 @@ import { Grid, List } from '@mui/material';
 import TextModel from '../assets/readability/TextModel';
 import * as Panel from '../assets/readability/PanelItems';
 import { highlightingStyles } from '../assets/readability/Styles';
-import { CompositeDecorator, Editor, EditorState, Modifier } from 'draft-js';
+import { CompositeDecorator, Editor, EditorState, SelectionState, Modifier } from 'draft-js';
 import tippy from 'tippy.js';
 import "tippy.js/dist/tippy.css";
 import "tippy.js/animations/scale.css";
 import 'tippy.js/themes/material.css';
 import { prismWords } from '../assets/readability/PrismWords';
-import { SelectionState } from 'draft-js';
 
 export default class DocumentAnalyser extends React.Component {
 
