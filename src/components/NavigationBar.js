@@ -5,6 +5,12 @@ import Toolbar from '@mui/material/Toolbar';
 import Link from '@mui/material/Link';
 import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
+import Drawer from '@mui/material/Drawer';
+import Divider from '@mui/material/Divider';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemButton from '@mui/material/ListItemButton';
+import ListItemText from '@mui/material/ListItemText';
 import MenuIcon from '@mui/icons-material/Menu';
 
 const pages = [
@@ -25,7 +31,21 @@ const pages = [
     }
 ];
 
+const drawerWidth = 250;
+
 export default class NavigationBar extends React.Component {
+
+    constructor(props) {
+        super(props);
+        this.state = {
+            mobileOpen: false
+        };
+    }
+
+    handleDrawerToggle() {
+        this.setState({ mobileOpen: !this.state.mobileOpen });
+    };
+
     render() {
         return (
             <Box sx={{ flexGrow: 1 }}>
@@ -36,7 +56,8 @@ export default class NavigationBar extends React.Component {
                             edge="start"
                             color="inherit"
                             aria-label="menu"
-                            sx={{ mr: 2 }}
+                            onClick={this.handleDrawerToggle.bind(this)}
+                            sx={{ mr: 2, display: { sm: 'none' } }}
                         >
                             <MenuIcon />
                         </IconButton>
@@ -48,11 +69,15 @@ export default class NavigationBar extends React.Component {
                             sx={{
                                 flexGrow: 1,
                                 textTransform: "uppercase",
-                                textDecoration: "none"
+                                textDecoration: "none",
+                                display: {
+                                    xs: 'none',
+                                    sm: 'block'
+                                }
                             }}>
                             NHS Medical Document Readability Tool
                         </Link>
-                        <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
+                        <Box sx={{ display: { xs: 'none', md: 'flex', sm: 'flex' } }}>
                             { pages.map((page) => (
                                 <Button
                                     key={page.key}                                    
@@ -75,6 +100,45 @@ export default class NavigationBar extends React.Component {
                         </Box>
                     </Toolbar>
                 </AppBar>
+                <Box component="nav">
+                    <Drawer                    
+                        variant="temporary"
+                        open={this.state.mobileOpen}
+                        onClose={this.handleDrawerToggle.bind(this)}
+                        ModalProps={{
+                            keepMounted: true, /* Better open performance on mobile */
+                        }}
+                        sx={{
+                            display: { xs: 'block', sm: 'none' },
+                            '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
+                        }}
+                    >
+                        <Box onClick={this.handleDrawerToggle.bind(this)} sx={{ textAlign: 'center' }}>
+                            <Link
+                                variant="h6"
+                                href="#"
+                                color="inherit"
+                                nowrap="true"
+                                sx={{
+                                    textTransform: "uppercase",
+                                    textDecoration: "none",
+                                    
+                                }}>
+                                NHS Readability Tool
+                            </Link>
+                            <Divider />
+                            <List>
+                                {pages.map((page) => (
+                                <ListItem key={page.key} disablePadding>
+                                    <ListItemButton sx={{ textAlign: 'left' }}>
+                                        <ListItemText primary={page.key} title={page.title} />
+                                    </ListItemButton>
+                                </ListItem>
+                                ))}
+                            </List>
+                        </Box>
+                    </Drawer>
+                </Box>
             </Box>
         );
     }
