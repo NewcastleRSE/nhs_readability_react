@@ -1,9 +1,10 @@
 import * as React from 'react';
 import { Grid, List } from '@mui/material';
-import { FormatBold, FormatItalic, FormatUnderlined, FormatListBulleted, FormatListNumbered } from '@mui/icons-material';
-import { Box, ButtonGroup, Button } from '@mui/material';
+import { Box, ToggleButtonGroup, ToggleButton } from '@mui/material';
+import { FormatBold, FormatItalic, FormatUnderlined, FormatListBulleted, FormatListNumbered } from "@mui/icons-material";
 import TextModel from '../assets/readability/TextModel';
 import * as Panel from '../assets/readability/PanelItems';
+import * as Toolbar from '../assets/readability/EditorToolbarItems';
 import { darkGrey, lightGrey, highlightingStyles, toolButtonStyles } from '../assets/readability/Styles';
 import { CompositeDecorator, Editor, EditorState, RichUtils } from 'draft-js';
 import tippy from 'tippy.js';
@@ -13,8 +14,9 @@ import 'tippy.js/themes/material.css';
 
 const EditorToolbarButton = (props) => {
     return (
-        <Button 
+        <ToggleButton 
             title={ props.title } 
+            value={ props.name }
             variant="text" 
             sx={{ width: '40px', height: '40px', color: lightGrey, fontWeight: 'bold', fontSize: '1em' }}
             onClick={ () => {
@@ -22,7 +24,7 @@ const EditorToolbarButton = (props) => {
             } }
         >            
             { typeof props.text == 'string' ? props.text  : <props.icon /> }
-        </Button>
+        </ToggleButton>
     );
 }
 
@@ -36,7 +38,7 @@ const EditorToolbar = (props) => {
             height: '40px',
             lineHeight: '40px'
         }}>
-            <ButtonGroup sx={{ borderRadius: 0 }}>
+            <ToggleButtonGroup value={['bold']} sx={{ borderRadius: 0 }}>
                 <EditorToolbarButton
                     name={ 'bold' }
                     title="Make selection bold" 
@@ -93,7 +95,7 @@ const EditorToolbar = (props) => {
                     onClick={ props.buttonAction }
                 >                    
                 </EditorToolbarButton>
-            </ButtonGroup>            
+            </ToggleButtonGroup>            
         </Box>
     );
 };
@@ -109,6 +111,7 @@ export default class DocumentAnalyser extends React.Component {
                 highlightPrismWords: Panel.getSwitchByName('highlightPrismWords').defaultChecked,
                 includeMedicalTerms: Panel.getSwitchByName('includeMedicalTerms').defaultChecked
             },
+            toolbarFormats: [],
             metrics: {
                 nCharacters: 0,
                 nSpaces: 0,
@@ -201,7 +204,7 @@ export default class DocumentAnalyser extends React.Component {
 
     onToolbarButtonAction(style) { 
         console.log('onToolbarButtonHandler()', style);
-        let newEditorState = RichUtils.toggleInlineStyle(this.state.editorState, style);
+        let newEditorState = RichUtils.toggleInlineStyle(this.state.editorState, 'bold');
         this.setState({ editorState: newEditorState });
     }
 
@@ -226,7 +229,32 @@ export default class DocumentAnalyser extends React.Component {
             <Grid container spacing={1}>
                 <Grid item xs={12} sm={12} md={9}>
                     <Panel.WhitePaper elevation={5}>  
-                        <EditorToolbar buttonAction={ this.onToolbarButtonAction.bind(this) }/>
+                        <Box sx={{
+                            background: darkGrey,
+                            color: lightGrey,
+                            fontSize: 'large',
+                            marginTop: '8px',
+                            height: '40px',
+                            lineHeight: '40px'
+                        }}>
+                            <ToggleButtonGroup value={this.state.toolbarFormats} onChange={(evt, newFormats) => {
+                                    console.log('Button group onChange()', newFormats);
+                                    this.setState({toolbarFormats: newFormats});
+                                }} sx={{ borderRadius: 0 }}>
+                                {Toolbar.editorToolbarItems.map((eti) => (
+                                    <ToggleButton 
+                                        variant="text" 
+                                        sx={{ width: '40px', height: '40px', color: lightGrey, fontWeight: 'bold', fontSize: '1em' }}
+                                        key={eti.key} 
+                                        value={eti.value} 
+                                        title={eti.title} 
+                                        onClick={this.onToolbarButtonAction.bind(this)}
+                                    >
+                                    { typeof eti.text == 'string' ? eti.text : eti.icon }
+                                    </ToggleButton>
+                                ))}                                
+                            </ToggleButtonGroup>            
+                        </Box>
                         <Editor
                             ref={ this.editor }
                             placeholder='&nbsp;Type or paste your document here'
