@@ -6,7 +6,7 @@ import TextModel from '../assets/readability/TextModel';
 import * as Panel from '../assets/readability/PanelItems';
 import * as Toolbar from '../assets/readability/EditorToolbarItems';
 import { darkGrey, lightGrey, highlightingStyles, toolButtonStyles } from '../assets/readability/Styles';
-import { CompositeDecorator, Editor, EditorState, RichUtils } from 'draft-js';
+import { CompositeDecorator, Editor, EditorState, Modifier } from 'draft-js';
 import tippy from 'tippy.js';
 import 'tippy.js/dist/tippy.css';
 import 'tippy.js/animations/scale.css';
@@ -43,56 +43,48 @@ const EditorToolbar = (props) => {
                     name={ 'bold' }
                     title="Make selection bold" 
                     icon={ FormatBold }
-                    onClick={ props.buttonAction }
                 >
                 </EditorToolbarButton>
                 <EditorToolbarButton 
                     name={ 'italic' }
                     title="Italicise selection" 
                     icon={ FormatItalic }
-                    onClick={ props.buttonAction }
                 >                    
                 </EditorToolbarButton>
                 <EditorToolbarButton 
                     name={ 'underline' }
                     title="Underline selection" 
                     icon={ FormatUnderlined }
-                    onClick={ props.buttonAction }
                 >                    
                 </EditorToolbarButton>
                 <EditorToolbarButton 
                     name={ 'h1' } 
                     title="Heading level 1" 
                     text={ 'H1' }
-                    onClick={ props.buttonAction }
                 >                    
                 </EditorToolbarButton>
                 <EditorToolbarButton 
                     name={ 'h2' } 
                     title="Heading level 2" 
                     text={ 'H2' }
-                    onClick={ props.buttonAction }
                 >                    
                 </EditorToolbarButton>
                 <EditorToolbarButton 
                     name={ 'h3' } 
                     title="Heading level 3" 
                     text={ 'H3' }
-                    onClick={ props.buttonAction }
                 >                    
                 </EditorToolbarButton>
                 <EditorToolbarButton 
                     name={ 'ul' } 
                     title="Create bulleted list" 
                     icon={ FormatListBulleted }
-                    onClick={ props.buttonAction }
                 >                    
                 </EditorToolbarButton>
                 <EditorToolbarButton 
                     name={ 'ol' } 
                     title="Create numbered list" 
                     icon={ FormatListNumbered }
-                    onClick={ props.buttonAction }
                 >                    
                 </EditorToolbarButton>
             </ToggleButtonGroup>            
@@ -202,10 +194,23 @@ export default class DocumentAnalyser extends React.Component {
         }        
     }
 
-    onToolbarButtonAction(style) { 
-        console.log('onToolbarButtonHandler()', style);
-        let newEditorState = RichUtils.toggleInlineStyle(this.state.editorState, 'bold');
-        this.setState({ editorState: newEditorState });
+    onToolbarStateChange(evt, newFormats) { 
+        console.log('onToolbarStateChange() : existing', this.state.toolbarFormats, 'new', newFormats);
+        let turnedOff = newFormats.filter(x => !this.state.toolbarFormats.includes(x));
+        let turnedOn = this.state.toolbarFormats.filter(x => !newFormats.includes(x));
+        let btnName = null;
+        if (turnedOff.length > 0) {
+            /* Button toggled off */
+            btnName = turnedOff[0];
+        } else if (turnedOn.length > 0) {
+            /* Button toggled off */
+            btnName = turnedOn[0];
+        }
+        this.setState({toolbarFormats: newFormats});
+        // let selection = this.state.editorState.getSelection();
+        // let newContentState = Modifier.applyInlineStyle(this.state.editorState.getCurrentContent(), selection, 'BOLD');
+        // let newEditorState = EditorState.createWithContent(newContentState, this.getDecorators());
+        // this.setState({editorState: EditorState.push(newEditorState, newContentState, 'change-inline-style')});
     }
 
     onStateChange(newState) {
@@ -237,10 +242,7 @@ export default class DocumentAnalyser extends React.Component {
                             height: '40px',
                             lineHeight: '40px'
                         }}>
-                            <ToggleButtonGroup value={this.state.toolbarFormats} onChange={(evt, newFormats) => {
-                                    console.log('Button group onChange()', newFormats);
-                                    this.setState({toolbarFormats: newFormats});
-                                }} sx={{ borderRadius: 0 }}>
+                            <ToggleButtonGroup value={this.state.toolbarFormats} onChange={ this.onToolbarStateChange.bind(this) } sx={{ borderRadius: 0 }}>
                                 {Toolbar.editorToolbarItems.map((eti) => (
                                     <ToggleButton 
                                         variant="text" 
@@ -248,7 +250,6 @@ export default class DocumentAnalyser extends React.Component {
                                         key={eti.key} 
                                         value={eti.value} 
                                         title={eti.title} 
-                                        onClick={this.onToolbarButtonAction.bind(this)}
                                     >
                                     { typeof eti.text == 'string' ? eti.text : eti.icon }
                                     </ToggleButton>

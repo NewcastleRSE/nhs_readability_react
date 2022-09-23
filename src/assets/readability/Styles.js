@@ -26,15 +26,9 @@ const highlightingStyles = {
 };
 
 const toolButtonStyles = {
-    'bold': {
-        fontWeight: 'bold'
-    },
-    'italic': {
-        fontStyle: 'italic'
-    },
-    'underline': {
-        textDecoration: 'underline'
-    }
+    'bold': 'BOLD',
+    'italic': 'ITALIC',
+    'underline': 'UNDERLINE'
 };
 
 const darkTheme = Object.assign(createTheme({ palette: { mode: 'dark' } }));
