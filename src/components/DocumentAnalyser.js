@@ -199,18 +199,29 @@ export default class DocumentAnalyser extends React.Component {
         let turnedOff = newFormats.filter(x => !this.state.toolbarFormats.includes(x));
         let turnedOn = this.state.toolbarFormats.filter(x => !newFormats.includes(x));
         let btnName = null;
+        let addStyle = false;
         if (turnedOff.length > 0) {
             /* Button toggled off */
             btnName = turnedOff[0];
+            addStyle = true;
         } else if (turnedOn.length > 0) {
             /* Button toggled off */
             btnName = turnedOn[0];
         }
+        let style = toolButtonStyles[btnName];
+        if (style) {
+            let selection = this.state.editorState.getSelection();
+            let newContentState = null;
+            if (addStyle) {
+                newContentState = Modifier.applyInlineStyle(this.state.editorState.getCurrentContent(), selection, style);
+            } else {
+                newContentState = Modifier.removeInlineStyle(this.state.editorState.getCurrentContent(), selection, style);
+            }
+            let newEditorState = EditorState.createWithContent(newContentState, this.getDecorators());
+            newEditorState = EditorState.forceSelection(newEditorState, selection);
+            this.setState({editorState: EditorState.push(newEditorState, newContentState, 'change-inline-style')});
+        }
         this.setState({toolbarFormats: newFormats});
-        // let selection = this.state.editorState.getSelection();
-        // let newContentState = Modifier.applyInlineStyle(this.state.editorState.getCurrentContent(), selection, 'BOLD');
-        // let newEditorState = EditorState.createWithContent(newContentState, this.getDecorators());
-        // this.setState({editorState: EditorState.push(newEditorState, newContentState, 'change-inline-style')});
     }
 
     onStateChange(newState) {
