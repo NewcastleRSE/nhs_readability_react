@@ -6,7 +6,7 @@ import TextModel from '../assets/readability/TextModel';
 import * as Panel from '../assets/readability/PanelItems';
 import * as Toolbar from '../assets/readability/EditorToolbarItems';
 import { darkGrey, lightGrey, highlightingStyles, toolButtonStyles } from '../assets/readability/Styles';
-import { CompositeDecorator, Editor, EditorState, Modifier } from 'draft-js';
+import { CompositeDecorator, Editor, EditorState, Modifier, RichUtils } from 'draft-js';
 import tippy from 'tippy.js';
 import 'tippy.js/dist/tippy.css';
 import 'tippy.js/animations/scale.css';
@@ -199,32 +199,36 @@ export default class DocumentAnalyser extends React.Component {
         let turnedOff = newFormats.filter(x => !this.state.toolbarFormats.includes(x));
         let turnedOn = this.state.toolbarFormats.filter(x => !newFormats.includes(x));
         let btnName = null;
-        let addStyle = false;
         if (turnedOff.length > 0) {
             /* Button toggled off */
             btnName = turnedOff[0];
-            addStyle = true;
         } else if (turnedOn.length > 0) {
             /* Button toggled off */
             btnName = turnedOn[0];
         }
         let style = toolButtonStyles[btnName];
-        if (style) {
-            let selection = this.state.editorState.getSelection();
-            let newContentState = null;
-            if (addStyle) {
-                newContentState = Modifier.applyInlineStyle(this.state.editorState.getCurrentContent(), selection, style);
-            } else {
-                newContentState = Modifier.removeInlineStyle(this.state.editorState.getCurrentContent(), selection, style);
-            }
-            let newEditorState = EditorState.createWithContent(newContentState, this.getDecorators());
-            newEditorState = EditorState.forceSelection(newEditorState, selection);
-            this.setState({editorState: EditorState.push(newEditorState, newContentState, 'change-inline-style')});
-        }
+        console.log('Selection before:', this.state.editorState.getSelection());
+        let newEditorState = RichUtils.toggleInlineStyle(this.state.editorState, style);
+        console.log('Selection after:', newEditorState.getSelection());
+        this.setState({editorState: EditorState.push(newEditorState, newEditorState.getCurrentContent(), 'change-inline-style')});
+        console.log('Selection after 2:', newEditorState.getSelection());
+        // if (style) {
+        //     let selection = this.state.editorState.getSelection();
+        //     let newContentState = null;
+        //     if (addStyle) {
+        //         newContentState = Modifier.applyInlineStyle(this.state.editorState.getCurrentContent(), selection, style);
+        //     } else {
+        //         newContentState = Modifier.removeInlineStyle(this.state.editorState.getCurrentContent(), selection, style);
+        //     }
+        //     let newEditorState = EditorState.createWithContent(newContentState, this.getDecorators());
+        //     newEditorState = EditorState.forceSelection(newEditorState, selection);
+        //     this.setState({editorState: EditorState.push(newEditorState, newContentState, 'change-inline-style')});
+        // }
         this.setState({toolbarFormats: newFormats});
     }
 
     onStateChange(newState) {
+        console.log('Selection on enter onStateChange():', newState.getSelection());
         let textChanged = this.textModel.stateUpdate(newState, this.state.switches);
         this.setState({ 'editorState': this.textModel.getEditorState() } );
         if (textChanged) {
