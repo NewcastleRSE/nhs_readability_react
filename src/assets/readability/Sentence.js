@@ -3,7 +3,7 @@
  */
 
 import { syllable } from "syllable";
-import { localeLang, multiNonWhitespaceRe, multiWhitespaceRe, sentenceComplexityThreshold } from './Constants';
+import { localeLang, multiNonWhitespaceRe, multiWhitespaceRe, sentenceComplexitySmogRange } from './Constants';
 
 /** 
  * @classdesc Class to model a sentence
@@ -89,7 +89,11 @@ export default class Sentence {
 
     /**
      * Complexity calculated via simplified SMOG index (https://readable.com/readability/smog-index/)
-     * NOTE: need to decide an official way of determining this and other metrics
+     * NOTE: need to decide an official way of determining this and other metrics 
+     * According to the "Plain English Medical Guide":
+     * "A good average sentence length ('ASL') is 15 to 20 words. Use shorter ones
+     * for 'punch'. Longer ones should not have more than three items of information;
+     * otherwise they get overloaded, and readers lose track."
      * @return if sentence complex
      */
     isComplex() {
@@ -98,11 +102,12 @@ export default class Sentence {
         console.log('Check', this.text, 'is complex');
 
         let smog = 3.0 + Math.sqrt(this.wordCount(3));
+        let isComplex = smog > sentenceComplexitySmogRange[0] && smog < sentenceComplexitySmogRange[1];
 
-        console.log('SMOG index', smog, 'complex', smog >= sentenceComplexityThreshold);
+        console.log('SMOG index', smog, 'complex', isComplex);
         console.groupEnd();
 
-        return(smog >= sentenceComplexityThreshold);
+        return(isComplex);
     }
 
 }
