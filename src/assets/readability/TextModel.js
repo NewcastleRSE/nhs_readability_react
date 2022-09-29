@@ -49,6 +49,7 @@ export default class TextModel {
 
         console.group('stateUpdate()');
         console.log('New editor state:\n', newEditorState);
+        console.log('Selection', newEditorState.getSelection());
 
         let textChanged = false;
         let changeType = newEditorState.getLastChangeType();
@@ -121,7 +122,8 @@ export default class TextModel {
                 break;
         }
 
-        this.editorState = newEditorState;
+        /* Need to force reselection as rendering is lost */
+        this.editorState = EditorState.forceSelection(newEditorState, newEditorState.getSelection());
                 
         console.log('Updated model:\n', this);
         console.groupEnd();

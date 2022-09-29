@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { Grid, List } from '@mui/material';
-import { Box, ButtonGroup, Button } from '@mui/material';
+import { Box, ToggleButtonGroup, ToggleButton } from '@mui/material';
+import { FormatBold, FormatItalic, FormatUnderlined, FormatListBulleted, FormatListNumbered } from "@mui/icons-material";
 import TextModel from '../assets/readability/TextModel';
 import * as Panel from '../assets/readability/PanelItems';
 import * as Toolbar from '../assets/readability/EditorToolbarItems';
@@ -11,18 +12,24 @@ import 'tippy.js/dist/tippy.css';
 import 'tippy.js/animations/scale.css';
 import 'tippy.js/themes/material.css';
 
+const EditorToolbarButton = (props) => {
+    return (
+        <ToggleButton 
+            title={ props.title } 
+            value={ props.name }
+            variant="text"
+            active
+            sx={{ width: '40px', height: '40px', color: lightGrey, fontWeight: 'bold', fontSize: '1em' }}
+            onClick={ () => {
+                props.onClick(toolButtonStyles[props.name] || 'none'); 
+            } }
+        >            
+            { typeof props.text == 'string' ? props.text  : <props.icon /> }
+        </ToggleButton>
+    );
+}
+
 const EditorToolbar = (props) => {
-
-
-    console.log('EditorToolbarRender()');
-    const { editorState } = props;
-    const selection = editorState.getSelection();
-    const blockType = editorState
-        .getCurrentContent()
-        .getBlockForKey(selection.getStartKey())
-        .getType();
-    const currentStyle = editorState.getCurrentInlineStyle();
-
     return (
         <Box sx={{
             background: darkGrey,
@@ -32,21 +39,56 @@ const EditorToolbar = (props) => {
             height: '40px',
             lineHeight: '40px'
         }}>
-            <ButtonGroup sx={{ borderRadius: 0 }}>
-                {Toolbar.editorToolbarItems.map((eti) => (
-                    <Button 
-                        variant="text" 
-                        sx={{ width: '40px', height: '40px', color: lightGrey, fontWeight: 'bold', fontSize: '1em' }}
-                        key={eti.key}
-                        active={eti.type == 'block' ? (eti.style === blockType) : (currentStyle.has(eti.style))} 
-                        value={eti.value} 
-                        title={eti.title}
-                        onClick={ (evt) => console.log('Toolbar button click', evt)} 
-                    >
-                    { typeof eti.text == 'string' ? eti.text : eti.icon }
-                    </Button>
-                ))}                                
-            </ButtonGroup>            
+            <ToggleButtonGroup value={['bold']} sx={{ borderRadius: 0 }}>
+                <EditorToolbarButton
+                    name={ 'bold' }
+                    title="Make selection bold" 
+                    icon={ FormatBold }
+                >
+                </EditorToolbarButton>
+                <EditorToolbarButton 
+                    name={ 'italic' }
+                    title="Italicise selection" 
+                    icon={ FormatItalic }
+                >                    
+                </EditorToolbarButton>
+                <EditorToolbarButton 
+                    name={ 'underline' }
+                    title="Underline selection" 
+                    icon={ FormatUnderlined }
+                >                    
+                </EditorToolbarButton>
+                <EditorToolbarButton 
+                    name={ 'h1' } 
+                    title="Heading level 1" 
+                    text={ 'H1' }
+                >                    
+                </EditorToolbarButton>
+                <EditorToolbarButton 
+                    name={ 'h2' } 
+                    title="Heading level 2" 
+                    text={ 'H2' }
+                >                    
+                </EditorToolbarButton>
+                <EditorToolbarButton 
+                    name={ 'h3' } 
+                    title="Heading level 3" 
+                    text={ 'H3' }
+                >                    
+                </EditorToolbarButton>
+                <EditorToolbarButton 
+                    name={ 'ul' } 
+                    title="Create bulleted list" 
+                    icon={ FormatListBulleted }
+                >                    
+                </EditorToolbarButton>
+                <EditorToolbarButton 
+                    name={ 'ol' } 
+                    title="Create numbered list" 
+                    icon={ FormatListNumbered }
+                >                    
+                </EditorToolbarButton>
+            </ToggleButtonGroup>            
         </Box>
     );
 };
@@ -62,6 +104,7 @@ export default class DocumentAnalyser extends React.Component {
                 highlightPrismWords: Panel.getSwitchByName('highlightPrismWords').defaultChecked,
                 includeMedicalTerms: Panel.getSwitchByName('includeMedicalTerms').defaultChecked
             },
+            toolbarFormats: [],
             metrics: {
                 nCharacters: 0,
                 nSpaces: 0,
@@ -87,10 +130,8 @@ export default class DocumentAnalyser extends React.Component {
      * @returns CompositeDecorator
      */
     getDecorators() {
-
         const complexStyle = this.state.switches['showComplexSentences'] ? highlightingStyles['showComplexSentences'] : highlightingStyles['normalText'];
         const prismStyle = this.state.switches['highlightPrismWords'] ? highlightingStyles['highlightPrismWords'] : highlightingStyles['normalText'];
-
         return(new CompositeDecorator([
             {
                 strategy: function(contentBlock, callback, contentState) { this.textModel.findComplexSentences(...arguments) }.bind(this),
@@ -155,24 +196,24 @@ export default class DocumentAnalyser extends React.Component {
     }
 
     onToolbarStateChange(evt, newFormats) { 
-        // console.log('onToolbarStateChange() : existing', this.state.toolButtonStates, 'new', newFormats);
-        // let turnedOff = newFormats.filter(x => !this.state.toolButtonStates.includes(x));
-        // let turnedOn = this.state.toolButtonStates.filter(x => !newFormats.includes(x));
-        // let btnName = null;
-        // if (turnedOff.length > 0) {
-        //     /* Button toggled off */
-        //     btnName = turnedOff[0];
-        // } else if (turnedOn.length > 0) {
-        //     /* Button toggled off */
-        //     btnName = turnedOn[0];
-        // }
-        // let style = toolButtonStyles[btnName];
-        // console.log('Selection before:', this.state.editorState.getSelection());
-        // let newEditorState = RichUtils.toggleInlineStyle(this.state.editorState, style);
-        // console.log('Selection after:', newEditorState.getSelection());
-        // this.setState({editorState: EditorState.push(newEditorState, newEditorState.getCurrentContent(), 'change-inline-style')});
-        // console.log('Selection after 2:', newEditorState.getSelection());
-        // console.log('Current inline style', newEditorState.getCurrentInlineStyle());
+        console.log('onToolbarStateChange() : existing', this.state.toolbarFormats, 'new', newFormats);
+        let turnedOff = newFormats.filter(x => !this.state.toolbarFormats.includes(x));
+        let turnedOn = this.state.toolbarFormats.filter(x => !newFormats.includes(x));
+        let btnName = null;
+        if (turnedOff.length > 0) {
+            /* Button toggled off */
+            btnName = turnedOff[0];
+        } else if (turnedOn.length > 0) {
+            /* Button toggled off */
+            btnName = turnedOn[0];
+        }
+        let style = toolButtonStyles[btnName];
+        console.log('Selection before:', this.state.editorState.getSelection());
+        let newEditorState = RichUtils.toggleInlineStyle(this.state.editorState, style);
+        console.log('Selection after:', newEditorState.getSelection());
+        this.setState({editorState: EditorState.push(newEditorState, newEditorState.getCurrentContent(), 'change-inline-style')});
+        console.log('Selection after 2:', newEditorState.getSelection());
+        console.log('Current inline style', newEditorState.getCurrentInlineStyle());
         // if (style) {
         //     let selection = this.state.editorState.getSelection();
         //     let newContentState = null;
@@ -185,16 +226,15 @@ export default class DocumentAnalyser extends React.Component {
         //     newEditorState = EditorState.forceSelection(newEditorState, selection);
         //     this.setState({editorState: EditorState.push(newEditorState, newContentState, 'change-inline-style')});
         // }
-        this.setState({toolButtonStates: newFormats});
+        this.setState({toolbarFormats: newFormats});
     }
 
     onStateChange(newState) {
-
-        console.group('onStateChange()');
         console.log('Selection on enter onStateChange():', newState.getSelection());
-
         let textChanged = this.textModel.stateUpdate(newState, this.state.switches);
-        this.setState({ 'editorState': this.textModel.getEditorState() } );       
+        this.setState({ 'editorState': this.textModel.getEditorState() } );
+        /* Ensure button states reflect the surrounding style of current selection */
+        //TODO
         if (textChanged) {
             /* Set basic document metrics */
             this.setState({ 'metrics': this.textModel.getMetrics() });
@@ -205,9 +245,7 @@ export default class DocumentAnalyser extends React.Component {
                 smogIndex: smog,
                 ukReadingAge: this.textModel.toUKReadingAge(smog)
             }});     
-        }
-        
-        console.groupEnd();
+        }     
     }
 
     render() {
@@ -215,9 +253,28 @@ export default class DocumentAnalyser extends React.Component {
             <Grid container spacing={1}>
                 <Grid item xs={12} sm={12} md={9}>
                     <Panel.WhitePaper elevation={5}>  
-                        <EditorToolbar
-                            editorState={ this.state.editorState }
-                        />
+                        <Box sx={{
+                            background: darkGrey,
+                            color: lightGrey,
+                            fontSize: 'large',
+                            marginTop: '8px',
+                            height: '40px',
+                            lineHeight: '40px'
+                        }}>
+                            <ToggleButtonGroup value={this.state.toolbarFormats} onChange={ this.onToolbarStateChange.bind(this) } sx={{ borderRadius: 0 }}>
+                                {Toolbar.editorToolbarItems.map((eti) => (
+                                    <ToggleButton 
+                                        variant="text" 
+                                        sx={{ width: '40px', height: '40px', color: lightGrey, fontWeight: 'bold', fontSize: '1em' }}
+                                        key={eti.key} 
+                                        value={eti.value} 
+                                        title={eti.title} 
+                                    >
+                                    { typeof eti.text == 'string' ? eti.text : eti.icon }
+                                    </ToggleButton>
+                                ))}                                
+                            </ToggleButtonGroup>            
+                        </Box>
                         <Editor
                             ref={ this.editor }
                             placeholder='&nbsp;Type or paste your document here'
