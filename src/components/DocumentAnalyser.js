@@ -4,8 +4,8 @@ import { Box, ButtonGroup, Button } from '@mui/material';
 import TextModel from '../assets/readability/TextModel';
 import * as Panel from '../assets/readability/PanelItems';
 import * as Toolbar from '../assets/readability/EditorToolbarItems';
-import { darkGrey, lightGrey, highlightingStyles, toolButtonStyles } from '../assets/readability/Styles';
-import { CompositeDecorator, Editor, EditorState, Modifier, RichUtils } from 'draft-js';
+import { highlightingStyles, toolbar, toolButtonActive, toolButtonInactive } from '../assets/readability/Styles';
+import { CompositeDecorator, Editor, EditorState, RichUtils } from 'draft-js';
 import tippy from 'tippy.js';
 import 'tippy.js/dist/tippy.css';
 import 'tippy.js/animations/scale.css';
@@ -13,39 +13,59 @@ import 'tippy.js/themes/material.css';
 
 const EditorToolbar = (props) => {
 
+    console.group('EditorToolbar() renderer');
 
-    console.log('EditorToolbarRender()');
-    const { editorState } = props;
-    const selection = editorState.getSelection();
-    const blockType = editorState
+    let { getEditorState, onChange } = props;
+    let editorState = getEditorState();
+    let selection = editorState.getSelection();
+    let blockType = editorState
         .getCurrentContent()
         .getBlockForKey(selection.getStartKey())
         .getType();
-    const currentStyle = editorState.getCurrentInlineStyle();
+    let currentStyle = editorState.getCurrentInlineStyle();
+    console.log('editor state', editorState, 'selection', selection, 'block type', blockType, 'current style', currentStyle);
+
+    console.groupEnd();
 
     return (
-        <Box sx={{
-            background: darkGrey,
-            color: lightGrey,
-            fontSize: 'large',
-            marginTop: '8px',
-            height: '40px',
-            lineHeight: '40px'
-        }}>
+        <Box sx={toolbar}>
             <ButtonGroup sx={{ borderRadius: 0 }}>
-                {Toolbar.editorToolbarItems.map((eti) => (
-                    <Button 
-                        variant="text" 
-                        sx={{ width: '40px', height: '40px', color: lightGrey, fontWeight: 'bold', fontSize: '1em' }}
-                        key={eti.key}
-                        active={eti.type == 'block' ? (eti.style === blockType) : (currentStyle.has(eti.style))} 
-                        value={eti.value} 
-                        title={eti.title}
-                        onClick={ (evt) => console.log('Toolbar button click', evt)} 
-                    >
-                    { typeof eti.text == 'string' ? eti.text : eti.icon }
-                    </Button>
-                ))}                                
+                {Toolbar.editorToolbarItems.map((eti) => {
+                    let active = eti.type == 'block' ? (eti.style === blockType) : (currentStyle.has(eti.style));                  
+                    return(
+                        <Button 
+                            variant="text" 
+                            sx={active ? toolButtonActive : toolButtonInactive}
+                            key={eti.key}
+                            value={eti.value} 
+                            title={eti.title}
+                            type={eti.type}
+                            onClick={ (evt) => {
+
+                                let btn = evt.target.closest('button');
+
+                                console.group('onClick() handler for toolbar button', btn);
+
+                                let currentEditorState = getEditorState(), newEditorState = null;                                
+                                btn.classList.toggle('editorToolbarActive');
+                                let isBlock = btn.getAttribute('type') == 'block';
+                                if (isBlock) {
+                                    console.log('Block type');
+                                    newEditorState = RichUtils.toggleBlockType(currentEditorState, blockType);
+                                } else {
+                                    console.log('Inline type');
+                                    newEditorState = RichUtils.toggleInlineStyle(currentEditorState, currentStyle);
+                                }
+
+                                console.log('Calling onChange() with new state', newEditorState);
+                                onChange(newEditorState);
+
+                                console.groupEnd();
+                            }} 
+                        >
+                        { typeof eti.text == 'string' ? eti.text : eti.icon }
+                        </Button>)
+                })}                                
             </ButtonGroup>            
         </Box>
     );
@@ -154,7 +174,9 @@ export default class DocumentAnalyser extends React.Component {
         }        
     }
 
-    onToolbarStateChange(evt, newFormats) { 
+    onToolbarStateChange(newState) { 
+        console.log('onToolbarStateChange()', newState, 'selection', newState.getSelection());
+        this.setState({editorState: EditorState.push(newState, newState.getCurrentContent(), 'change-inline-style')});
         // console.log('onToolbarStateChange() : existing', this.state.toolButtonStates, 'new', newFormats);
         // let turnedOff = newFormats.filter(x => !this.state.toolButtonStates.includes(x));
         // let turnedOn = this.state.toolButtonStates.filter(x => !newFormats.includes(x));
@@ -185,7 +207,7 @@ export default class DocumentAnalyser extends React.Component {
         //     newEditorState = EditorState.forceSelection(newEditorState, selection);
         //     this.setState({editorState: EditorState.push(newEditorState, newContentState, 'change-inline-style')});
         // }
-        this.setState({toolButtonStates: newFormats});
+        //this.setState({toolButtonStates: newFormats});
     }
 
     onStateChange(newState) {
@@ -216,7 +238,8 @@ export default class DocumentAnalyser extends React.Component {
                 <Grid item xs={12} sm={12} md={9}>
                     <Panel.WhitePaper elevation={5}>  
                         <EditorToolbar
-                            editorState={ this.state.editorState }
+                            getEditorState={ () => this.state.editorState }
+                            onChange={ this.onToolbarStateChange.bind(this) }
                         />
                         <Editor
                             ref={ this.editor }

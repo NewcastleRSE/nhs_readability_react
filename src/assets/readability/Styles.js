@@ -25,15 +25,34 @@ const highlightingStyles = {
     }
 };
 
-const toolButtonStyles = {
-    'bold': 'BOLD',
-    'italic': 'ITALIC',
-    'underline': 'UNDERLINE'
-};
-
 const darkTheme = Object.assign(createTheme({ palette: { mode: 'dark' } }));
 
 const darkGrey = grey.A700;
-const lightGrey = grey.A100;
+const lightGrey = grey.A200;
 
-export { highlightingStyles, toolButtonStyles, darkTheme, darkGrey, lightGrey };
+const toolbar = {
+    background: darkGrey,
+    marginTop: '8px'
+}
+
+const toolButtonInactive = {
+    width: '40px', 
+    height: '40px', 
+    background: darkGrey,
+    color: lightGrey, 
+    fontWeight: 'bold', 
+    fontSize: '1em',
+    borderRadius: 0
+};
+
+const toolButtonActive = {
+    width: '40px', 
+    height: '40px',
+    background: grey[500],
+    color: grey[50],
+    fontWeight: 'bold', 
+    fontSize: '1em',
+    borderRadius: 0
+};
+
+export { highlightingStyles, darkTheme, darkGrey, lightGrey, toolbar, toolButtonInactive, toolButtonActive };
