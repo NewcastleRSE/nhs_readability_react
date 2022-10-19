@@ -15,12 +15,18 @@ div.DraftEditor-root {
 @media screen and (min-width: 900px) {
     div.DraftEditor-root {        
         height: calc(100vh - 100px);
-    }
+    }  
+    .tippy-box {
+        font-size: medium;
+    }  
 }
 
 @media screen and (max-width: 899px) {
     div.DraftEditor-root {        
         height: calc(50vh);
+    }
+    .tippy-box {
+        font-size: smaller;
     }
 }
 
@@ -41,7 +47,7 @@ div.public-DraftEditorPlaceholder-root {
     background-color: #0185c7 !important;
     font-family: Arial, Helvetica, sans-serif;
     font-weight: normal !important;
-}
+}    
 
 .tippy-box a {
     text-decoration: none;

@@ -130,7 +130,7 @@ export default class NavigationBar extends React.Component {
                             <List>
                                 {pages.map((page) => (
                                 <ListItem key={page.key} disablePadding>
-                                    <ListItemButton sx={{ textAlign: 'left' }}>
+                                    <ListItemButton sx={{ textAlign: 'left', display: 'none' }}>
                                         <ListItemText primary={page.key} title={page.title} />
                                     </ListItemButton>
                                 </ListItem>

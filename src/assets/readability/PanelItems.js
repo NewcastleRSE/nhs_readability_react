@@ -3,7 +3,7 @@ import { grey } from '@mui/material/colors';
 import Switch from '@mui/material/Switch';
 import { Help } from '@mui/icons-material';
 import { Paper, ListSubheader, ListItem, ListItemIcon, ListItemText } from '@mui/material';
-import { highlightingStyles } from './Styles';
+import { highlightingStyles, readingAgeTrafficLightStyles } from './Styles';
 
 const switchListItems = [
     {
@@ -91,22 +91,6 @@ const metricListItems = [
 const readabilityListItems = [
     {
         key: 1,
-        id: 'readingTime',
-        primary: 'Average reading time',
-        help: 'Estimated reading time for document, based on a 250 words per minute average'
-    },
-    {
-        key: 2,
-        id: 'smogIndex',
-        primary: 'SMOG Index',
-        help: `
-            <p>Returns the SMOG index of the given text. This is a grade formula in that a score of 9.3 means that a US ninth grader would be able to read the document.
-            Texts of fewer than 30 sentences are statistically invalid, because the SMOG formula was normed on 30-sentence samples</p>
-            Further reading on <a href="https://en.wikipedia.org/wiki/SMOG" target="_blank">Wikipedia</a>
-        `
-    },
-    {
-        key: 3,
         id: 'ukReadingAge',
         primary: 'Estimated UK Reading Age',
         help: `
@@ -128,6 +112,22 @@ const readabilityListItems = [
                 <tr><td>Year 12</td><td>16-17</td><td>Grade 11</td></tr>
                 <tr><td>Year 13</td><td>17-18</td><td>Grade 12</td></tr>
             </table>                    
+        `
+    },
+    {
+        key: 2,
+        id: 'readingTime',
+        primary: 'Average reading time',
+        help: 'Estimated reading time for document, based on a 250 words per minute average'
+    },
+    {
+        key: 3,
+        id: 'smogIndex',
+        primary: 'SMOG Index',
+        help: `
+            <p>Returns the SMOG index of the given text. This is a grade formula in that a score of 9.3 means that a US ninth grader would be able to read the document.
+            Texts of fewer than 30 sentences are statistically invalid, because the SMOG formula was normed on 30-sentence samples</p>
+            Further reading on <a href="https://en.wikipedia.org/wiki/SMOG" target="_blank">Wikipedia</a>
         `
     }
 ];
@@ -235,12 +235,26 @@ const SwitchListItem = props => {
 
 const MetricListItem = props => {
     const { id, primary, help, value } = props;
-    const sx = { color: darkGrey, background: lightGrey };
+    const textStyle = { color: darkGrey, background: lightGrey };
+    let valueStyle = textStyle;
+    if (id == 'ukReadingAge') {
+        /* Apply traffic light style to reading age output */
+        if (value && !isNaN(value)) {
+            if (value <= 13) {
+                valueStyle = readingAgeTrafficLightStyles['green'];
+            } else if (value <= 16) {
+                valueStyle = readingAgeTrafficLightStyles['amber'];
+            } else {
+                valueStyle = readingAgeTrafficLightStyles['red'];
+            }
+        }
+    }
+    valueStyle = Object.assign({}, valueStyle, { textAlign: 'right', paddingRight: '1em' });
     return (
         <ListItem>
             <HelpIcon help={help} />
-            <ListItemText id={id} primary={primary} sx={sx} />
-            <ListItemText primary={value} sx={ Object.assign({}, sx, { textAlign: 'right', paddingRight: '1em' }) } />
+            <ListItemText id={id} primary={primary} sx={textStyle} />
+            <ListItemText primary={value} sx={valueStyle} />
         </ListItem>
     );
 };

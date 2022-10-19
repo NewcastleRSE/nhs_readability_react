@@ -1,4 +1,4 @@
-import { red, teal, grey } from "@mui/material/colors";
+import { red, teal, grey, green, amber } from "@mui/material/colors";
 import { createTheme } from '@mui/material/styles';
 
 const highlightingStyles = {
@@ -25,6 +25,30 @@ const highlightingStyles = {
     }
 };
 
+const readingAgeTrafficLightStyles = {
+    'green': {
+        fontWeight: 'bold', 
+        color: '#ffffff',
+        padding: '0.2em',
+        margin: '0.2em 0',
+        backgroundColor: green[800]
+    },
+    'amber': {
+        fontWeight: 'bold', 
+        color: '#ffffff',
+        padding: '0.2em',
+        margin: '0.2em 0',
+        backgroundColor: amber[800]
+    },
+    'red': {
+        fontWeight: 'bold', 
+        color: '#ffffff',
+        padding: '0.2em',
+        margin: '0.2em 0',
+        backgroundColor: red[800]
+    }
+};
+
 const darkTheme = Object.assign(createTheme({ palette: { mode: 'dark' } }));
 
-export { highlightingStyles, darkTheme };
+export { highlightingStyles, readingAgeTrafficLightStyles, darkTheme };
