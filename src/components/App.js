@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { ThemeProvider } from '@mui/material/styles';
 
+import FirstTimeInstructionsBox from './FirstTimeInstructionsBox';
 import NavigationBar from './NavigationBar';
 import DocumentAnalyser from './DocumentAnalyser';
 
@@ -11,6 +12,7 @@ export default class App extends React.Component {
     render() {
         return (
             <ThemeProvider theme={darkTheme}>
+                <FirstTimeInstructionsBox />
                 <main>
                     <NavigationBar />
                     <DocumentAnalyser />

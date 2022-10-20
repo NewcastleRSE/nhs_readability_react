@@ -26,9 +26,11 @@ export default class DocumentAnalyser extends React.Component {
                 nSpaces: 0,
                 nPunctuation: 0,
                 nWords: 0,
+                avWordsPerSentence: 0,
                 nSyllables: 0,
                 nPolySyllables: 0,
                 nSentences: 0,
+                avSentencesPerParagraph: 0,
                 nParagraphs: 0
             },
             readability: {
@@ -181,7 +183,7 @@ export default class DocumentAnalyser extends React.Component {
     }
 
     render() {
-        return (
+        return ( 
             <Grid container spacing={1}>
                 <Grid item xs={12} sm={12} md={9}>
                     <Panel.WhitePaper elevation={5}>

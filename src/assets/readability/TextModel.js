@@ -15,9 +15,11 @@ const GLOBAL_COUNT_INITIALISER = {
     nSpaces: 0,
     nPunctuation: 0,
     nWords: 0,
+    avWordsPerSentence: 0,
     nSyllables: 0,
     nPolySyllables: 0,
     nSentences: 0,
+    avSentencesPerParagraph: 0,
     nParagraphs: 0
 };
 
@@ -94,7 +96,7 @@ export default class TextModel {
                             this.nCharacters += paraRecord.nChars;
                             this.nSpaces += paraRecord.nSpaces;
                             this.nPunctuation += paraRecord.nPunctuation;
-                            this.nWords += paraRecord.wordCount(1);
+                            this.nWords += paraRecord.wordCount(1);                            
                             this.nSyllables += paraRecord.syllableCount();
                             this.nPolySyllables += paraRecord.wordCount(3);
                             this.nSentences += paraRecord.getSentences().length;
@@ -122,6 +124,10 @@ export default class TextModel {
         }
 
         this.editorState = newEditorState;
+
+        /* Update derived metrics */
+        this.avWordsPerSentence = this.averageWordsPerSentence();
+        this.avSentencesPerParagraph = this.averageSentencesPerParagraph();
                 
         console.log('Updated model:\n', this);
         console.groupEnd();
@@ -206,8 +212,8 @@ export default class TextModel {
      */
     getMetrics() {
         return((
-            ({ nCharacters, nSpaces, nPunctuation, nWords, nSyllables, nPolySyllables, nSentences, nParagraphs }) => 
-            ({ nCharacters, nSpaces, nPunctuation, nWords, nSyllables, nPolySyllables, nSentences, nParagraphs }))(this)
+            ({ nCharacters, nSpaces, nPunctuation, nWords, avWordsPerSentence, nSyllables, nPolySyllables, nSentences, avSentencesPerParagraph, nParagraphs }) => 
+            ({ nCharacters, nSpaces, nPunctuation, nWords, avWordsPerSentence, nSyllables, nPolySyllables, nSentences, avSentencesPerParagraph, nParagraphs }))(this)
         );
     }
 
@@ -270,15 +276,27 @@ export default class TextModel {
     }
 
     /**
-     * Compute average number of sentences per word in current text
-     * @returns average sentences per word
+     * Compute average number of words per sentence in current text
+     * @returns average words per sentence
      */
-    averageSentencesPerWord() {
-        let sentencesPerWord = 0;  
-        if (this.nSentences != 0 && this.nWords != 0) {
-            sentencesPerWord = this._roundFloat((this.nSentences / this.nWords), 2);
+    averageWordsPerSentence() {
+        let wordsPerSentence = 0;
+        if (this.nWords != 0 && this.nSentences != 0) {
+            wordsPerSentence = this._roundFloat((this.nWords / this.nSentences), 2);
         }
-        return(sentencesPerWord);
+        return(wordsPerSentence);
+    }
+
+    /**
+     * Compute average number of sentences per paragraph in current text
+     * @returns average sentences per paragraph
+     */
+    averageSentencesPerParagraph() {
+        let sentencesPerParagraph = 0;
+        if (this.nSentences != 0 && this.nParagraphs != 0) {
+            sentencesPerParagraph = this._roundFloat((this.nSentences / this.nParagraphs), 2);
+        }
+        return(sentencesPerParagraph);
     }
 
     /**
@@ -292,8 +310,8 @@ export default class TextModel {
         date.setSeconds(Math.ceil(this.nWords / wordsPerSec));
         let [h, m, s] = date.toISOString().substring(11, 19).split(':').map(c => parseInt(c));
         if (h == 0) {
-            /* Minutes/seconds */
-            art = `${m} min ${s} sec`;
+            /* Minutes/seconds */            
+            art = (m > 0 ? `${m} min ` : '') + `${s} sec`;
         } else {
             /* Hours/minutes */
             art = `${h} hr ${m} min`;
@@ -414,7 +432,11 @@ export default class TextModel {
     colemanLiauIndex() {
         console.group('colemanLiauIndex()');
         let letters = this._roundFloat(this.averageLettersPerWord() * 100, 2);
-        let sentences = this._roundFloat(this.averageSentencesPerWord() * 100, 2);
+        let sentencesPerWord = 0;  
+        if (this.nSentences != 0 && this.nWords != 0) {
+            sentencesPerWord = this._roundFloat((this.nSentences / this.nWords), 2);
+        }
+        let sentences = this._roundFloat(sentencesPerWord * 100, 2);
         let cli = this._roundFloat(0.058 * letters - 0.296 * sentences - 15.8, 2);
         console.log('Coleman-Liau Index', cli);
         console.groupEnd();
