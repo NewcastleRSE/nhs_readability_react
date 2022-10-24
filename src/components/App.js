@@ -11,9 +11,9 @@ import '../assets/css/App.css';
 export default class App extends React.Component {
     render() {
         return (
-            <ThemeProvider theme={darkTheme}>
-                <FirstTimeInstructionsBox />
+            <ThemeProvider theme={darkTheme}>                
                 <main>
+                    <FirstTimeInstructionsBox />
                     <NavigationBar />
                     <DocumentAnalyser />
                 </main>

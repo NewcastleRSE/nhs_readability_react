@@ -33,8 +33,15 @@ export default class FirstTimeInstructionsBox extends Component {
             // p: 4,
             '& .MuiDialog-container': {
                 '& .MuiPaper-root': {
-                    width: '100%',
-                    height: '100%'
+                    position: 'absolute',
+                    color: grey[800],
+                    top: '25%',
+                    left: '25%',
+                    width: '75%',
+                    height: '50%',
+                    bgcolor: 'white',
+                    boxShadow: 24,
+                    p: 4
                 }
             }
         };
