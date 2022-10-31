@@ -15,7 +15,8 @@ const localeLang = "en-UK";
 
 /* Sentence complexity threshold (SMOG value > which sentence is deemed complex) (DEPRECATED) */
 const sentenceComplexityThreshold = 4.5;
-const sentenceComplexitySmogRange = [6.873, 7.472];
+//const sentenceComplexitySmogRange = [6.873, 7.472];   - the real figures
+const sentenceComplexitySmogRange = [4.5, 7.472];   // Set artificially low range value for testing
 
 /* Average words per minute reading time */
 const averageReadingWordsPerMinute = 250;
