@@ -44,7 +44,7 @@ const switchListItems = [
     {
         key: 3,
         id: 'includeMedicalTerms',
-        primary: 'Include medical terms in grading',
+        primary: 'Include medical terms in reading age scores',
         help: `
             Compute the SMOG Index and Reading Age including all the medical terms.  To properly filter out medical terms requires a set of medical vocabularies, 
             possibly classified by discipline area.  A comprehensive medical dictionary may work but would likely be very sluggish in operation.

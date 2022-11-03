@@ -197,14 +197,14 @@ export default class DocumentAnalyser extends React.Component {
                 </Grid>
                 <Grid item xs={12} sm={12} md={3}>
                     <Panel.WhitePaper elevation={5}>
-                        <List sx={{ width: '100%' }} subheader={<Panel.PanelListSubheader caption="Readability Metrics" />}>
+                        <List sx={{ width: '100%' }} subheader={<Panel.PanelListSubheader caption="Readability" />}>
                             {Panel.readabilityListItems.map((rli) => (
                                 <Panel.MetricListItem key={rli.key} id={rli.id} primary={rli.primary} help={rli.help} value={this.state.readability[rli.id]} />
                             ))}
                         </List>
                     </Panel.WhitePaper>
                     <Panel.WhitePaper elevation={5}>
-                        <List sx={{ width: '100%' }} subheader={<Panel.PanelListSubheader caption="Document Analysis Options" />}>
+                        <List sx={{ width: '100%' }} subheader={<Panel.PanelListSubheader caption="Analysis Options" />}>
                             {Panel.switchListItems.map((sli) => (
                                 <Panel.SwitchListItem 
                                     key={sli.key} 
@@ -217,7 +217,7 @@ export default class DocumentAnalyser extends React.Component {
                         </List>
                     </Panel.WhitePaper>
                     <Panel.WhitePaper elevation={5}>
-                        <List sx={{ width: '100%' }} subheader={<Panel.PanelListSubheader caption="Current Document Metrics" />}>
+                        <List sx={{ width: '100%' }} subheader={<Panel.PanelListSubheader caption="Metrics" />}>
                             {Panel.metricListItems.map((mli) => (
                                 <Panel.MetricListItem key={mli.key} id={mli.id} primary={mli.primary} help={mli.help} value={this.state.metrics[mli.id]} />
                             ))}
