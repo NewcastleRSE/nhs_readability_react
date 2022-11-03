@@ -2,7 +2,7 @@ name: Build & Staging Deploy
 on:
   push:
     branches:
-      - draft_decorators
+      - main
 jobs:
   build:
     runs-on: ubuntu-latest
