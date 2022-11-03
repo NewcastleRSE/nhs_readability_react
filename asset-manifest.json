@@ -1,11 +1,13 @@
 {
   "files": {
-    "main.css": "/nhs_readability_react/static/css/main.4458ce72.css",
-    "main.js": "/nhs_readability_react/static/js/main.d0313075.js",
-    "index.html": "/nhs_readability_react/index.html"
+    "main.css": "/nhs_readability_react/static/css/main.5b781c05.css",
+    "main.js": "/nhs_readability_react/static/js/main.97baa6bf.js",
+    "index.html": "/nhs_readability_react/index.html",
+    "main.5b781c05.css.map": "/nhs_readability_react/static/css/main.5b781c05.css.map",
+    "main.97baa6bf.js.map": "/nhs_readability_react/static/js/main.97baa6bf.js.map"
   },
   "entrypoints": [
-    "static/css/main.4458ce72.css",
-    "static/js/main.d0313075.js"
+    "static/css/main.5b781c05.css",
+    "static/js/main.97baa6bf.js"
   ]
 }
