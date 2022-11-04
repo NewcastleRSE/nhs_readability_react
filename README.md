@@ -6,12 +6,13 @@ Description of the project
 
 ### Project Team
 
-* [rse-name], Newcastle University  ([rse-name@newcastle.ac.uk](mailto:rse-name@newcastle.ac.uk))
-* [rse-name], Newcastle University  ([rse-name@newcastle.ac.uk](mailto:rse-name@newcsatle.ac.uk))
+* David Herbert, Newcastle University  ([david.herbert@newcastle.ac.uk](mailto:david.herbert@newcastle.ac.uk))
+* Becky Osselton, Newcastle University  ([rebecca.osselton@newcastle.ac.uk](mailto:rebecca.osselton@newcastle.ac.uk))
+* Lorna Dawson, South Tyneside and Sunderland NHS Foundation Trust ([lorna.dawson3@nhs.net](mailto:lorna.dawson3@nhs.net))
 
 
 ### RSE Contact
-[rse-name], RSE Team, Newcastle University
+Becky Osselton or David Herbert, RSE Team, Newcastle University
 
 
 ### Built With
@@ -22,19 +23,13 @@ Technical stack description with links e.g.
 
 ## Getting Started
 
-### Prerequisites
+Clone the repository then:
 
-Details here.
-
-### Installation
-
-Installation instructions.
+```npm install --legacy-peer-deps```
 
 ### Running Locally
 
-Directions on how to run locally. e.g.
-
-```npm run dev```
+```npm start```
 
 ### Running Tests
 
@@ -48,26 +43,14 @@ How to run tests on your local system.
 - [ ] Feature-Complete Release   
 
 
-### Prerequisites
-
-Any pre-requisites here..
-
 ## Deployment
 
-Description of how it's deployed.
+The app is automatically deployed to github pages on push to ```main``` branch
 
-### Local Deployment
-
-### Production Deployment
-
-### Azure registry
-
-Details here.
-
-## Contributing
 
 ### Main Branch
-Protected and can only be pushed to via pull requests. Should be considered stable and a representation of production code.
+
+Not protected currently.
 
 ### Dev Branch
 Should be considered fragile, code should compile and run but features may be prone to errors.
@@ -76,5 +59,3 @@ Should be considered fragile, code should compile and run but features may be pr
 A branch per feature being worked on.
 
 ### License
-
-### Useful information
