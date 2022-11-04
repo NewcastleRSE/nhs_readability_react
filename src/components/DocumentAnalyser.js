@@ -36,7 +36,8 @@ export default class DocumentAnalyser extends React.Component {
             readability: {
                 readingTime: 0,
                 smogIndex: 0,
-                ukReadingAge: 0
+                ukReadingAge: 0,
+                fleschKincaid: 0
             }
         };
         this.editor = React.createRef();
@@ -155,7 +156,9 @@ export default class DocumentAnalyser extends React.Component {
             this.setState({ 'readability': {
                 readingTime: this.textModel.averageReadingTime(),
                 smogIndex: smog,
-                ukReadingAge: this.textModel.toUKReadingAge(smog)
+                ukReadingAge: this.textModel.toUKReadingAge(smog),
+                fleschKincaid: this.textModelfleschKincaidGrade()
+
             }});      
         } else {
             /* Update inline styles representing complexity and chosen terms */
@@ -176,7 +179,8 @@ export default class DocumentAnalyser extends React.Component {
             this.setState({ 'readability': {
                 readingTime: this.textModel.averageReadingTime(),
                 smogIndex: smog,
-                ukReadingAge: this.textModel.toUKReadingAge(smog)
+                ukReadingAge: this.textModel.toUKReadingAge(smog),
+                fleschKincaid: this.textModel.fleschKincaidGrade()
             }});            
         } 
         console.debug('onStateChange() done');        

@@ -141,6 +141,12 @@ const readabilityListItems = [
             Texts of fewer than 30 sentences are statistically invalid, because the SMOG formula was normed on 30-sentence samples</p>
             Further reading on <a href="https://en.wikipedia.org/wiki/SMOG" target="_blank">Wikipedia</a>
         `
+    },
+    {
+        key: 4,
+        id: 'fleschKincaid',
+        primary: 'Flesch Kincaid Grade',
+        help: ` <p>Returns the Flesh Kincaid grade of the given text.</p>`
     }
 ];
 
