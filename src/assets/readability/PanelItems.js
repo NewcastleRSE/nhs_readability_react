@@ -77,7 +77,7 @@ const metricListItems = [
     {
         key: 4,
         id: 'avWordsPerSentence',
-        primary: 'Average words / sentence',
+        primary: 'Average words per sentence',
         help: 'Average number of words per sentence'
     },
     {
@@ -89,7 +89,7 @@ const metricListItems = [
     {
         key: 6,
         id: 'avSentencesPerParagraph',
-        primary: 'Average sentences / paragraph',
+        primary: 'Average sentences per paragraph',
         help: 'Average number of sentences per paragraph'
     },
     {
