@@ -4,6 +4,7 @@
 
 import Sentence from './Sentence';
 import { punctuationRe, singleWhitespaceRe } from './Constants';
+import { prismWords } from './PrismWords';
 import { SelectionState } from 'draft-js';
  
 /** 
@@ -63,7 +64,7 @@ export default class ParagraphRecord {
                 sentences: this._splitIntoSentences(text)
             });
 
-            console.debug('End');
+            console.log('End');
 
         } else {
             console.log('Hash codes equal => no change');
@@ -74,28 +75,47 @@ export default class ParagraphRecord {
     }
 
     /**
-     * Return array of selection states representing complex sentences
+     * Return array of text ranges representing complex sentences
      * @return {Array<SelectionState>} ranges
      */
     markComplex() {
 
         console.group('markComplex()');
         
-        let ranges = [];
-        const key = this.block.getKey();
-
-        ranges = this.sentences.filter(s1 => s1.isComplex()).map(s2 => {
-            console.log('Sentence', s2);
-            let ss = SelectionState.createEmpty(key);
-            ss = ss.merge({
-                'anchorKey': key,
-                'anchorOffset': s2.paraOffsetStart,
-                'focusKey': key,
-                'focusOffset': s2.paraOffsetEnd + 1
+        let ranges = this.sentences.filter(s1 => s1.isComplex()).map(s2 => {
+            return({
+                start: s2.paraOffsetStart,
+                end: s2.paraOffsetEnd + 1
             });
-            return(ss);
         });
+        
+        console.groupEnd();
 
+        return(ranges);
+    }
+
+    /**
+     * Return array of text ranges representing PRISM words
+     * @return {Array<SelectionState>} ranges
+     */
+     markPrismWords() {
+
+        console.group('markPrismWords()');
+        
+        let ranges = [];
+
+        this.sentences.forEach(s => {
+            s.getWordRanges().forEach(wr => {
+                if (prismWords[wr.text]) {
+                    ranges.push({
+                        start: s.paraOffsetStart + wr.sentenceOffsetStart,
+                        end: s.paraOffsetStart + wr.sentenceOffsetEnd
+                    });
+                }
+                
+            });
+        });
+        
         console.groupEnd();
 
         return(ranges);
@@ -103,13 +123,14 @@ export default class ParagraphRecord {
 
     /**
      * Word count for paragraph
-     * @param {int} syllableThreshold only count words > this number of syllables
+     * @param {int} syllableThreshold               -- only count words > this number of syllables
+     * @param {Object<key, value>} filterDictionary -- only count words NOT in this dictionary/vocabulary}
      * @return number of words
      */
-    wordCount(syllableThreshold = 1) {
+    wordCount(syllableThreshold = 1, filterDictionary = null) {
         let nWords = 0;
         if (this.sentences.length > 0) {
-            nWords = this.sentences.map(s => s.wordCount(syllableThreshold)).reduce((partialSum, a) => partialSum + a, 0);
+            nWords = this.sentences.map(s => s.wordCount(syllableThreshold, filterDictionary)).reduce((partialSum, a) => partialSum + a, 0);
         }
         return(nWords);
     }

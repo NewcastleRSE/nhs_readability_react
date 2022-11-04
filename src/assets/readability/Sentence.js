@@ -3,7 +3,7 @@
  */
 
 import { syllable } from "syllable";
-import { localeLang, multiWhitespaceRe, sentenceComplexityThreshold } from './Constants';
+import { localeLang, multiNonWhitespaceRe, multiWhitespaceRe, sentenceComplexitySmogRange } from './Constants';
 
 /** 
  * @classdesc Class to model a sentence
@@ -39,12 +39,44 @@ export default class Sentence {
     }
 
     /**
-     * Count number of words in text
-     * @param {int} syllableThreshold only count words > this number of syllables
-     * @return word count
+     * Find all the words in the sentence along with their offsets within it
+     * @param {int} syllableThreshold 
+     * @returns {Array<Object>} ranges as { text: <the_word>, sentenceOffsetStart: <int>, sentenceOffsetEnd: <int> }
      */
-    wordCount(syllableThreshold = 1) {
-        return(this.getWords(syllableThreshold).length);
+    getWordRanges(syllableThreshold = 1) {
+        let ranges = [];
+        const lcText = this.text.toLocaleLowerCase(localeLang);
+        const matches = lcText.matchAll(multiNonWhitespaceRe);
+        for (const match of matches) {
+            const word = match[0];
+            if (syllable(word) >= syllableThreshold) {
+                ranges.push({
+                    text: match[0],
+                    sentenceOffsetStart: match.index,
+                    sentenceOffsetEnd: match.index + match[0].length
+                });
+            }            
+        }
+        return(ranges);
+    }
+
+    /**
+     * Count number of words in text 
+     * @param {int} syllableThreshold               -- only count words > this number of syllables
+     * @param {Object<key, value>} filterDictionary -- only count words NOT in this dictionary/vocabulary
+     */
+    wordCount(syllableThreshold = 1, filterDictionary = null) {
+        let count = 0;
+        if (filterDictionary == null) {
+            count = this.getWords(syllableThreshold).length;
+        } else {
+            this.getWordRanges(syllableThreshold).forEach(wr => {
+                if (!filterDictionary[wr.text]) {
+                    count++;
+                }
+            });
+        }        
+        return(count);
     }
 
     /**
@@ -57,7 +89,11 @@ export default class Sentence {
 
     /**
      * Complexity calculated via simplified SMOG index (https://readable.com/readability/smog-index/)
-     * NOTE: need to decide an official way of determining this and other metrics
+     * NOTE: need to decide an official way of determining this and other metrics 
+     * According to the "Plain English Medical Guide":
+     * "A good average sentence length ('ASL') is 15 to 20 words. Use shorter ones
+     * for 'punch'. Longer ones should not have more than three items of information;
+     * otherwise they get overloaded, and readers lose track."
      * @return if sentence complex
      */
     isComplex() {
@@ -66,11 +102,12 @@ export default class Sentence {
         console.log('Check', this.text, 'is complex');
 
         let smog = 3.0 + Math.sqrt(this.wordCount(3));
+        let isComplex = smog > sentenceComplexitySmogRange[0] && smog < sentenceComplexitySmogRange[1];
 
-        console.log('SMOG index', smog, 'complex', smog >= sentenceComplexityThreshold);
+        console.log('SMOG index', smog, 'complex', isComplex);
         console.groupEnd();
 
-        return(smog >= sentenceComplexityThreshold);
+        return(isComplex);
     }
 
 }

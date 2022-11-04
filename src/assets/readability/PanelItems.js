@@ -3,27 +3,54 @@ import { grey } from '@mui/material/colors';
 import Switch from '@mui/material/Switch';
 import { Help } from '@mui/icons-material';
 import { Paper, ListSubheader, ListItem, ListItemIcon, ListItemText } from '@mui/material';
+import { highlightingStyles, readingAgeTrafficLightStyles } from './Styles';
 
 const switchListItems = [
     {
         key: 1,
         id: 'showComplexSentences',
         primary: 'Show complex sentences',
-        help: 'Highlight sentences which are too complex and show potential alternatives',
+        help: `
+            Highlight sentences which are too complex, defined by:
+            <p>
+            SMOG = 3 + &radic;(no_of_3+_syllable_words) > threshold.  
+            </p>
+            <p>
+            NOTE: The threshold for complexity is set artificially low for demonstration purposes (most documents will show up some complexity).
+            </p>
+            <p>
+            QUESTIONS FOR TESTERS: How do we want to measure complexity? How might suggestions to rectify it be communicated?
+            </p>
+            `,
         defaultChecked: true
     },
     {
         key: 2,
         id: 'highlightPrismWords',
         primary: 'Highlight PRISM-listed words',
-        help: 'Highlight words in the PRISM readability Toolkit having a simpler alternative word or phrase',
-        defaultChecked: true
+        help: `
+            <p>
+            Highlight words in the <a href="https://www.nhlbi.nih.gov/files/docs/ghchs_readability_toolkit.pdf" target="_blank">PRISM readability Toolkit</a>
+            having a simpler alternative word or phrase.  Hovering the cursor over a highlighted 
+            word will make some suggestions of simpler alternatives.  It might be possible to click on a suggestion eventually and do an 
+            auto-replace of the complex word by the simpler.  
+            </p>
+            <p>
+            NOTE: You need to turn off the complex sentences to see the PRISM highlights - it does not seem to be possible to have the two together.
+            </p>
+            `,
+        defaultChecked: false
     },
     {
         key: 3,
         id: 'includeMedicalTerms',
-        primary: 'Include medical terms in grading',
-        help: 'Compute the SMOG Index and Reading Age including all the medical terms',
+        primary: 'Include medical terms in reading age scores',
+        help: `
+            Compute the SMOG Index and Reading Age including all the medical terms.  To properly filter out medical terms requires a set of medical vocabularies, 
+            possibly classified by discipline area.  A comprehensive medical dictionary may work but would likely be very sluggish in operation.
+            For the demonstration, if this switch if OFF, the PRISM words are filtered out and the SMOG index and Reading Age computed with the 
+            reduced word set.
+            `,
         defaultChecked: true
     }
 ];
@@ -49,12 +76,24 @@ const metricListItems = [
     },
     {
         key: 4,
+        id: 'avWordsPerSentence',
+        primary: 'Average words / sentence',
+        help: 'Average number of words per sentence'
+    },
+    {
+        key: 5,
         id: 'nSentences',
         primary: 'Sentences',
         help: 'Total number of sentences in document'
     },
     {
-        key: 5,
+        key: 6,
+        id: 'avSentencesPerParagraph',
+        primary: 'Average sentences / paragraph',
+        help: 'Average number of sentences per paragraph'
+    },
+    {
+        key: 7,
         id: 'nParagraphs',
         primary: 'Paragraphs',
         help: 'Total number of paragraphs in document'
@@ -64,22 +103,6 @@ const metricListItems = [
 const readabilityListItems = [
     {
         key: 1,
-        id: 'readingTime',
-        primary: 'Average reading time',
-        help: 'Estimated reading time for document, based on a 250 words per minute average'
-    },
-    {
-        key: 2,
-        id: 'smogIndex',
-        primary: 'SMOG Index',
-        help: `
-            <p>Returns the SMOG index of the given text. This is a grade formula in that a score of 9.3 means that a US ninth grader would be able to read the document.
-            Texts of fewer than 30 sentences are statistically invalid, because the SMOG formula was normed on 30-sentence samples</p>
-            Further reading on <a href="https://en.wikipedia.org/wiki/SMOG" target="_blank">Wikipedia</a>
-        `
-    },
-    {
-        key: 3,
         id: 'ukReadingAge',
         primary: 'Estimated UK Reading Age',
         help: `
@@ -102,6 +125,28 @@ const readabilityListItems = [
                 <tr><td>Year 13</td><td>17-18</td><td>Grade 12</td></tr>
             </table>                    
         `
+    },
+    {
+        key: 2,
+        id: 'readingTime',
+        primary: 'Average reading time',
+        help: 'Estimated reading time for document, based on a 250 words per minute average'
+    },
+    {
+        key: 3,
+        id: 'smogIndex',
+        primary: 'SMOG Index',
+        help: `
+            <p>Returns the SMOG index of the given text. This is a grade formula in that a score of 9.3 means that a US ninth grader would be able to read the document.
+            Texts of fewer than 30 sentences are statistically invalid, because the SMOG formula was normed on 30-sentence samples</p>
+            Further reading on <a href="https://en.wikipedia.org/wiki/SMOG" target="_blank">Wikipedia</a>
+        `
+    },
+    {
+        key: 4,
+        id: 'fleschKincaid',
+        primary: 'Flesch Kincaid Grade',
+        help: ` <p>Returns the Flesh Kincaid grade of the given text.</p>`
     }
 ];
 
@@ -185,7 +230,13 @@ const HelpIcon = props => {
 
 const SwitchListItem = props => {
     const { id, primary, help, defaultChecked, onChange } = props;
-    const sx = { color: darkGrey, background: lightGrey };
+    let sx;
+    if (highlightingStyles[id]) {
+        /* Shoehorn in a bit of right pad to avoid the coloured label touching the switch element which looks really bad */
+        sx = Object.assign({}, highlightingStyles[id], { marginRight: '2em' });
+    } else {
+        sx = highlightingStyles['normalText'];
+    }    
     return (
         <ListItem>
             <HelpIcon help={help} />
@@ -202,12 +253,26 @@ const SwitchListItem = props => {
 
 const MetricListItem = props => {
     const { id, primary, help, value } = props;
-    const sx = { color: darkGrey, background: lightGrey };
+    const textStyle = { color: darkGrey, background: lightGrey };
+    let valueStyle = textStyle;
+    if (id == 'ukReadingAge') {
+        /* Apply traffic light style to reading age output */
+        if (value && !isNaN(value)) {
+            if (value <= 13) {
+                valueStyle = readingAgeTrafficLightStyles['green'];
+            } else if (value <= 16) {
+                valueStyle = readingAgeTrafficLightStyles['amber'];
+            } else {
+                valueStyle = readingAgeTrafficLightStyles['red'];
+            }
+        }
+    }
+    valueStyle = Object.assign({}, valueStyle, { textAlign: 'right', paddingRight: '1em' });
     return (
         <ListItem>
             <HelpIcon help={help} />
-            <ListItemText id={id} primary={primary} sx={sx} />
-            <ListItemText primary={value} sx={ Object.assign({}, sx, { textAlign: 'right', paddingRight: '1em' }) } />
+            <ListItemText id={id} primary={primary} sx={textStyle} />
+            <ListItemText primary={value} sx={valueStyle} />
         </ListItem>
     );
 };

@@ -5,8 +5,9 @@
 import { syllable } from 'syllable';
 import pluralize from 'pluralize';
 import { localeLang, easyWords, ukReadingAgeCorrection, averageReadingWordsPerMinute } from './Constants';
-import { EditorState, Modifier, RichUtils, SelectionState } from 'draft-js';
+import { EditorState } from 'draft-js';
 import ParagraphRecord from './ParagraphRecord';
+import { prismWords } from './PrismWords';
 
 /* Document-level counts */
 const GLOBAL_COUNT_INITIALISER = {
@@ -14,9 +15,11 @@ const GLOBAL_COUNT_INITIALISER = {
     nSpaces: 0,
     nPunctuation: 0,
     nWords: 0,
+    avWordsPerSentence: 0,
     nSyllables: 0,
     nPolySyllables: 0,
     nSentences: 0,
+    avSentencesPerParagraph: 0,
     nParagraphs: 0
 };
 
@@ -29,19 +32,12 @@ export default class TextModel {
      * Creates analysis record of paragraph text indexed by ContentBlock key, containing individual StateRecords
      * @param {Object} switchState initial switch values { <switch_name1>: t|f, <switch_name2>: t|f,... }
      */
-    constructor(switchState = {}) {
-        let highlightState = {};
-        for (let name in switchState) {
-            highlightState[name] = {
-                switchState: switchState[name],
-                highlightEntity: null
-            }
-        }
+    constructor(switchState = {}) {        
         Object.assign(this, GLOBAL_COUNT_INITIALISER, {            
             lang: localeLang,
             editorState: null,  
             modelState: {},
-            highlightState: highlightState,
+            switchState: switchState,
             easyWordSet: new Set(easyWords)            
         });        
     }
@@ -49,12 +45,14 @@ export default class TextModel {
     /**
      * Update the text model state based on a new EditorState
      * @param {EditorState} newEditorState
+     * @return {boolean} if text has changed (as opposed to selection/inline styles etc)
      */
-    stateUpdate(newEditorState) {
+     stateUpdate(newEditorState) {
 
         console.group('stateUpdate()');
         console.log('New editor state:\n', newEditorState);
 
+        let textChanged = false;
         let changeType = newEditorState.getLastChangeType();
         switch(changeType) {
 
@@ -66,7 +64,6 @@ export default class TextModel {
             case 'change-inline-style':
                 /* No changes to actual text have occurred */
                 console.log('Change type', changeType, '=> no text changes have occurred');
-                this.editorState = newEditorState;
                 break;
 
             default:
@@ -75,17 +72,10 @@ export default class TextModel {
                 const currentContentState = this._getCurrentEditorContent();
                 let newContentState = newEditorState.getCurrentContent();
 
-                /* Create persistent entities for the highlighting */
-                for (let name in this.highlightState) {
-                    if (this.highlightState[name].highlightEntity == null) {
-                        newContentState = newContentState.createEntity(name, 'MUTABLE', name);
-                        this.highlightState[name].highlightEntity = newContentState.getLastCreatedEntityKey();
-                    }
-                }
-
                 if (currentContentState != newContentState) {  
 
                     /* Recompute all global counts */
+                    textChanged = true;
                     Object.assign(this, GLOBAL_COUNT_INITIALISER);
                     let liveKeys = [];
 
@@ -106,7 +96,7 @@ export default class TextModel {
                             this.nCharacters += paraRecord.nChars;
                             this.nSpaces += paraRecord.nSpaces;
                             this.nPunctuation += paraRecord.nPunctuation;
-                            this.nWords += paraRecord.wordCount(1);
+                            this.nWords += paraRecord.wordCount(1);                            
                             this.nSyllables += paraRecord.syllableCount();
                             this.nPolySyllables += paraRecord.wordCount(3);
                             this.nSentences += paraRecord.getSentences().length;
@@ -125,36 +115,29 @@ export default class TextModel {
                             console.log('Key', k, 'is dead - removing');
                             delete this.modelState[k];
                         }
-                    });
 
-                    /* Mark complex sentences if necessary */
-                    let existingSelectionState = newEditorState.getSelection();
-                    let contentState = newContentState;
-                    Object.keys(this.modelState).forEach(k => {
-                        console.log('Marking complex sentences...');                        
-                        this.modelState[k].markComplex().forEach(cr => {
-                            console.log(cr);
-                            contentState = Modifier.applyInlineStyle(contentState, cr, 'BOLD');                            
-                        });                            
-                        console.log('Done');
-                    });
-                    newEditorState = EditorState.push(newEditorState, contentState, 'change-inline-style');
-
-                    /* Restore selection */
-                    newEditorState = EditorState.forceSelection(newEditorState, existingSelectionState);
-                    newEditorState = EditorState.push(newEditorState, contentState, 'change-inline-style');
+                    });                    
 
                     console.log('Finished');
                 } else {
-                    console.log('Content state has not changed');
-                }
-                this.editorState = newEditorState;
+                    console.log('Content state has not changed (e.g. a selection)');
+                }                
                 break;
         }
+
+        this.editorState = newEditorState;
+
+        /* Update derived metrics */
+        this.avWordsPerSentence = this.averageWordsPerSentence();
+        this.avSentencesPerParagraph = this.averageSentencesPerParagraph();
                 
         console.log('Updated model:\n', this);
         console.groupEnd();
 
+        return(textChanged);
+    }
+
+    getEditorState() {
         return(this.editorState);
     }
 
@@ -165,7 +148,62 @@ export default class TextModel {
      */
     switchStateUpdate(switchName, switchValue) {
         this.switchState[switchName] = switchValue;
+    }
 
+    /**
+     * Strategy method for determining complex sentences
+     * @param {ContentBlock} contentBlock 
+     * @param {Function} callback 
+     * @param {ContentState} contentState 
+     */
+     findComplexSentences(contentBlock, callback, contentState) {
+
+        console.group('findComplexSentences()');
+        console.log('Determine complex decorations in block', contentBlock.getKey());
+        console.log('Model state', this.modelState);
+
+        if (this.switchState['showComplexSentences'] && this.modelState) {
+            let paraRecordKey = Object.keys(this.modelState).find(key => key == contentBlock.getKey());
+            if (!paraRecordKey) {
+                this.modelState[paraRecordKey] = new ParagraphRecord();     
+                this.modelState[paraRecordKey].stateUpdate(contentBlock);
+            }           
+            console.log('Found paragraph record', this.modelState[paraRecordKey], 'with key', paraRecordKey);
+            let complexRanges = this.modelState[paraRecordKey].markComplex();
+            complexRanges.forEach(cr => {
+                callback(cr.start, cr.end);
+            });
+        }
+
+        console.groupEnd();
+    }
+
+    /**
+     * Strategy method for finding PRISM words in a content block (paragraph)
+     * @param {ContentBlock} contentBlock 
+     * @param {Function} callback 
+     * @param {ContentState} contentState 
+     */
+    findPrismWords(contentBlock, callback, contentState) {
+
+        console.group('findPrismWords()');
+        console.debug('Determine PRISM words in block', contentBlock.getKey());
+        console.debug('Model state', this.modelState);
+
+        if (this.switchState['highlightPrismWords'] && this.modelState) {
+            let paraRecordKey = Object.keys(this.modelState).find(key => key == contentBlock.getKey());
+            if (!paraRecordKey) {
+                this.modelState[paraRecordKey] = new ParagraphRecord();                     
+            }   
+            this.modelState[paraRecordKey].stateUpdate(contentBlock);        
+            console.debug('Found paragraph record', this.modelState[paraRecordKey], 'with key', paraRecordKey);
+            let complexRanges = this.modelState[paraRecordKey].markPrismWords();
+            complexRanges.forEach(cr => {
+                callback(cr.start, cr.end);
+            });
+        }
+
+        console.groupEnd();
     }
 
     /**
@@ -176,8 +214,8 @@ export default class TextModel {
      */
     getMetrics() {
         return((
-            ({ nCharacters, nSpaces, nPunctuation, nWords, nSyllables, nPolySyllables, nSentences, nParagraphs }) => 
-            ({ nCharacters, nSpaces, nPunctuation, nWords, nSyllables, nPolySyllables, nSentences, nParagraphs }))(this)
+            ({ nCharacters, nSpaces, nPunctuation, nWords, avWordsPerSentence, nSyllables, nPolySyllables, nSentences, avSentencesPerParagraph, nParagraphs }) => 
+            ({ nCharacters, nSpaces, nPunctuation, nWords, avWordsPerSentence, nSyllables, nPolySyllables, nSentences, avSentencesPerParagraph, nParagraphs }))(this)
         );
     }
 
@@ -240,15 +278,27 @@ export default class TextModel {
     }
 
     /**
-     * Compute average number of sentences per word in current text
-     * @returns average sentences per word
+     * Compute average number of words per sentence in current text
+     * @returns average words per sentence
      */
-    averageSentencesPerWord() {
-        let sentencesPerWord = 0;  
-        if (this.nSentences != 0 && this.nWords != 0) {
-            sentencesPerWord = this._roundFloat((this.nSentences / this.nWords), 2);
+    averageWordsPerSentence() {
+        let wordsPerSentence = 0;
+        if (this.nWords != 0 && this.nSentences != 0) {
+            wordsPerSentence = this._roundFloat((this.nWords / this.nSentences), 2);
         }
-        return(sentencesPerWord);
+        return(wordsPerSentence);
+    }
+
+    /**
+     * Compute average number of sentences per paragraph in current text
+     * @returns average sentences per paragraph
+     */
+    averageSentencesPerParagraph() {
+        let sentencesPerParagraph = 0;
+        if (this.nSentences != 0 && this.nParagraphs != 0) {
+            sentencesPerParagraph = this._roundFloat((this.nSentences / this.nParagraphs), 2);
+        }
+        return(sentencesPerParagraph);
     }
 
     /**
@@ -262,8 +312,8 @@ export default class TextModel {
         date.setSeconds(Math.ceil(this.nWords / wordsPerSec));
         let [h, m, s] = date.toISOString().substring(11, 19).split(':').map(c => parseInt(c));
         if (h == 0) {
-            /* Minutes/seconds */
-            art = `${m} min ${s} sec`;
+            /* Minutes/seconds */            
+            art = (m > 0 ? `${m} min ` : '') + `${s} sec`;
         } else {
             /* Hours/minutes */
             art = `${h} hr ${m} min`;
@@ -282,7 +332,7 @@ export default class TextModel {
         if (grade >= 4) {
             ukra = this._roundFloat(grade + ukReadingAgeCorrection, 2);
         }
-        console.debug('UK Reading Age', ukra);
+        console.log('UK Reading Age', ukra);
         console.groupEnd();
         return(ukra);
     }
@@ -310,7 +360,7 @@ export default class TextModel {
         } else if (score < 40 && score >= 30) {
             grade = 15;
         }
-        console.debug('Grade', grade);
+        console.log('Grade', grade);
         console.groupEnd();
         return(grade);
     }
@@ -328,7 +378,7 @@ export default class TextModel {
             flesch = 206.835 - (1.015 * sentenceLength) - (84.6 * syllablesPerWord);
         }  
         let fre = this._roundFloat(flesch, 2); 
-        console.debug('Flesch Reading Ease', fre);
+        console.log('Flesch Reading Ease', fre);
         console.groupEnd();
         return(fre);
     }
@@ -346,22 +396,33 @@ export default class TextModel {
             flesch = 0.39 * sentenceLength + 11.8 * syllablesPerWord - 15.59;
         }
         let fkg = this._roundFloat(flesch, 1);
-        console.debug('Flesch-Kincaid grade', fkg);
+        console.log('Flesch-Kincaid grade', fkg);
         console.groupEnd();
         return(fkg);
     }
     
     /**
      * Compute SMOG index on current text
+     * @param {boolean} filterMedicalTerms  -- whether to compute index minus all medical terms
      * @returns SMOG index as a US grade
      */
-    smogIndex() {
+    smogIndex(filterMedicalTerms = false) {
         console.group('smogIndex()');
         let smog = 0.0;
+        let nPolySyllables = 0;
         if (this.nSentences >= 3) {
-            smog = this._roundFloat(1.043 * (30 * (this.nPolySyllables / this.nSentences)) ** 0.5 + 3.1291, 1);            
-        }
-        console.debug('SMOG Index', smog);
+            if (filterMedicalTerms) {
+                /* Have to compute number of polysyllables minus the filtered words */                
+                for (const [blockKey, paraRecord] of Object.entries(this.modelState)) {
+                    nPolySyllables += paraRecord.wordCount(3, prismWords);  /* Only using PRISM words at present */
+                }
+            } else {
+                /* Can use globally computed value */
+                nPolySyllables = this.nPolySyllables;                            
+            }
+            smog = this._roundFloat(1.043 * (30 * (nPolySyllables / this.nSentences)) ** 0.5 + 3.1291, 1);
+        }       
+        console.log('SMOG Index', smog);
         console.groupEnd();
         return(smog);
     }
@@ -373,9 +434,13 @@ export default class TextModel {
     colemanLiauIndex() {
         console.group('colemanLiauIndex()');
         let letters = this._roundFloat(this.averageLettersPerWord() * 100, 2);
-        let sentences = this._roundFloat(this.averageSentencesPerWord() * 100, 2);
+        let sentencesPerWord = 0;  
+        if (this.nSentences != 0 && this.nWords != 0) {
+            sentencesPerWord = this._roundFloat((this.nSentences / this.nWords), 2);
+        }
+        let sentences = this._roundFloat(sentencesPerWord * 100, 2);
         let cli = this._roundFloat(0.058 * letters - 0.296 * sentences - 15.8, 2);
-        console.debug('Coleman-Liau Index', cli);
+        console.log('Coleman-Liau Index', cli);
         console.groupEnd();
         return(cli);
     }
@@ -393,7 +458,7 @@ export default class TextModel {
             (0.5 * this._roundFloat(avWordsPerSentence, 2)) -
             21.43
         );
-        console.debug('Automated Readability Index', ari);
+        console.log('Automated Readability Index', ari);
         console.groupEnd();
         return(ari);        
     }
@@ -443,7 +508,7 @@ export default class TextModel {
         let { difficult, easy, sentences } = this._easyAndDifficultWords(sampleSize);        
         let number = (easy + difficult * 3) / sentences;
         let lwf = this._roundFloat(number <= 20 ? (number - 2) / 2 : number / 2, 1);
-        console.debug('Linsear Write Formula', lwf);
+        console.log('Linsear Write Formula', lwf);
         console.groupEnd();
         return(lwf);
     }
@@ -461,7 +526,7 @@ export default class TextModel {
             score += 3.6365;
         }
         let dsrs = this._roundFloat(score, 2);
-        console.debug('Dale-Chall Readability Score', dsrs);
+        console.log('Dale-Chall Readability Score', dsrs);
         console.groupEnd();
         return(dsrs);        
     }
@@ -480,7 +545,7 @@ export default class TextModel {
         if (score < 7.9) grade = 9;
         if (score < 8.9) grade = 11;
         if (score < 9.9) grade = 13;
-        console.debug('Dale-Chall grade', grade);
+        console.log('Dale-Chall grade', grade);
         console.groupEnd();
         return(grade);
     }
@@ -494,7 +559,7 @@ export default class TextModel {
         let { total, difficult } = this._daleChallDifficultWords(3);
         let percentDifficult = 100 * difficult / total;
         let gfi = this._roundFloat(0.4 * (this.averageSentenceLength() + percentDifficult), 2);
-        console.debug('Gunning Fog Index', gfi);
+        console.log('Gunning Fog Index', gfi);
         console.groupEnd();
         return(gfi);
     }
