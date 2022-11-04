@@ -37,7 +37,8 @@ export default class DocumentAnalyser extends React.Component {
                 readingTime: 0,
                 smogIndex: 0,
                 ukReadingAge: 0,
-                fleschKincaid: 0
+                fleschKincaid: 0,
+                includeMedicalTerms: Panel.getSwitchByName('includeMedicalTerms').defaultChecked
             }
         };
         this.editor = React.createRef();
@@ -204,6 +205,15 @@ export default class DocumentAnalyser extends React.Component {
                         <List sx={{ width: '100%' }} subheader={<Panel.PanelListSubheader caption="Readability" />}>
                             {Panel.readabilityListItems.map((rli) => (
                                 <Panel.MetricListItem key={rli.key} id={rli.id} primary={rli.primary} help={rli.help} value={this.state.readability[rli.id]} />
+                            ))}
+                             {Panel.readabilitySwitchItems.map((rsi) => (
+                                <Panel.ReadabilitySwitchItem 
+                                    key={rsi.key} 
+                                    id={rsi.id} 
+                                    primary={rsi.primary} 
+                                    help={rsi.help} 
+                                    defaultChecked={rsi.defaultChecked} 
+                                    onChange={this.onSwitchChange.bind(this)} />
                             ))}
                         </List>
                     </Panel.WhitePaper>

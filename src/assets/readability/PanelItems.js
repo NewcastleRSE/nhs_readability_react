@@ -40,9 +40,14 @@ const switchListItems = [
             </p>
             `,
         defaultChecked: false
-    },
+    }
+   
+];
+
+const readabilitySwitchItems = [
+
     {
-        key: 3,
+        key: 1,
         id: 'includeMedicalTerms',
         primary: 'Include medical terms in reading age scores',
         help: `
@@ -53,7 +58,8 @@ const switchListItems = [
             `,
         defaultChecked: true
     }
-];
+
+]
 
 const metricListItems = [
     {
@@ -77,7 +83,7 @@ const metricListItems = [
     {
         key: 4,
         id: 'avWordsPerSentence',
-        primary: 'Average words / sentence',
+        primary: 'Average words per sentence',
         help: 'Average number of words per sentence'
     },
     {
@@ -89,7 +95,7 @@ const metricListItems = [
     {
         key: 6,
         id: 'avSentencesPerParagraph',
-        primary: 'Average sentences / paragraph',
+        primary: 'Average sentences per paragraph',
         help: 'Average number of sentences per paragraph'
     },
     {
@@ -251,6 +257,30 @@ const SwitchListItem = props => {
     );
 };
 
+const ReadabilitySwitchItem = props => {
+    const { id, primary, help, defaultChecked, onChange } = props;
+    let sx;
+    if (highlightingStyles[id]) {
+        /* Shoehorn in a bit of right pad to avoid the coloured label touching the switch element which looks really bad */
+        sx = Object.assign({}, highlightingStyles[id], { marginRight: '2em' });
+    } else {
+        sx = highlightingStyles['normalText'];
+    }    
+    return (
+        <ListItem>
+            <HelpIcon help={help} />
+            <ListItemText primary={primary} sx={sx} />
+            <AntSwitch
+                id={id}
+                color='default'
+                defaultChecked={defaultChecked}
+                onChange={onChange}
+            />
+        </ListItem>
+    );
+
+}
+
 const MetricListItem = props => {
     const { id, primary, help, value } = props;
     const textStyle = { color: darkGrey, background: lightGrey };
@@ -285,9 +315,11 @@ export {
     switchListItems, 
     metricListItems, 
     readabilityListItems,
+    readabilitySwitchItems,
     WhitePaper,
     PanelListSubheader,
     SwitchListItem,
     MetricListItem,
+    ReadabilitySwitchItem,
     getSwitchByName
 };
