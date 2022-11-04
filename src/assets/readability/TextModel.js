@@ -115,7 +115,9 @@ export default class TextModel {
                             console.log('Key', k, 'is dead - removing');
                             delete this.modelState[k];
                         }
+
                     });                    
+
                     console.log('Finished');
                 } else {
                     console.log('Content state has not changed (e.g. a selection)');
