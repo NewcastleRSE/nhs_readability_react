@@ -37,8 +37,8 @@ How to run tests on your local system.
 
 ## Roadmap
 
-- [x] Initial Research  
-- [ ] Minimum viable product <-- You are Here  
+- [ ] Initial Research  
+- [x] Minimum viable product  
 - [ ] Alpha Release  
 - [ ] Feature-Complete Release   
 
