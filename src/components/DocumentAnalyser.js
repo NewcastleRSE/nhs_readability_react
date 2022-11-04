@@ -157,7 +157,7 @@ export default class DocumentAnalyser extends React.Component {
                 readingTime: this.textModel.averageReadingTime(),
                 smogIndex: smog,
                 ukReadingAge: this.textModel.toUKReadingAge(smog),
-                fleschKincaid: this.textModelfleschKincaidGrade()
+                fleschKincaid: this.textModel.fleschKincaidGrade()
 
             }});      
         } else {
