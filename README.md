@@ -17,9 +17,8 @@ Becky Osselton or David Herbert, RSE Team, Newcastle University
 
 ### Built With
 
-Technical stack description with links e.g.
-
-* [Vue.js](https://vuejs.org/)
+* [React.js](https://reactjs.org/)
+* Uses draft.js library
 
 ## Getting Started
 
