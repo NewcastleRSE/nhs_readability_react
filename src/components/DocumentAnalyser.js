@@ -157,7 +157,7 @@ export default class DocumentAnalyser extends React.Component {
                 readingTime: this.textModel.averageReadingTime(),
                 smogIndex: smog,
                 ukReadingAge: this.textModel.toUKReadingAge(smog),
-                fleschKincaid: this.textModelfleschKincaidGrade()
+                fleschKincaid: this.textModel.fleschKincaidGrade()
 
             }});      
         } else {
@@ -204,6 +204,9 @@ export default class DocumentAnalyser extends React.Component {
                         <List sx={{ width: '100%' }} subheader={<Panel.PanelListSubheader caption="Readability" />}>
                             {Panel.readabilityListItems.map((rli) => (
                                 <Panel.MetricListItem key={rli.key} id={rli.id} primary={rli.primary} help={rli.help} value={this.state.readability[rli.id]} />
+                            ))}
+                             {Panel.readabilitySwitchItems.map((rli) => (
+                                <Panel.ReadabilitySwitchItem key={rli.key} id={rli.id} primary={rli.primary} help={rli.help} value={this.state.readability[rli.id]} />
                             ))}
                         </List>
                     </Panel.WhitePaper>
