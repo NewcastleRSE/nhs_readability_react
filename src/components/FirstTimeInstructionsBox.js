@@ -17,6 +17,7 @@ export default class FirstTimeInstructionsBox extends Component {
 
     onClose() {
         this.setState({ showInstructions: !this.state.showInstructions });
+        localStorage.setItem('hideInstructions', true)
     }
 
     render() {
@@ -72,8 +73,26 @@ export default class FirstTimeInstructionsBox extends Component {
                         <CloseIcon />
                     </IconButton>
                 </DialogTitle>
-                <DialogContent>
-                    Tips for first-time users
+                <DialogContent
+                    sx={{
+                        m: 0, 
+                        p: 2,
+                        fontFamily: `"Roboto","Helvetica","Arial",sans-serif;`,
+                        fontSize: 18
+                    }}> 
+                
+                    <strong>Tips for users</strong>
+                
+                    <p>The NHS Document Readability Tool helps you write simple and clear health information.</p>
+
+                    <p>Copy and paste in text you’re working on already, or start writing something new directly in the tool.</p>
+
+                    <p>Use the options on the right hand side to get suggestions on how to make you writing easy to understand.</p>
+
+                    <p>Once you’ve finished, copy and paste your text from the tool into a word document, email etc.</p>
+
+                    <p><strong>Please note:</strong> the tool does not check for spelling and grammar mistakes. You will need to use another programme to check for these.</p>
+                
                 </DialogContent>
             </Dialog>
         )
