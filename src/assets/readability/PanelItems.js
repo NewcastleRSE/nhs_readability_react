@@ -241,7 +241,7 @@ const SwitchListItem = props => {
         /* Shoehorn in a bit of right pad to avoid the coloured label touching the switch element which looks really bad */
         sx = Object.assign({}, highlightingStyles[id], { marginRight: '2em' });
     } else {
-        sx = highlightingStyles['normalText'];
+        sx = highlightingStyles['labelText'];
     }    
     return (
         <ListItem>
