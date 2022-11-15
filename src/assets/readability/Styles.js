@@ -3,20 +3,25 @@ import { createTheme } from '@mui/material/styles';
 
 const highlightingStyles = {
     'showComplexSentences': {
-        fontWeight: 'bold', 
         color: '#ffffff',
-        padding: '0.2em',
-        margin: '0.2em 0',
-        backgroundColor: red[800]
+        padding: '0.05em',
+        lineHeight: '1.8rem',
+        backgroundColor: '#DD95BA'
     },
     'highlightPrismWords': {
-        fontWeight: 'bold',
         color: '#ffffff',
-        padding: '0.2em',
-        margin: '0.2em 0',
-        backgroundColor: teal[800]
+        padding: '0.05em',
+        lineHeight: '1.8rem',
+        backgroundColor: '#72B16F'
     },
     'normalText': {
+        fontWeight: 'normal',
+        color: grey[900],
+        padding: '0.2em',
+        margin: '0.2em 0',
+        backgroundColor: grey[100]
+    },
+    'labelText': {
         fontWeight: 'normal',
         color: grey[900],
         padding: '0.2em',
@@ -38,7 +43,7 @@ const readingAgeTrafficLightStyles = {
         color: '#ffffff',
         padding: '0.2em',
         margin: '0.2em 0',
-        backgroundColor: amber[800]
+        backgroundColor: '#FBBE17'
     },
     'red': {
         fontWeight: 'bold', 
