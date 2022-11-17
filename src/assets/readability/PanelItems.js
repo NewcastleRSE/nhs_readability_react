@@ -46,7 +46,7 @@ const readabilitySwitchItems = [
         primary: 'Include medical terms in reading age scores',
         help: `
             <p>
-            Include medical terms in reading age scores', put 'Medical words make the reading age higher. To check the reading age of writing excluding the medical terms, switch this button off.
+            Medical words make the reading age higher. To check the reading age of writing excluding the medical terms, switch this button off.
             </p>
             `,
         defaultChecked: true
