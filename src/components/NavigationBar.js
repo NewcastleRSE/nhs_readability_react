@@ -5,6 +5,11 @@ import Toolbar from '@mui/material/Toolbar';
 import Link from '@mui/material/Link';
 import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
 import Drawer from '@mui/material/Drawer';
 import Divider from '@mui/material/Divider';
 import List from '@mui/material/List';
@@ -45,13 +50,24 @@ export default class NavigationBar extends React.Component {
         super(props);
         this.state = {
             mobileOpen: false,
-            showInstructions: false
+            open: false
         };
     }
 
+   
     handleDrawerToggle() {
         this.setState({ mobileOpen: !this.state.mobileOpen });
     };
+
+  
+    handleClickOpen() {
+      this.setState({ open: true });
+    };
+  
+    handleClose() {
+        this.setState({ open: false });
+    };
+
 
     render() {
         return (
@@ -98,8 +114,7 @@ export default class NavigationBar extends React.Component {
                                             window.open(page.url, '_blank');
                                         } 
                                         else if (page.key==='Hints and Tips') {
-                                            localStorage.clear();
-                                            this.setState({ showInstructions: true });
+                                            this.handleClickOpen();
                                         }                                  
                                     }}
                                     title={page.title}
@@ -148,6 +163,47 @@ export default class NavigationBar extends React.Component {
                         </Box>
                     </Drawer>
                 </Box>
+
+                <div>
+                    <Dialog
+                
+                        open={this.state.open}
+                        onClose={this.handleClose.bind(this)}
+                        aria-labelledby="alert-dialog-title"
+                        aria-describedby="alert-dialog-description"
+                        sx={{
+                         '& .MuiDialog-paper': { backgroundColor: 'white', color: '#000' },
+                        }}
+                    >
+                    <DialogTitle id="alert-dialog-title">
+                        Hints and tips
+                    </DialogTitle>
+                    <DialogContent>
+                        <DialogContentText id="alert-dialog-description"  sx={{
+                                m: 0, 
+                                p: 2,
+                                fontFamily: `"Roboto","Helvetica","Arial",sans-serif;`,
+                                fontSize: 18,
+                                color: '#000'
+                            }}> 
+                    
+                            <p>The NHS Document Readability Tool helps you write simple and clear health information.</p>
+
+                            <p>Copy and paste in text you’re working on already, or start writing something new directly in the tool.</p>
+
+                            <p>Use the options on the right hand side to get suggestions on how to make you writing easy to understand.</p>
+
+                            <p>Once you’ve finished, copy and paste your text from the tool into a word document, email etc.</p>
+
+                            <p><strong>Please note:</strong> the tool does not check for spelling and grammar mistakes. You will need to use another programme to check for these.</p>
+
+                        </DialogContentText>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={this.handleClose.bind(this)}>Close</Button>
+                    </DialogActions>
+                    </Dialog>
+                </div>
             </Box>
         );
     }
