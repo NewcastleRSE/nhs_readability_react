@@ -12,6 +12,7 @@ import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
 import MenuIcon from '@mui/icons-material/Menu';
+import { AppsOutage } from '@mui/icons-material';
 
 const pages = [
    /* {
@@ -43,7 +44,8 @@ export default class NavigationBar extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            mobileOpen: false
+            mobileOpen: false,
+            showInstructions: false
         };
     }
 
@@ -94,9 +96,11 @@ export default class NavigationBar extends React.Component {
                                     onClick={() => {
                                         if (page.url) {
                                             window.open(page.url, '_blank');
-                                        } else {
-                                            alert('Not implemented yet!');
-                                        }                                        
+                                        } 
+                                        else if (page.key==='Hints and Tips') {
+                                            localStorage.clear();
+                                            this.setState({ showInstructions: true });
+                                        }                                  
                                     }}
                                     title={page.title}
                                 >{page.key}
