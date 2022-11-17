@@ -14,8 +14,13 @@ import ListItemText from '@mui/material/ListItemText';
 import MenuIcon from '@mui/icons-material/Menu';
 
 const pages = [
-    {
+   /* {
         key: 'Docs',
+        url: '',
+        title: 'View the documentation in a new tab (Not Implemented!)'
+    }, */
+    {
+        key: 'Hints and Tips',
         url: '',
         title: 'View the documentation in a new tab (Not Implemented!)'
     },
@@ -24,11 +29,11 @@ const pages = [
         url: 'https://github.com/NewcastleRSE/nhs_readability_react/issues',
         title: 'Report an issue with the tool directly into the GitHub issues database'
     },
-    {
+    /*{
         key: 'Login',
         url: '',
         title: 'Log in as a registered user (Not Implemented!)'
-    }
+    } */
 ];
 
 const drawerWidth = 250;
