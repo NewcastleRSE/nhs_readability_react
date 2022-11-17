@@ -6,13 +6,13 @@ const highlightingStyles = {
         color: '#ffffff',
         padding: '0.05em',
         lineHeight: '1.8rem',
-        backgroundColor: '#DD95BA'
+        backgroundColor: '#db6ba5'
     },
     'highlightPrismWords': {
         color: '#ffffff',
         padding: '0.05em',
         lineHeight: '1.8rem',
-        backgroundColor: '#72B16F'
+        backgroundColor: '#55ad56'
     },
     'normalText': {
         fontWeight: 'normal',
@@ -50,7 +50,7 @@ const readingAgeTrafficLightStyles = {
         color: '#ffffff',
         padding: '0.2em',
         margin: '0.2em 0',
-        backgroundColor: red[800]
+        backgroundColor: '#e67930'
     }
 };
 
