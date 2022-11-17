@@ -30,13 +30,7 @@ const switchListItems = [
         primary: 'Highlight PRISM-listed words',
         help: `
             <p>
-            Highlight words in the <a href="https://www.nhlbi.nih.gov/files/docs/ghchs_readability_toolkit.pdf" target="_blank">PRISM readability Toolkit</a>
-            having a simpler alternative word or phrase.  Hovering the cursor over a highlighted 
-            word will make some suggestions of simpler alternatives.  It might be possible to click on a suggestion eventually and do an 
-            auto-replace of the complex word by the simpler.  
-            </p>
-            <p>
-            NOTE: You need to turn off the complex sentences to see the PRISM highlights - it does not seem to be possible to have the two together.
+            Highlights words that could be simpler. Hover the mouse over the word to see suggestions for simpler words or phrases.
             </p>
             `,
         defaultChecked: false
@@ -51,10 +45,9 @@ const readabilitySwitchItems = [
         id: 'includeMedicalTerms',
         primary: 'Include medical terms in reading age scores',
         help: `
-            Compute the SMOG Index and Reading Age including all the medical terms.  To properly filter out medical terms requires a set of medical vocabularies, 
-            possibly classified by discipline area.  A comprehensive medical dictionary may work but would likely be very sluggish in operation.
-            For the demonstration, if this switch if OFF, the PRISM words are filtered out and the SMOG index and Reading Age computed with the 
-            reduced word set.
+            <p>
+            Include medical terms in reading age scores', put 'Medical words make the reading age higher. To check the reading age of writing excluding the medical terms, switch this button off.
+            </p>
             `,
         defaultChecked: true
     }
@@ -143,16 +136,14 @@ const readabilityListItems = [
         id: 'smogIndex',
         primary: 'SMOG Index',
         help: `
-            <p>Returns the SMOG index of the given text. This is a grade formula in that a score of 9.3 means that a US ninth grader would be able to read the document.
-            Texts of fewer than 30 sentences are statistically invalid, because the SMOG formula was normed on 30-sentence samples</p>
-            Further reading on <a href="https://en.wikipedia.org/wiki/SMOG" target="_blank">Wikipedia</a>
+            <p>Returns the SMOG index of the text</a>
         `
     },
     {
         key: 4,
         id: 'fleschKincaid',
         primary: 'Flesch Kincaid Grade',
-        help: ` <p>Returns the Flesh Kincaid grade of the given text.</p>`
+        help: ` <p>Returns the Flesh Kincaid grade of the given text - (US grades)</p>`
     }
 ];
 
