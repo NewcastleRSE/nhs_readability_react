@@ -14,8 +14,13 @@ import ListItemText from '@mui/material/ListItemText';
 import MenuIcon from '@mui/icons-material/Menu';
 
 const pages = [
-    {
+   /* {
         key: 'Docs',
+        url: '',
+        title: 'View the documentation in a new tab (Not Implemented!)'
+    }, */
+    {
+        key: 'Hints and Tips',
         url: '',
         title: 'View the documentation in a new tab (Not Implemented!)'
     },
