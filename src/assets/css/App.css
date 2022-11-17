@@ -36,10 +36,11 @@ div.public-DraftEditor-content {
 }   
 
 div.public-DraftEditorPlaceholder-root {
-    color: rgb(186, 186, 193);
+    color: rgb(138, 138, 145);
     padding-top: 3px;
     padding-left: 3px;
     margin-bottom: -20px;
+    font-size: larger;
 }
 
 /* Default blue tippy theme */
