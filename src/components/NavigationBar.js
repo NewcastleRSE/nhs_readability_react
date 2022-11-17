@@ -29,11 +29,11 @@ const pages = [
         url: 'https://github.com/NewcastleRSE/nhs_readability_react/issues',
         title: 'Report an issue with the tool directly into the GitHub issues database'
     },
-    {
+    /*{
         key: 'Login',
         url: '',
         title: 'Log in as a registered user (Not Implemented!)'
-    }
+    } */
 ];
 
 const drawerWidth = 250;
