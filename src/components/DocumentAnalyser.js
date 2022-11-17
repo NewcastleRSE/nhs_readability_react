@@ -3,6 +3,7 @@ import { Grid, List } from '@mui/material';
 import TextModel from '../assets/readability/TextModel';
 import * as Panel from '../assets/readability/PanelItems';
 import { highlightingStyles } from '../assets/readability/Styles';
+import Button from '@mui/material/Button';
 import { CompositeDecorator, Editor, EditorState, SelectionState, Modifier } from 'draft-js';
 import tippy from 'tippy.js';
 import "tippy.js/dist/tippy.css";
@@ -187,17 +188,23 @@ export default class DocumentAnalyser extends React.Component {
         console.debug('onStateChange() done');        
     }
 
+    clearStateText(newState) {
+        this.setState({editorState: EditorState.push(this.state.editorState, null)});
+    }
+
     render() {
         return ( 
             <Grid container spacing={1}>
                 <Grid item xs={12} sm={12} md={9}>
                     <Panel.WhitePaper elevation={5}>
+                    <button variant="outlined" onClick={this.clearStateText.bind(this)}>Clear text</button>    
                         <Editor
                             ref={ this.editor }
                             placeholder='&nbsp;Type or paste your document here'
                             editorState={ this.state.editorState }
-                            onChange={ this.onStateChange.bind(this) }                            
-                        />                  
+                            onChange={ this.onStateChange.bind(this) }                           
+                        />  
+                               
                     </Panel.WhitePaper>
                 </Grid>
                 <Grid item xs={12} sm={12} md={3}>
@@ -236,7 +243,10 @@ export default class DocumentAnalyser extends React.Component {
                                 <Panel.MetricListItem key={mli.key} id={mli.id} primary={mli.primary} help={mli.help} value={this.state.metrics[mli.id]} />
                             ))}
                         </List>
-                    </Panel.WhitePaper>                    
+                    </Panel.WhitePaper> 
+                    <Panel.WhitePaper>
+                       <button variant="outlined" onClick={this.clearStateText.bind(this)}>Clear text</button> 
+                    </Panel.WhitePaper>                   
                 </Grid>
             </Grid>
         );
