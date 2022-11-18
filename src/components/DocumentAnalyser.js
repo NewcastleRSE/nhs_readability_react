@@ -189,7 +189,7 @@ export default class DocumentAnalyser extends React.Component {
     }
 
     clearStateText(newState) {
-        this.setState({editorState: EditorState.push(this.state.editorState, null)});
+       this.setState({ 'editorState': EditorState.createEmpty(this.getDecorators()) });
     }
 
     render() {
@@ -197,7 +197,7 @@ export default class DocumentAnalyser extends React.Component {
             <Grid container spacing={1}>
                 <Grid item xs={12} sm={12} md={9}>
                     <Panel.WhitePaper elevation={5}>
-                    <button variant="outlined" onClick={this.clearStateText.bind(this)}>Clear text</button>    
+                    <Button sx={{ padding: 1, margin: 1 }} variant="outlined" onClick={this.clearStateText.bind(this)}>Clear text</Button>    
                         <Editor
                             ref={ this.editor }
                             placeholder='&nbsp;Type or paste your document here'
@@ -244,8 +244,10 @@ export default class DocumentAnalyser extends React.Component {
                             ))}
                         </List>
                     </Panel.WhitePaper> 
-                    <Panel.WhitePaper>
-                       <button variant="outlined" onClick={this.clearStateText.bind(this)}>Clear text</button> 
+                    <Panel.WhitePaper elevation={5}>
+                        <List sx={{ width: '100%' }} subheader={<Panel.PanelListSubheader/>}>
+                            <Button sx={{ padding: 1, margin: 1 }} variant="outlined" onClick={this.clearStateText.bind(this)}>Clear text</Button> 
+                        </List>    
                     </Panel.WhitePaper>                   
                 </Grid>
             </Grid>
