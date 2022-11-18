@@ -152,6 +152,20 @@ export default class DocumentAnalyser extends React.Component {
         this.setState({'switches': currentSwitchState});
         console.log('Updated switch state', this.state.switches, 'editor state', this.state.editorState);
         this.textModel.switchStateUpdate(id, checked);
+
+        /* if prismWords or complexSentences switch is on, the other must be off 
+          switches not updating */
+
+        if (id == 'highlightPrismWords' && checked == true) {
+            this.textModel.switchStateUpdate('showComplexSentences', false);
+            //Panel.getSwitchByName('showComplexSentences').checked = false;
+            Panel.getSwitchByName('showComplexSentences').defaultChecked = false;
+        }
+        else if (id == 'showComplexSentences' && checked == true) {
+            this.textModel.switchStateUpdate('highlightPrismWords', false);
+            Panel.getSwitchByName('highlightPrismWords').checked = false;
+        }
+            
         if (id == 'includeMedicalTerms') {
             /* Update the SMOG index metric */
             const smog = this.textModel.smogIndex(!checked);
