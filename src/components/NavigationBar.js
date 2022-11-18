@@ -17,7 +17,7 @@ import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
 import MenuIcon from '@mui/icons-material/Menu';
-import { AppsOutage } from '@mui/icons-material';
+import { AppsOutage, SpatialTrackingTwoTone } from '@mui/icons-material';
 
 const pages = [
    /* {
@@ -166,7 +166,6 @@ export default class NavigationBar extends React.Component {
 
                 <div>
                     <Dialog
-                
                         open={this.state.open}
                         onClose={this.handleClose.bind(this)}
                         aria-labelledby="alert-dialog-title"
@@ -186,17 +185,15 @@ export default class NavigationBar extends React.Component {
                                 fontSize: 18,
                                 color: '#000'
                             }}> 
-                    
-                            <p>The NHS Document Readability Tool helps you write simple and clear health information.</p>
-
-                            <p>Copy and paste in text you’re working on already, or start writing something new directly in the tool.</p>
-
-                            <p>Use the options on the right hand side to get suggestions on how to make you writing easy to understand.</p>
-
-                            <p>Once you’ve finished, copy and paste your text from the tool into a word document, email etc.</p>
-
-                            <p><strong>Please note:</strong> the tool does not check for spelling and grammar mistakes. You will need to use another programme to check for these.</p>
-
+                                <span>The NHS Document Readability Tool helps you write simple and clear health information.</span>
+                                <br></br> 
+                                <span>Copy and paste in text you’re working on already, or start writing something new directly in the tool.</span>
+                                <br></br> 
+                                <span>Use the options on the right hand side to get suggestions on how to make you writing easy to understand.</span>
+                                <br></br> 
+                                <span>Once you’ve finished, copy and paste your text from the tool into a word document, email etc.</span>
+                                <br></br> 
+                                <span><strong>Please note:</strong> the tool does not check for spelling and grammar mistakes. You will need to use another programme to check for these.</span>
                         </DialogContentText>
                     </DialogContent>
                     <DialogActions>
