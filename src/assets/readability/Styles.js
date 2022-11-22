@@ -14,6 +14,12 @@ const highlightingStyles = {
         lineHeight: '1.8rem',
         backgroundColor: '#55ad56'
     },
+    'showLongWords': {
+        color: '#ffffff',
+        padding: '0.05em',
+        lineHeight: '1.8rem',
+        backgroundColor: '#9971bf'
+    },
     'normalText': {
         fontWeight: 'normal',
         color: grey[900],

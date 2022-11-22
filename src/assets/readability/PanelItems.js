@@ -34,6 +34,17 @@ const switchListItems = [
             </p>
             `,
         defaultChecked: false
+    },
+    {
+        key: 3,
+        id: 'showLongWords',
+        primary: 'Highlight long words',
+        help: `
+            <p>
+            Highlights words that are 3 or more syllables in length.
+            </p>
+            `,
+        defaultChecked: false
     }
    
 ];

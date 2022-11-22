@@ -121,6 +121,26 @@ export default class ParagraphRecord {
         return(ranges);
     }
 
+     /**
+     * Return array of text ranges representing PRISM words
+     * @return {Array<SelectionState>} ranges
+     */
+      markLongWords() {
+
+        console.group('markLongWords()');
+        
+        let ranges = this.sentences.filter(s1 => s1.isComplex()).map(s2 => {
+            return({
+                start: s2.paraOffsetStart,
+                end: s2.paraOffsetEnd + 1
+            });
+        });
+        
+        console.groupEnd();
+
+        return(ranges);
+    }
+
     /**
      * Word count for paragraph
      * @param {int} syllableThreshold               -- only count words > this number of syllables
