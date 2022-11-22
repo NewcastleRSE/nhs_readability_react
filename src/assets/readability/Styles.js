@@ -42,7 +42,7 @@ const readingAgeTrafficLightStyles = {
         color: '#ffffff',
         padding: '0.2em',
         margin: '0.2em 0',
-        backgroundColor: green[800]
+        backgroundColor: '#63ba54'
     },
     'amber': {
         fontWeight: 'bold', 
