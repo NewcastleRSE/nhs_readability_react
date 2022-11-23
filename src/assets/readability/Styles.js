@@ -14,6 +14,12 @@ const highlightingStyles = {
         lineHeight: '1.8rem',
         backgroundColor: '#55ad56'
     },
+    'showLongWords': {
+        color: '#ffffff',
+        padding: '0.05em',
+        lineHeight: '1.8rem',
+        backgroundColor: '#9971bf'
+    },
     'normalText': {
         fontWeight: 'normal',
         color: grey[900],
@@ -36,7 +42,7 @@ const readingAgeTrafficLightStyles = {
         color: '#ffffff',
         padding: '0.2em',
         margin: '0.2em 0',
-        backgroundColor: green[800]
+        backgroundColor: '#63ba54'
     },
     'amber': {
         fontWeight: 'bold', 

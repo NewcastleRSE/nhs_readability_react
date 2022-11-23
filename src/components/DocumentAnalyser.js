@@ -20,6 +20,7 @@ export default class DocumentAnalyser extends React.Component {
             switches: {
                 showComplexSentences: Panel.getSwitchByName('showComplexSentences').defaultChecked,
                 highlightPrismWords: Panel.getSwitchByName('highlightPrismWords').defaultChecked,
+                showLongWords: Panel.getSwitchByName('showLongWords'). defaultChecked,
                 includeMedicalTerms: Panel.getSwitchByName('includeMedicalTerms').defaultChecked
             },
             metrics: {
@@ -55,13 +56,21 @@ export default class DocumentAnalyser extends React.Component {
         const complexStyle = showComplex ? highlightingStyles['showComplexSentences'] : highlightingStyles['normalText'];
         const showPrism = this.state.switches['highlightPrismWords'];
         const prismStyle = showPrism ? highlightingStyles['highlightPrismWords'] : highlightingStyles['normalText'];
+        const showLong = this.state.switches['showLongWords'];
+        const longStyle = showLong ? highlightingStyles['showLongWords'] : highlightingStyles['normalText'];
+
         return(new CompositeDecorator([
             {
                 strategy: function(contentBlock, callback, contentState) { this.textModel.findComplexSentences(...arguments) }.bind(this),
                 component: (props) => {
-                    return ( <span className={showComplex ? "sentence-is-complex" : ""} style={complexStyle} data-offset-key={props.offsetKey}>{props.children}</span> )
+                    return ( <span 
+                        className={showComplex ? "sentence-is-complex" : ""} 
+                        style={complexStyle} 
+                        data-offset-key={props.offsetKey}>
+                        {props.children}</span> )
                 }
-            }, {
+            }, 
+            {
                 strategy: function(contentBlock, callback, contentState) { this.textModel.findPrismWords(...arguments) }.bind(this),
                 component: (props) => {
                     console.debug('Re-rendering prism word', props);
@@ -74,7 +83,17 @@ export default class DocumentAnalyser extends React.Component {
                             data-offset-key={props.offsetKey}
                         >{props.children}</span>)
                 }
-            }
+            },
+            {
+                strategy: function(contentBlock, callback, contentState) { this.textModel.findLongWords(...arguments) }.bind(this),
+                component: (props) => {
+                    return ( <span 
+                        className={showLong ? "long-word" : ""} 
+                        style={longStyle} 
+                        data-offset-key={props.offsetKey}>
+                        {props.children}</span> )
+                }
+            }, 
         ]));
     }
 
@@ -152,6 +171,26 @@ export default class DocumentAnalyser extends React.Component {
         this.setState({'switches': currentSwitchState});
         console.log('Updated switch state', this.state.switches, 'editor state', this.state.editorState);
         this.textModel.switchStateUpdate(id, checked);
+
+        /* if a switch is on, the others must be off */
+        /*  switches not updating */
+
+        if (id == 'highlightPrismWords' && checked == true) {
+            this.textModel.switchStateUpdate('showComplexSentences', false);
+            //Panel.getSwitchByName('showComplexSentences').checked = false;
+            Panel.getSwitchByName('showComplexSentences').defaultChecked = false;
+        }
+        else if (id == 'showComplexSentences' && checked == true) {
+            this.textModel.switchStateUpdate('highlightPrismWords', false);
+            Panel.getSwitchByName('highlightPrismWords').checked = false;
+        }
+        else if (id == 'showLongWords' && checked == true) {
+            this.textModel.switchStateUpdate('highlightPrismWords', false);
+            this.textModel.switchStateUpdate('showComplexSentences', false);
+            Panel.getSwitchByName('highlightPrismWords').checked = false;
+            Panel.getSwitchByName('showComplexSentences').checked = false;
+        }
+            
         if (id == 'includeMedicalTerms') {
             /* Update the SMOG index metric */
             const smog = this.textModel.smogIndex(!checked);

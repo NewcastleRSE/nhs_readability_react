@@ -207,6 +207,34 @@ export default class TextModel {
     }
 
     /**
+     * Strategy method for finding words with 3 or more syllables in a content block (paragraph)
+     * @param {ContentBlock} contentBlock 
+     * @param {Function} callback 
+     * @param {ContentState} contentState 
+     */
+     findLongWords(contentBlock, callback, contentState) {
+
+        console.group('findLongWords()');
+        console.debug('Determine long words in block', contentBlock.getKey());
+        console.debug('Model state', this.modelState);
+
+        if (this.switchState['showLongWords'] && this.modelState) {
+            let paraRecordKey = Object.keys(this.modelState).find(key => key == contentBlock.getKey());
+            if (!paraRecordKey) {
+                this.modelState[paraRecordKey] = new ParagraphRecord();                     
+            }   
+            this.modelState[paraRecordKey].stateUpdate(contentBlock);        
+            console.debug('Found paragraph record', this.modelState[paraRecordKey], 'with key', paraRecordKey);
+            let complexRanges = this.modelState[paraRecordKey].markLongWords();
+            complexRanges.forEach(cr => {
+                callback(cr.start, cr.end);
+            });
+        }
+
+        console.groupEnd();
+    }
+
+    /**
      * Extract model properties representing count metrics
      * Thanks to https://stackoverflow.com/questions/17781472/how-to-get-a-subset-of-a-javascript-objects-properties for the elegant
      * way of doing this, rather than the usual loop

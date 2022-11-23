@@ -39,6 +39,23 @@ export default class Sentence {
     }
 
     /**
+     * Get words in sentence
+     * @param {int} syllableThreshold only return words > this number of syllables
+     * @return {Array<String>} words
+     */
+    getLongWords(syllableThreshold = 3) {
+        let words = [];
+        let trimmed = this.text.trim().toLocaleLowerCase(localeLang);
+        if (trimmed != '') {
+            words = trimmed.split(multiWhitespaceRe);
+            if (syllableThreshold > 3) {                
+                words = words.filter(w => syllable(w) >= syllableThreshold);;
+            }
+        }
+        return(words);
+    }
+
+    /**
      * Find all the words in the sentence along with their offsets within it
      * @param {int} syllableThreshold 
      * @returns {Array<Object>} ranges as { text: <the_word>, sentenceOffsetStart: <int>, sentenceOffsetEnd: <int> }
