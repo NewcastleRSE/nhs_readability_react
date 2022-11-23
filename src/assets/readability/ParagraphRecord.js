@@ -6,6 +6,8 @@ import Sentence from './Sentence';
 import { punctuationRe, singleWhitespaceRe } from './Constants';
 import { prismWords } from './PrismWords';
 import { SelectionState } from 'draft-js';
+import { syllable } from "syllable";
+import { localeLang } from './Constants';
  
 /** 
  * @classdesc Class to model a ContentBlock state record
@@ -81,16 +83,13 @@ export default class ParagraphRecord {
     markComplex() {
 
         console.group('markComplex()');
-        
         let ranges = this.sentences.filter(s1 => s1.isComplex()).map(s2 => {
             return({
                 start: s2.paraOffsetStart,
                 end: s2.paraOffsetEnd + 1
             });
-        });
-        
+        }); 
         console.groupEnd();
-
         return(ranges);
     }
 
@@ -101,43 +100,44 @@ export default class ParagraphRecord {
      markPrismWords() {
 
         console.group('markPrismWords()');
-        
         let ranges = [];
-
         this.sentences.forEach(s => {
             s.getWordRanges().forEach(wr => {
-                if (prismWords[wr.text]) {
+               if (prismWords[wr.text]) {
                     ranges.push({
                         start: s.paraOffsetStart + wr.sentenceOffsetStart,
                         end: s.paraOffsetStart + wr.sentenceOffsetEnd
                     });
-                }
+                } 
                 
             });
         });
-        
         console.groupEnd();
-
         return(ranges);
     }
 
      /**
-     * Return array of text ranges representing PRISM words
+     * Return array of text ranges contaning long words (4 or more syllables)
      * @return {Array<SelectionState>} ranges
      */
       markLongWords() {
-
         console.group('markLongWords()');
-        
-        let ranges = this.sentences.filter(s1 => s1.isComplex()).map(s2 => {
-            return({
-                start: s2.paraOffsetStart,
-                end: s2.paraOffsetEnd + 1
+        let ranges = [];
+        this.sentences.forEach(s => {
+            s.getWordRanges().forEach(wr => {
+ 
+                let numSyllables = syllable(wr.text.toLocaleLowerCase(localeLang));
+                if (numSyllables > 3) {
+                    /* console.log(wr.text);
+                    console.log(syllable(wr.text.toLocaleLowerCase(localeLang))); */
+                    ranges.push({
+                        start: s.paraOffsetStart + wr.sentenceOffsetStart,
+                        end: s.paraOffsetStart + wr.sentenceOffsetEnd
+                    });
+                }     
             });
         });
-        
         console.groupEnd();
-
         return(ranges);
     }
 
@@ -166,6 +166,8 @@ export default class ParagraphRecord {
         }
         return(nSyllables);
     }
+
+  
 
     forAllSentences(callback) {
         for (const s of this.sentences) {

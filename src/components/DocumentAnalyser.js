@@ -172,8 +172,8 @@ export default class DocumentAnalyser extends React.Component {
         console.log('Updated switch state', this.state.switches, 'editor state', this.state.editorState);
         this.textModel.switchStateUpdate(id, checked);
 
-        /* if prismWords or complexSentences switch is on, the other must be off 
-          switches not updating */
+        /* if a switch is on, the others must be off */
+        /*  switches not updating */
 
         if (id == 'highlightPrismWords' && checked == true) {
             this.textModel.switchStateUpdate('showComplexSentences', false);
@@ -188,7 +188,7 @@ export default class DocumentAnalyser extends React.Component {
             this.textModel.switchStateUpdate('highlightPrismWords', false);
             this.textModel.switchStateUpdate('showComplexSentences', false);
             Panel.getSwitchByName('highlightPrismWords').checked = false;
-            Panel.getSwitchByName('highlightPrismWords').checked = false;
+            Panel.getSwitchByName('showComplexSentences').checked = false;
         }
             
         if (id == 'includeMedicalTerms') {
