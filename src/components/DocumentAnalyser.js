@@ -187,7 +187,7 @@ export default class DocumentAnalyser extends React.Component {
         /* if a switch is on, the others must be off */
         /*  switches not updating */
 
-        if (id == 'highlightPrismWords' && checked == true) {
+       /* if (id == 'highlightPrismWords' && checked == true) {
             this.textModel.switchStateUpdate('showComplexSentences', false);
             //Panel.getSwitchByName('showComplexSentences').checked = false;
             Panel.getSwitchByName('showComplexSentences').defaultChecked = false;
@@ -201,7 +201,7 @@ export default class DocumentAnalyser extends React.Component {
             this.textModel.switchStateUpdate('showComplexSentences', false);
             Panel.getSwitchByName('highlightPrismWords').checked = false;
             Panel.getSwitchByName('showComplexSentences').checked = false;
-        }
+        } */
             
         if (id == 'includeMedicalTerms') {
             /* Update the SMOG index metric */
@@ -294,12 +294,7 @@ export default class DocumentAnalyser extends React.Component {
                                 <Panel.MetricListItem key={mli.key} id={mli.id} primary={mli.primary} help={mli.help} value={this.state.metrics[mli.id]} />
                             ))}
                         </List>
-                    </Panel.WhitePaper> 
-                    <Panel.WhitePaper elevation={5}>
-                        <List sx={{ width: '100%' }} subheader={<Panel.PanelListSubheader/>}>
-                            <Button sx={{ padding: 1, margin: 1 }} variant="outlined" onClick={this.clearStateText.bind(this)}>Clear text</Button> 
-                        </List>    
-                    </Panel.WhitePaper>                   
+                    </Panel.WhitePaper>               
                 </Grid>
             </Grid>
         );

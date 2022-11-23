@@ -188,7 +188,7 @@ export default class TextModel {
     findPassiveSentences(contentBlock, callback, contentState) {
 
 
-        if (this.switchState['showComplexSentences'] && this.modelState) {
+        if (this.switchState['showPassiveSentences'] && this.modelState) {
             let paraRecordKey = Object.keys(this.modelState).find(key => key == contentBlock.getKey());
             if (!paraRecordKey) {
                 this.modelState[paraRecordKey] = new ParagraphRecord();     
