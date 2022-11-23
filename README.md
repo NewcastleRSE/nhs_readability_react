@@ -9,6 +9,7 @@ Description of the project
 * David Herbert, Newcastle University  ([david.herbert@newcastle.ac.uk](mailto:david.herbert@newcastle.ac.uk))
 * Becky Osselton, Newcastle University  ([rebecca.osselton@newcastle.ac.uk](mailto:rebecca.osselton@newcastle.ac.uk))
 * Lorna Dawson, South Tyneside and Sunderland NHS Foundation Trust ([lorna.dawson3@nhs.net](mailto:lorna.dawson3@nhs.net))
+* Nicole Ahmed, South Tyneside and Sunderland NHS Foundation Trust ([nicole.ahmed@nhs.net](mailto:nicole.ahmed@nhs.net))
 
 
 ### RSE Contact
