@@ -4,6 +4,8 @@
 
 import { syllable } from "syllable";
 import { localeLang, multiNonWhitespaceRe, multiWhitespaceRe, sentenceComplexitySmogRange } from './Constants';
+// @ts-ignore
+import passive from "passive-voice";
 
 /** 
  * @classdesc Class to model a sentence
@@ -125,6 +127,21 @@ export default class Sentence {
         console.groupEnd();
 
         return(isComplex);
+    }
+
+    isPassive() {
+
+        console.group('isPassive()');
+        console.log('Check', this.text, 'is passive');
+
+        let isPassive = passive(this.text);
+        if(isPassive.length){
+            return true;
+        }
+        else {
+            return false;
+        }
+
     }
 
 }

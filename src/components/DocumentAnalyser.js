@@ -54,6 +54,8 @@ export default class DocumentAnalyser extends React.Component {
     getDecorators() {
         const showComplex = this.state.switches['showComplexSentences'];
         const complexStyle = showComplex ? highlightingStyles['showComplexSentences'] : highlightingStyles['normalText'];
+        const showPassive = this.state.switches['showPassiveSentences'];
+        const passiveStyle = showPassive ? highlightingStyles['showPassiveSentences'] : highlightingStyles['normalText'];
         const showPrism = this.state.switches['highlightPrismWords'];
         const prismStyle = showPrism ? highlightingStyles['highlightPrismWords'] : highlightingStyles['normalText'];
         const showLong = this.state.switches['showLongWords'];
@@ -66,6 +68,16 @@ export default class DocumentAnalyser extends React.Component {
                     return ( <span 
                         className={showComplex ? "sentence-is-complex" : ""} 
                         style={complexStyle} 
+                        data-offset-key={props.offsetKey}>
+                        {props.children}</span> )
+                }
+            }, 
+            {
+                strategy: function(contentBlock, callback, contentState) { this.textModel.findPassiveSentences(...arguments) }.bind(this),
+                component: (props) => {
+                    return ( <span 
+                        className={showPassive ? "sentence-is-passive" : ""} 
+                        style={passiveStyle} 
                         data-offset-key={props.offsetKey}>
                         {props.children}</span> )
                 }
