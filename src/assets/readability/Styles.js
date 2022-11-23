@@ -8,6 +8,12 @@ const highlightingStyles = {
         lineHeight: '1.8rem',
         backgroundColor: '#db6ba5'
     },
+    'showPassiveSentences': {
+        color: '#ffffff',
+        padding: '0.05em',
+        lineHeight: '1.8rem',
+        backgroundColor: '#879a9a'
+    },
     'highlightPrismWords': {
         color: '#ffffff',
         padding: '0.05em',

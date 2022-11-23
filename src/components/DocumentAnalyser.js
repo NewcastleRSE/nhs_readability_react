@@ -54,6 +54,8 @@ export default class DocumentAnalyser extends React.Component {
     getDecorators() {
         const showComplex = this.state.switches['showComplexSentences'];
         const complexStyle = showComplex ? highlightingStyles['showComplexSentences'] : highlightingStyles['normalText'];
+        const showPassive = this.state.switches['showPassiveSentences'];
+        const passiveStyle = showPassive ? highlightingStyles['showPassiveSentences'] : highlightingStyles['normalText'];
         const showPrism = this.state.switches['highlightPrismWords'];
         const prismStyle = showPrism ? highlightingStyles['highlightPrismWords'] : highlightingStyles['normalText'];
         const showLong = this.state.switches['showLongWords'];
@@ -66,6 +68,16 @@ export default class DocumentAnalyser extends React.Component {
                     return ( <span 
                         className={showComplex ? "sentence-is-complex" : ""} 
                         style={complexStyle} 
+                        data-offset-key={props.offsetKey}>
+                        {props.children}</span> )
+                }
+            }, 
+            {
+                strategy: function(contentBlock, callback, contentState) { this.textModel.findPassiveSentences(...arguments) }.bind(this),
+                component: (props) => {
+                    return ( <span 
+                        className={showPassive ? "sentence-is-passive" : ""} 
+                        style={passiveStyle} 
                         data-offset-key={props.offsetKey}>
                         {props.children}</span> )
                 }
@@ -175,7 +187,7 @@ export default class DocumentAnalyser extends React.Component {
         /* if a switch is on, the others must be off */
         /*  switches not updating */
 
-        if (id == 'highlightPrismWords' && checked == true) {
+       /* if (id == 'highlightPrismWords' && checked == true) {
             this.textModel.switchStateUpdate('showComplexSentences', false);
             //Panel.getSwitchByName('showComplexSentences').checked = false;
             Panel.getSwitchByName('showComplexSentences').defaultChecked = false;
@@ -189,7 +201,7 @@ export default class DocumentAnalyser extends React.Component {
             this.textModel.switchStateUpdate('showComplexSentences', false);
             Panel.getSwitchByName('highlightPrismWords').checked = false;
             Panel.getSwitchByName('showComplexSentences').checked = false;
-        }
+        } */
             
         if (id == 'includeMedicalTerms') {
             /* Update the SMOG index metric */
@@ -282,12 +294,7 @@ export default class DocumentAnalyser extends React.Component {
                                 <Panel.MetricListItem key={mli.key} id={mli.id} primary={mli.primary} help={mli.help} value={this.state.metrics[mli.id]} />
                             ))}
                         </List>
-                    </Panel.WhitePaper> 
-                    <Panel.WhitePaper elevation={5}>
-                        <List sx={{ width: '100%' }} subheader={<Panel.PanelListSubheader/>}>
-                            <Button sx={{ padding: 1, margin: 1 }} variant="outlined" onClick={this.clearStateText.bind(this)}>Clear text</Button> 
-                        </List>    
-                    </Panel.WhitePaper>                   
+                    </Panel.WhitePaper>               
                 </Grid>
             </Grid>
         );

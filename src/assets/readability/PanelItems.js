@@ -26,6 +26,17 @@ const switchListItems = [
     },
     {
         key: 2,
+        id: 'showPassiveSentences',
+        primary: 'Show passive sentences',
+        help: `
+            <p>
+            Highlight sentences which are in passive tense.
+            </p>
+            `,
+        defaultChecked: false
+    },
+    {
+        key: 3,
         id: 'highlightPrismWords',
         primary: 'Highlight PRISM-listed words',
         help: `
@@ -36,7 +47,7 @@ const switchListItems = [
         defaultChecked: false
     },
     {
-        key: 3,
+        key: 4,
         id: 'showLongWords',
         primary: 'Highlight long words',
         help: `

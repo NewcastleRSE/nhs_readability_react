@@ -170,7 +170,34 @@ export default class TextModel {
             }           
             console.log('Found paragraph record', this.modelState[paraRecordKey], 'with key', paraRecordKey);
             let complexRanges = this.modelState[paraRecordKey].markComplex();
+
             complexRanges.forEach(cr => {
+                callback(cr.start, cr.end);
+            });
+        }
+
+        console.groupEnd();
+    }
+
+         /**
+     * Strategy method for determining passive sentences
+     * @param {ContentBlock} contentBlock 
+     * @param {Function} callback 
+     * @param {ContentState} contentState 
+     */
+    findPassiveSentences(contentBlock, callback, contentState) {
+
+
+        if (this.switchState['showPassiveSentences'] && this.modelState) {
+            let paraRecordKey = Object.keys(this.modelState).find(key => key == contentBlock.getKey());
+            if (!paraRecordKey) {
+                this.modelState[paraRecordKey] = new ParagraphRecord();     
+                this.modelState[paraRecordKey].stateUpdate(contentBlock);
+            }           
+            console.log('Found paragraph record', this.modelState[paraRecordKey], 'with key', paraRecordKey);
+            let passiveRanges = this.modelState[paraRecordKey].markPassive();
+
+            passiveRanges.forEach(cr => {
                 callback(cr.start, cr.end);
             });
         }

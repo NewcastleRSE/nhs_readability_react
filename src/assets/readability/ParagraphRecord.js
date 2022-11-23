@@ -93,6 +93,19 @@ export default class ParagraphRecord {
         return(ranges);
     }
 
+    markPassive() {
+
+        console.group('markPassive()');
+        let ranges = this.sentences.filter(s1 => s1.isPassive()).map(s2 => {
+            return({
+                start: s2.paraOffsetStart,
+                end: s2.paraOffsetEnd + 1
+            });
+        }); 
+        console.groupEnd();
+        return(ranges);
+    }
+
     /**
      * Return array of text ranges representing PRISM words
      * @return {Array<SelectionState>} ranges
