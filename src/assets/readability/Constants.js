@@ -1,5 +1,5 @@
 /* Punctuation if '?' or '!' or '.' where not part of a floating point number or section number (e.g. 1.2.11) */
-const punctuationRe = /\s*([?!]+|(?<!\d+)\.(?!\d+))\s*/g;
+const punctuationRe = /\s*([?!]+|(?!\d+)\.(?!\d+))\s*/g;
 
 /* Single whitespace match, global (for matchAll) */
 const singleWhitespaceRe = /\s/g;
