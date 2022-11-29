@@ -11,16 +11,7 @@ const switchListItems = [
         id: 'showComplexSentences',
         primary: 'Show complex sentences',
         help: `
-            Highlight sentences which are too complex, defined by:
-            <p>
-            SMOG = 3 + &radic;(no_of_3+_syllable_words) > threshold.  
-            </p>
-            <p>
-            NOTE: The threshold for complexity is set artificially low for demonstration purposes (most documents will show up some complexity).
-            </p>
-            <p>
-            QUESTIONS FOR TESTERS: How do we want to measure complexity? How might suggestions to rectify it be communicated?
-            </p>
+           Highlights sentences that are long and contain 15 or more words.
             `,
         defaultChecked: true
     },
@@ -38,7 +29,7 @@ const switchListItems = [
     {
         key: 3,
         id: 'highlightPrismWords',
-        primary: 'Highlight PRISM-listed words',
+        primary: 'Highlight complex words',
         help: `
             <p>
             Highlights words that could be simpler. Hover the mouse over the word to see suggestions for simpler words or phrases.

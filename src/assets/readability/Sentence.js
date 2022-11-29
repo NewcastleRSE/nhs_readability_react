@@ -118,12 +118,16 @@ export default class Sentence {
     isComplex() {
 
         console.group('isComplex()');
-        console.log('Check', this.text, 'is complex');
 
-        let smog = 3.0 + Math.sqrt(this.wordCount(3));
-        let isComplex = smog > sentenceComplexitySmogRange[0] && smog < sentenceComplexitySmogRange[1];
+        let isComplex = false;
+        let longSentence = this.wordCount(this.text);
 
-        console.log('SMOG index', smog, 'complex', isComplex);
+        /* use word count in sentence */
+        if(longSentence >= 15){
+          isComplex = true;
+        }
+
+        console.log('complex', isComplex, 'Words in sentence', longSentence);
         console.groupEnd();
 
         return(isComplex);
