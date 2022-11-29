@@ -11,16 +11,9 @@ const switchListItems = [
         id: 'showComplexSentences',
         primary: 'Show complex sentences',
         help: `
-            Highlight sentences which are too complex, defined by:
-            <p>
-            SMOG = 3 + &radic;(no_of_3+_syllable_words) > threshold.  
-            </p>
-            <p>
-            NOTE: The threshold for complexity is set artificially low for demonstration purposes (most documents will show up some complexity).
-            </p>
-            <p>
-            QUESTIONS FOR TESTERS: How do we want to measure complexity? How might suggestions to rectify it be communicated?
-            </p>
+           <p>
+           Highlights sentences that are long and contain 15 or more words.
+           </p>
             `,
         defaultChecked: true
     },
@@ -38,7 +31,7 @@ const switchListItems = [
     {
         key: 3,
         id: 'highlightPrismWords',
-        primary: 'Highlight PRISM-listed words',
+        primary: 'Highlight complex words',
         help: `
             <p>
             Highlights words that could be simpler. Hover the mouse over the word to see suggestions for simpler words or phrases.
@@ -52,7 +45,7 @@ const switchListItems = [
         primary: 'Highlight long words',
         help: `
             <p>
-            Highlights words that are 3 or more syllables in length.
+            Highlights words that are 4 or more syllables in length.
             </p>
             `,
         defaultChecked: false
@@ -126,26 +119,7 @@ const readabilityListItems = [
         key: 1,
         id: 'ukReadingAge',
         primary: 'Estimated UK Reading Age',
-        help: `
-            <p>The US grade system is translated into a UK school reading age via the following table:</p>
-            <table class="table is-fullwidth">
-                <tr><th>Year in<br/>England</th><th>Student age</th><th>US grade</th></tr>
-                <tr><td>Nursery</td><td>3-4</td><td>Preschool</td></tr>
-                <tr><td>Reception</td><td>4-5</td><td>Preschool</td></tr>
-                <tr><td>Year 2</td><td>6-7</td><td>Grade 1</td></tr>
-                <tr><td>Year 3</td><td>7-8</td><td>Grade 2</td></tr>
-                <tr><td>Year 4</td><td>8-9</td><td>Grade 3</td></tr>
-                <tr><td>Year 5</td><td>9-10</td><td>Grade 4</td></tr>
-                <tr><td>Year 6</td><td>10-11</td><td>Grade 5</td></tr>
-                <tr><td>Year 7</td><td>11-12</td><td>Grade 6</td></tr>
-                <tr><td>Year 8</td><td>12-13</td><td>Grade 7</td></tr>
-                <tr><td>Year 9</td><td>13-14</td><td>Grade 8</td></tr>
-                <tr><td>Year 10</td><td>14-15</td><td>Grade 9</td></tr>
-                <tr><td>Year 11</td><td>15-16</td><td>Grade 10</td></tr>
-                <tr><td>Year 12</td><td>16-17</td><td>Grade 11</td></tr>
-                <tr><td>Year 13</td><td>17-18</td><td>Grade 12</td></tr>
-            </table>                    
-        `
+        help: `<p>Aim for a reading age of 11</p>`
     },
     {
         key: 2,
@@ -153,7 +127,7 @@ const readabilityListItems = [
         primary: 'Average reading time',
         help: 'Estimated reading time for document, based on a 250 words per minute average'
     },
-    {
+   /* {
         key: 3,
         id: 'smogIndex',
         primary: 'SMOG Index',
@@ -166,7 +140,7 @@ const readabilityListItems = [
         id: 'fleschKincaid',
         primary: 'Flesch Kincaid Grade',
         help: ` <p>Returns the Flesh Kincaid grade of the given text - (US grades)</p>`
-    }
+    } */
 ];
 
 const darkGrey = grey.A700;

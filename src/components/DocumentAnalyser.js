@@ -206,10 +206,11 @@ export default class DocumentAnalyser extends React.Component {
         if (id == 'includeMedicalTerms') {
             /* Update the SMOG index metric */
             const smog = this.textModel.smogIndex(!checked);
+            const fKGrade = this.textModel.fleschKincaidGrade(!checked);
             this.setState({ 'readability': {
                 readingTime: this.textModel.averageReadingTime(),
                 smogIndex: smog,
-                ukReadingAge: this.textModel.toUKReadingAge(smog),
+                ukReadingAge: this.textModel.toUKReadingAge(fKGrade),
                 fleschKincaid: this.textModel.fleschKincaidGrade()
 
             }});      
@@ -229,10 +230,12 @@ export default class DocumentAnalyser extends React.Component {
             this.setState({ 'metrics': this.textModel.getMetrics() });
             /* Set readability metrics */
             const smog = this.textModel.smogIndex();
+            const fKGrade = this.textModel.fleschKincaidGrade();
+            /* Use FK grade not SMOG for reading age calculation */
             this.setState({ 'readability': {
                 readingTime: this.textModel.averageReadingTime(),
                 smogIndex: smog,
-                ukReadingAge: this.textModel.toUKReadingAge(smog),
+                ukReadingAge: this.textModel.toUKReadingAge(fKGrade),
                 fleschKincaid: this.textModel.fleschKincaidGrade()
             }});            
         } 
