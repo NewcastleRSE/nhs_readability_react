@@ -11,7 +11,9 @@ const switchListItems = [
         id: 'showComplexSentences',
         primary: 'Show complex sentences',
         help: `
+           <p>
            Highlights sentences that are long and contain 15 or more words.
+           </p>
             `,
         defaultChecked: true
     },
