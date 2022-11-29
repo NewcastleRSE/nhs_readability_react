@@ -26,15 +26,15 @@ const pages = [
         title: 'View the documentation in a new tab (Not Implemented!)'
     }, */
     {
-        key: 'Hints and Tips',
+        key: 'More information',
         url: '',
-        title: 'View the documentation in a new tab (Not Implemented!)'
+        title: 'Click to see more information about the tool'
     },
-    {
+   /* {
         key: 'Contact',
         url: 'https://github.com/NewcastleRSE/nhs_readability_react/issues',
         title: 'Report an issue with the tool directly into the GitHub issues database'
-    },
+    }, */
     /*{
         key: 'Login',
         url: '',
@@ -185,6 +185,11 @@ export default class NavigationBar extends React.Component {
                                 fontSize: 18,
                                 color: '#000'
                             }}> 
+
+                                Highlight sentences which are too complex, defined by:
+                                <p>
+                                SMOG = 3 + &radic;(no_of_3+_syllable_words) &gt; threshold.  
+                                </p>
                                 <span>The NHS Document Readability Tool helps you write simple and clear health information.</span>
                                 <br></br> 
                                 <span>Copy and paste in text you’re working on already, or start writing something new directly in the tool.</span>
