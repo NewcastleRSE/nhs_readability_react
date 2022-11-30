@@ -59,7 +59,7 @@ export default class FirstTimeInstructionsBox extends Component {
                 <DialogTitle sx={{
                     m: 0, p: 2
                 }}>
-                    NHS Document Readability Tool
+                    Welcome to the NHS Document Readability Tool
                     <IconButton
                         aria-label="close"
                         onClick={this.onClose.bind(this)}
@@ -68,6 +68,7 @@ export default class FirstTimeInstructionsBox extends Component {
                             right: 8,
                             top: 8,
                             color: grey[500],
+                            fontWeight: 900
                         }}
                     >
                         <CloseIcon />
@@ -81,13 +82,13 @@ export default class FirstTimeInstructionsBox extends Component {
                         fontSize: 18
                     }}> 
                 
-                    <strong>Tips for users</strong>
-                
-                    <p>The NHS Document Readability Tool helps you write simple and clear health information.</p>
+                    <p>The average reading age of adults in the UK in 9 to 11 years old. The information we write often has a higher reading age than this. This tool helps you write in a simple and clear way for the average UK reading age.</p>
 
-                    <p>Copy and paste in text you’re working on already, or start writing something new directly in the tool.</p>
+                    <p><strong>How to use this tool</strong></p>
 
-                    <p>Use the options on the right hand side to get suggestions on how to make you writing easy to understand.</p>
+                    <p>Copy and paste text that you have written into the tool and make edits. Or start writing something new directly in the tool.</p>
+
+                    <p>Use the options on the right hand side to find out the reading age of your text. Also find out what might make your writing hard to read. Edit your text and see the reading age change.</p>
 
                     <p>Once you’ve finished, copy and paste your text from the tool into a word document, email etc.</p>
 

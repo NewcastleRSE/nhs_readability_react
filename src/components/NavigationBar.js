@@ -29,13 +29,13 @@ const pages = [
         key: 'More information',
         url: '',
         title: 'Click to see more information about the tool'
-    },
-   /* {
+    }/*,
+    {
         key: 'Contact',
         url: 'https://github.com/NewcastleRSE/nhs_readability_react/issues',
         title: 'Report an issue with the tool directly into the GitHub issues database'
-    }, */
-    /*{
+    },
+    {
         key: 'Login',
         url: '',
         title: 'Log in as a registered user (Not Implemented!)'
@@ -113,7 +113,7 @@ export default class NavigationBar extends React.Component {
                                         if (page.url) {
                                             window.open(page.url, '_blank');
                                         } 
-                                        else if (page.key==='Hints and Tips') {
+                                        else if (page.key==='More information') {
                                             this.handleClickOpen();
                                         }                                  
                                     }}
@@ -175,7 +175,7 @@ export default class NavigationBar extends React.Component {
                         }}
                     >
                     <DialogTitle id="alert-dialog-title">
-                        Hints and tips
+                         NHS Readability Tool Information
                     </DialogTitle>
                     <DialogContent>
                         <DialogContentText id="alert-dialog-description"  sx={{
@@ -185,20 +185,10 @@ export default class NavigationBar extends React.Component {
                                 fontSize: 18,
                                 color: '#000'
                             }}> 
-
-                                Highlight sentences which are too complex, defined by:
-                                <p>
-                                SMOG = 3 + &radic;(no_of_3+_syllable_words) &gt; threshold.  
-                                </p>
-                                <span>The NHS Document Readability Tool helps you write simple and clear health information.</span>
-                                <br></br> 
-                                <span>Copy and paste in text you’re working on already, or start writing something new directly in the tool.</span>
-                                <br></br> 
-                                <span>Use the options on the right hand side to get suggestions on how to make you writing easy to understand.</span>
-                                <br></br> 
-                                <span>Once you’ve finished, copy and paste your text from the tool into a word document, email etc.</span>
-                                <br></br> 
-                                <span><strong>Please note:</strong> the tool does not check for spelling and grammar mistakes. You will need to use another programme to check for these.</span>
+                                <span>The UK reading age is calculated on the Flesch Kincaid system of measurement. This is a US based algorithm that can be converted into a UK average reading age. Flesch Kincaid is also the algorithm used by Microsoft Word, so calculated reading ages should be consistent.</span> <br></br><br></br>
+                                <span>The tool works by analysing submitted text and splitting it into paragraphs and single words. Words are also analysed for syllable content. Words with 4 or more syllables are classed as long words. Replacing longer words with simpler alternatives will help reduce the overall reading age of the text. The average reading age in the UK is 11, so text readability should be a close to 11 as possible, although 13 or below is also a good result. </span>
+                                
+                               
                         </DialogContentText>
                     </DialogContent>
                     <DialogActions>
