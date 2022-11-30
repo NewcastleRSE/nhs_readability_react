@@ -210,12 +210,21 @@ const prismWords = {
         "inform",
         "tell"
     ],
-    "appropriate(ly)": [
-        "correct(ly)",
-        "proper(ly)",
+    "appropriate": [
+        "correct",
+        "proper",
         "right"
     ],
-    "approximate(ly)": [
+    "appropriately": [
+        "correctly",
+        "properly"
+    ],
+    "approximate": [
+        "about",
+        "around",
+        "roughly"
+    ],
+    "approximately": [
         "about",
         "around",
         "roughly"
@@ -224,7 +233,10 @@ const prismWords = {
         "irregular heartbeat",
         "when the heart doesn't have a steady beat"
     ],
-    "arteriosclerosis (or atherosclerosis)": [
+    "arteriosclerosis": [
+        "hardening of the arteries"
+    ],
+    "atherosclerosis": [
         "hardening of the arteries"
     ],
     "articulate": [
@@ -276,7 +288,7 @@ const prismWords = {
         "help",
         "aid"
     ],
-    "associated with": [
+    "associated": [
         "linked to",
         "related to"
     ],
@@ -308,11 +320,9 @@ const prismWords = {
         "helpful",
         "good"
     ],
-    "benefit (noun)": [
+    "benefit": [
         "good effect",
-        "advantage"
-    ],
-    "benefit (verb)": [
+        "advantage",
         "help",
         "be useful to"
     ],
@@ -464,7 +474,10 @@ const prismWords = {
     "collaborate with": [
         "work with"
     ],
-    "colon/colorectal": [
+    "colon": [
+        "large intestine"
+    ],
+    "colorectal": [
         "large intestine"
     ],
     "colonoscopy": [
@@ -847,7 +860,10 @@ const prismWords = {
         "lump of blood",
         "clot"
     ],
-    "embolist/embolus": [
+    "embolist": [
+        "clot that blocks a blood vessel or artery"
+    ],
+    "embolus": [
         "clot that blocks a blood vessel or artery"
     ],
     "emesis": [
@@ -1170,10 +1186,18 @@ const prismWords = {
     "hypersensitivity": [
         "very sensitive to"
     ],
-    "hypertension (hypotension)": [
+    "hypertension": [
         "blood pressure that's too high (blood pressure that's too low)"
     ],
-    "hyperthyroidism (hypothyroidism)": [
+    "hypotension": [
+        "blood pressure that's too high (blood pressure that's too low)"
+    ],
+    "hyperthyroidism": [
+        "overactive thyroid",
+        "too much thyroid hormone (underactive thyroid",
+        "not enough thyroid hormone)"
+    ],
+    "hypothyroidism": [
         "overactive thyroid",
         "too much thyroid hormone (underactive thyroid",
         "not enough thyroid hormone)"
@@ -1291,7 +1315,7 @@ const prismWords = {
         "useless",
         "of no use"
     ],
-    "infectious (disease)": [
+    "infectious": [
         "passed from one person to the next"
     ],
     "infection": [
@@ -1417,8 +1441,12 @@ const prismWords = {
     "investigation": [
         "study"
     ],
-    "investigator(s)": [
-        "researcher(s)",
+    "investigator": [
+        "researcher",
+        "person doing the study"
+    ],
+    "investigators": [
+        "researchers",
         "people doing the study"
     ],
     "issue": [
@@ -1510,7 +1538,7 @@ const prismWords = {
     "malingering": [
         "pretending to be sick"
     ],
-    "majority (of)": [
+    "majority": [
         "most"
     ],
     "manifestation": [
@@ -1561,7 +1589,12 @@ const prismWords = {
     "miliaria": [
         "prickly heat"
     ],
-    "minimal (minimum)": [
+    "minimal": [
+        "least",
+        "smallest",
+        "slight (at least)"
+    ],
+    "minimum": [
         "least",
         "smallest",
         "slight (at least)"
@@ -1571,8 +1604,11 @@ const prismWords = {
         "lower",
         "reduce"
     ],
-    "mobile (mobility)": [
-        "able (ability) to move around"
+    "mobile": [
+        "able to move around"
+    ],
+    "mobility": [
+        "ability to move around"
     ],
     "moderate (verb)": [
         "limit",
@@ -1697,7 +1733,10 @@ const prismWords = {
     "occasionally": [
         "sometimes"
     ],
-    "occlude (occlusion)": [
+    "occlude": [
+        "block (blockage)"
+    ],
+    "occlusion": [
         "block (blockage)"
     ],
     "occupation(al)": [

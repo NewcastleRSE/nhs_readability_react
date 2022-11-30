@@ -275,9 +275,9 @@ const MetricListItem = props => {
     if (id == 'ukReadingAge') {
         /* Apply traffic light style to reading age output */
         if (value && !isNaN(value)) {
-            if (value <= 13) {
+            if (value <= 11) {
                 valueStyle = readingAgeTrafficLightStyles['green'];
-            } else if (value <= 16) {
+            } else if (value <= 13) {
                 valueStyle = readingAgeTrafficLightStyles['amber'];
             } else {
                 valueStyle = readingAgeTrafficLightStyles['red'];
