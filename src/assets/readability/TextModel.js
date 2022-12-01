@@ -483,6 +483,32 @@ export default class TextModel {
     }
 
     /**
+     * Compute FK index on current text
+     * @param {boolean} filterMedicalTerms  -- whether to compute index minus all medical terms
+     * @returns FK index as a US grade
+     */
+     fkIndex(filterMedicalTerms = false) {
+        console.group('fkIndex()');
+        let fk = 0.0;
+        let nPolySyllables = 0;
+        if (this.nSentences >= 3) {
+            if (filterMedicalTerms) {
+                /* Have to compute number of polysyllables minus the filtered words */                
+                for (const [blockKey, paraRecord] of Object.entries(this.modelState)) {
+                    nPolySyllables += paraRecord.wordCount(3, prismWords);  /* Only using PRISM words at present */
+                }
+            } else {
+                /* Can use globally computed value */
+                nPolySyllables = this.nPolySyllables;                            
+            }
+            fk = this._roundFloat(1.043 * (30 * (nPolySyllables / this.nSentences)) ** 0.5 + 3.1291, 1);
+        }       
+        console.log('FK Index', fk);
+        console.groupEnd();
+        return(fk);
+    }
+
+    /**
      * Compute Coleman-Liau index on current text
      * @returns Coleman-Liau index as a US grade
      */
