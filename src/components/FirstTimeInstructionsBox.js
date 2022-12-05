@@ -17,21 +17,11 @@ export default class FirstTimeInstructionsBox extends Component {
 
     onClose() {
         this.setState({ showInstructions: !this.state.showInstructions });
-        localStorage.setItem('hideInstructions', true)
+       // localStorage.setItem('hideInstructions', true)
     }
 
     render() {
         const style = {
-            // position: 'absolute',
-            // top: '50%',
-            // left: '50%',
-            // transform: 'translate(-50%, -50%)',
-            // width: '50%',
-            // height: '50%',
-            // bgcolor: 'white',
-            // border: '1px solid white',
-            // boxShadow: 24,
-            // p: 4,
             '& .MuiDialog-container': {
                 '& .MuiPaper-root': {
                     position: 'absolute',
