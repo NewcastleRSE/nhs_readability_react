@@ -206,7 +206,8 @@ export default class DocumentAnalyser extends React.Component {
         if (id == 'includeMedicalTerms') {
             /* Update the SMOG index metric */
             const smog = this.textModel.smogIndex(!checked);
-            const fKGrade = this.textModel.fleschKincaidGrade(!checked);
+            /* Update the FK index metric */
+            const fKGrade = this.textModel.fkIndex(!checked);
             this.setState({ 'readability': {
                 readingTime: this.textModel.averageReadingTime(),
                 smogIndex: smog,
