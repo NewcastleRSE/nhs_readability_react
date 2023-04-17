@@ -46,8 +46,8 @@ export default class ParagraphRecord {
      */
     stateUpdate(block) {
 
-        console.group('setText()');
-        console.log('Paragraph state record before update:\n', this);
+       /* console.group('setText()');
+        console.log('Paragraph state record before update:\n', this); */
 
         const key = block.getKey();
         const text = block.getText();
@@ -105,6 +105,20 @@ export default class ParagraphRecord {
         console.groupEnd();
         return(ranges);
     }
+
+    markPassiveAndComplex() {
+
+        console.group('markPassiveAndComplex()');
+        let ranges = this.sentences.filter(s1 => s1.isPassiveAndComplex()).map(s2 => {
+            return({
+                start: s2.paraOffsetStart,
+                end: s2.paraOffsetEnd + 1
+            });
+        }); 
+        console.groupEnd();
+        return(ranges);
+    }
+
 
     /**
      * Return array of text ranges representing PRISM words
@@ -249,6 +263,6 @@ export default class ParagraphRecord {
             hash |= 0; /* Convert to 32bit integer */
         }
         return(hash);
-    }
+    }       
 
 }

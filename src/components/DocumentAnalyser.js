@@ -21,7 +21,8 @@ export default class DocumentAnalyser extends React.Component {
                 showComplexSentences: Panel.getSwitchByName('showComplexSentences').defaultChecked,
                 highlightPrismWords: Panel.getSwitchByName('highlightPrismWords').defaultChecked,
                 showLongWords: Panel.getSwitchByName('showLongWords'). defaultChecked,
-                includeMedicalTerms: Panel.getSwitchByName('includeMedicalTerms').defaultChecked
+                includeMedicalTerms: Panel.getSwitchByName('includeMedicalTerms').defaultChecked,
+                showPassiveSentences: Panel.getSwitchByName('showPassiveSentences').defaultChecked
             },
             metrics: {
                 nCharacters: 0,
@@ -52,6 +53,8 @@ export default class DocumentAnalyser extends React.Component {
      * @returns CompositeDecorator
      */
     getDecorators() {
+
+        console.log('switches', this.state.switches);
         const showComplex = this.state.switches['showComplexSentences'];
         const complexStyle = showComplex ? highlightingStyles['showComplexSentences'] : highlightingStyles['normalText'];
         const showPassive = this.state.switches['showPassiveSentences'];
@@ -60,21 +63,12 @@ export default class DocumentAnalyser extends React.Component {
         const prismStyle = showPrism ? highlightingStyles['highlightPrismWords'] : highlightingStyles['normalText'];
         const showLong = this.state.switches['showLongWords'];
         const longStyle = showLong ? highlightingStyles['showLongWords'] : highlightingStyles['normalText'];
-
+       
         return(new CompositeDecorator([
-            {
-                strategy: function(contentBlock, callback, contentState) { this.textModel.findComplexSentences(...arguments) }.bind(this),
-                component: (props) => {
-                    return ( <span 
-                        className={showComplex ? "sentence-is-complex" : ""} 
-                        style={complexStyle} 
-                        data-offset-key={props.offsetKey}>
-                        {props.children}</span> )
-                }
-            }, 
             {
                 strategy: function(contentBlock, callback, contentState) { this.textModel.findPassiveSentences(...arguments) }.bind(this),
                 component: (props) => {
+                    console.debug('Re-rendering passive sentences', props);
                     return ( <span 
                         className={showPassive ? "sentence-is-passive" : ""} 
                         style={passiveStyle} 
@@ -99,6 +93,7 @@ export default class DocumentAnalyser extends React.Component {
             {
                 strategy: function(contentBlock, callback, contentState) { this.textModel.findLongWords(...arguments) }.bind(this),
                 component: (props) => {
+                    console.debug('Re-rendering long word', props);
                     return ( <span 
                         className={showLong ? "long-word" : ""} 
                         style={longStyle} 
@@ -106,6 +101,18 @@ export default class DocumentAnalyser extends React.Component {
                         {props.children}</span> )
                 }
             }, 
+            {
+                strategy: function(contentBlock, callback, contentState) { this.textModel.findComplexSentences(...arguments) }.bind(this),
+                component: (props) => {
+                    console.debug('Re-rendering complex sentences', props);
+                    return ( <span 
+                        className={showComplex ? "sentence-is-complex" : ""} 
+                        style={complexStyle} 
+                        data-offset-key={props.offsetKey}>
+                        {props.children}</span> )
+                }
+            }
+            
         ]));
     }
 
@@ -142,7 +149,7 @@ export default class DocumentAnalyser extends React.Component {
             let blockAnchorOffset = spw.dataset.anchorOffset;
             let blockFocusOffset = spw.dataset.focusOffset;
             console.debug('Highlighted word', spw.innerText, 'block key', blockKey, 'anchor offset', blockAnchorOffset, 'focus offset', blockFocusOffset);
-            let alts = prismWords[spw.innerText.toLowerCase()];
+            let alts = prismWords[spw.innerText.toLowerCase()]; 
             if (alts) {
                 /* Add tooltip indicating alternative words/phrases */
                 let tipFrag = document.createDocumentFragment();
@@ -252,7 +259,7 @@ export default class DocumentAnalyser extends React.Component {
             <Grid container spacing={1}>
                 <Grid item xs={12} sm={12} md={9}>
                     <Panel.WhitePaper elevation={5}>
-                    <Button sx={{ padding: 1, margin: 1 }} variant="outlined" onClick={this.clearStateText.bind(this)}>Clear text</Button>    
+                    <Button sx={{ padding: 1, margin: 1, color: "#4666db", border: "1px black solid"  }} variant="outlined" onClick={this.clearStateText.bind(this)}>Clear text</Button>    
                         <Editor
                             ref={ this.editor }
                             placeholder='&nbsp;Type or paste your document here'

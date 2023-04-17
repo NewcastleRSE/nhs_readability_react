@@ -26,7 +26,7 @@ const switchListItems = [
             Highlight sentences which are in passive tense.
             </p>
             `,
-        defaultChecked: false
+        defaultChecked: true
     },
     {
         key: 3,
@@ -37,7 +37,7 @@ const switchListItems = [
             Highlights words that could be simpler. Hover the mouse over the word to see suggestions for simpler words or phrases.
             </p>
             `,
-        defaultChecked: false
+        defaultChecked: true
     },
     {
         key: 4,
@@ -48,7 +48,7 @@ const switchListItems = [
             Highlights words that are 4 or more syllables in length.
             </p>
             `,
-        defaultChecked: false
+        defaultChecked: true
     }
    
 ];
