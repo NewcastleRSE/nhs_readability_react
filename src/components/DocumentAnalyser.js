@@ -53,8 +53,6 @@ export default class DocumentAnalyser extends React.Component {
      * @returns CompositeDecorator
      */
     getDecorators() {
-
-        console.log('switches', this.state.switches);
         const showComplex = this.state.switches['showComplexSentences'];
         const complexStyle = showComplex ? highlightingStyles['showComplexSentences'] : highlightingStyles['normalText'];
         const showPassive = this.state.switches['showPassiveSentences'];
