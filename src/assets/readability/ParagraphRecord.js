@@ -51,12 +51,12 @@ export default class ParagraphRecord {
 
         const key = block.getKey();
         const text = block.getText();
-        console.log('Check block', key, 'for changes...');
+        console.debug('Check block', key, 'for changes...');
 
         let newHash = this._hashCode(text);
         if (newHash != this.hashCode) {            
             /* Text has changed => recompute all fields */
-            console.log('Hash code discrepancy - new: ', newHash, 'old: ', this.hashCode, '=> changes have occurred');
+            console.debug('Hash code discrepancy - new: ', newHash, 'old: ', this.hashCode, '=> changes have occurred');
             Object.assign(this, {
                 block: block,
                 hashCode: newHash,
@@ -66,13 +66,13 @@ export default class ParagraphRecord {
                 sentences: this._splitIntoSentences(text)
             });
 
-            console.log('End');
+            console.debug('End');
 
         } else {
-            console.log('Hash codes equal => no change');
+            console.debug('Hash codes equal => no change');
         }
 
-        console.log('Paragraph state record after update:\n', this);
+        console.debug('Paragraph state record after update:\n', this);
         console.groupEnd();
     }
 
@@ -108,7 +108,7 @@ export default class ParagraphRecord {
 
     /**
      * Return array of text ranges representing PRISM words
-     * @return {Array<SelectionState>} ranges
+     * Referred to as 'complex' words in the editor
      */
      markPrismWords() {
 

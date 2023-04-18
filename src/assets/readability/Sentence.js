@@ -31,10 +31,10 @@ export default class Sentence {
         let trimmed = this.text.trim().toLocaleLowerCase(localeLang);
         if (trimmed != '') {
             words = trimmed.split(multiWhitespaceRe);
-            console.log('words.length', words.length);
+            console.debug('words.length', words.length);
             if (syllableThreshold > 1) {                
                 words = words.filter(w => syllable(w) >= syllableThreshold);
-                console.log('words.length after', syllableThreshold, 'syllable filter', words.length);
+                console.debug('words.length after', syllableThreshold, 'syllable filter', words.length);
             }
         }
         return(words);
@@ -127,7 +127,7 @@ export default class Sentence {
           isComplex = true;
         }
 
-        console.log('complex', isComplex, 'Words in sentence', longSentence);
+        console.debug('complex', isComplex, 'Words in sentence', longSentence);
         console.groupEnd();
 
         return(isComplex);
@@ -136,7 +136,7 @@ export default class Sentence {
     isPassive() {
 
         console.group('isPassive()');
-        console.log('Check', this.text, 'is passive');
+        console.debug('Check', this.text, 'is passive');
 
         let isPassive = passive(this.text);
         if(isPassive.length){

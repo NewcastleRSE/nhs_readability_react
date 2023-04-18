@@ -11,6 +11,7 @@ import "tippy.js/animations/scale.css";
 import 'tippy.js/themes/material.css';
 import { prismWords } from '../assets/readability/PrismWords';
 import MultiDecorator from 'draft-js-multidecorators';
+import { ContentState } from 'draft-js';
 
 export default class DocumentAnalyser extends React.Component {
 
@@ -244,25 +245,6 @@ export default class DocumentAnalyser extends React.Component {
         this.setState({'switches': currentSwitchState});
         console.log('Updated switch state', this.state.switches, 'editor state', this.state.editorState);
         this.textModel.switchStateUpdate(id, checked);
-
-        /* if a switch is on, the others must be off */
-        /*  switches not updating */
-
-       /* if (id == 'highlightPrismWords' && checked == true) {
-            this.textModel.switchStateUpdate('showComplexSentences', false);
-            //Panel.getSwitchByName('showComplexSentences').checked = false;
-            Panel.getSwitchByName('showComplexSentences').defaultChecked = false;
-        }
-        else if (id == 'showComplexSentences' && checked == true) {
-            this.textModel.switchStateUpdate('highlightPrismWords', false);
-            Panel.getSwitchByName('highlightPrismWords').checked = false;
-        }
-        else if (id == 'showLongWords' && checked == true) {
-            this.textModel.switchStateUpdate('highlightPrismWords', false);
-            this.textModel.switchStateUpdate('showComplexSentences', false);
-            Panel.getSwitchByName('highlightPrismWords').checked = false;
-            Panel.getSwitchByName('showComplexSentences').checked = false;
-        } */
             
         if (id == 'includeMedicalTerms') {
             /* Update the SMOG index metric */
@@ -292,7 +274,7 @@ export default class DocumentAnalyser extends React.Component {
             this.setState({ 'metrics': this.textModel.getMetrics() });
             /* Set readability metrics */
             const smog = this.textModel.smogIndex();
-            const fKGrade = this.textModel.fleschKincaidGrade();
+            const fKGrade = this.textModel.fkIndex();
             /* Use FK grade not SMOG for reading age calculation */
             this.setState({ 'readability': {
                 readingTime: this.textModel.averageReadingTime(),
@@ -305,8 +287,10 @@ export default class DocumentAnalyser extends React.Component {
     }
 
     clearStateText(newState) {
-       this.setState({ 'editorState': EditorState.createEmpty(this.getDecorators()) });
-    }
+        const editorState = EditorState.push(this.state.editorState, ContentState.createFromText(''));
+        this.setState({ editorState });
+
+    } 
 
     render() {
         return ( 
