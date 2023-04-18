@@ -10,6 +10,7 @@ import "tippy.js/dist/tippy.css";
 import "tippy.js/animations/scale.css";
 import 'tippy.js/themes/material.css';
 import { prismWords } from '../assets/readability/PrismWords';
+import MultiDecorator from 'draft-js-multidecorators';
 
 export default class DocumentAnalyser extends React.Component {
 
@@ -61,8 +62,63 @@ export default class DocumentAnalyser extends React.Component {
         const prismStyle = showPrism ? highlightingStyles['highlightPrismWords'] : highlightingStyles['normalText'];
         const showLong = this.state.switches['showLongWords'];
         const longStyle = showLong ? highlightingStyles['showLongWords'] : highlightingStyles['normalText'];
+
+        return(new MultiDecorator([
+            new CompositeDecorator([
+            {
+                strategy: function(contentBlock, callback, contentState) { this.textModel.findComplexSentences(...arguments) }.bind(this),
+                component: (props) => {
+                    console.debug('Re-rendering complex sentences', props);
+                    return ( <span
+                        className={showComplex ? "sentence-is-complex" : ""}
+                        style={complexStyle}
+                        data-offset-key={props.offsetKey}>
+                        {props.children}</span> )
+                }
+            }]),
+            new CompositeDecorator([
+            {
+                strategy: function(contentBlock, callback, contentState) { this.textModel.findPassiveSentences(...arguments) }.bind(this),
+                component: (props) => {
+                    console.debug('Re-rendering passive sentences', props);
+                    return ( <span
+                        className={showPassive ? "sentence-is-passive" : ""}
+                        style={passiveStyle}
+                        data-offset-key={props.offsetKey}>
+                        {props.children}</span> )
+                }
+            }]),
+            new CompositeDecorator([
+            {
+                strategy: function(contentBlock, callback, contentState) { this.textModel.findLongWords(...arguments) }.bind(this),
+                component: (props) => {
+                    console.debug('Re-rendering long word', props);
+                    return ( <span
+                        className={showLong ? "long-word" : ""}
+                        style={longStyle}
+                        data-offset-key={props.offsetKey}>
+                        {props.children}</span> )
+                }
+            }]),
+            new CompositeDecorator([
+                {
+                    strategy: function(contentBlock, callback, contentState) { this.textModel.findPrismWords(...arguments) }.bind(this),
+                    component: (props) => {
+                        console.debug('Re-rendering prism word', props);
+                        return (
+                            <span
+                                className={showPrism ? "prism-word" : ""}
+                                style={prismStyle}
+                                data-anchor-offset={props.start}
+                                data-focus-offset={props.end}
+                                data-offset-key={props.offsetKey}
+                            >{props.children}</span>)
+                    }
+                }])
+        ]));
+    } 
        
-        return(new CompositeDecorator([
+     /*   return(new CompositeDecorator([
             {
                 strategy: function(contentBlock, callback, contentState) { this.textModel.findPassiveSentences(...arguments) }.bind(this),
                 component: (props) => {
@@ -111,8 +167,8 @@ export default class DocumentAnalyser extends React.Component {
                 }
             }
             
-        ]));
-    }
+        ])); 
+    } */
 
     componentDidMount() {        
         
