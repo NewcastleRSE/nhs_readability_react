@@ -26,7 +26,7 @@ const switchListItems = [
             Highlight sentences which are in passive tense.
             </p>
             `,
-        defaultChecked: false
+        defaultChecked: true
     },
     {
         key: 3,
@@ -37,7 +37,7 @@ const switchListItems = [
             Highlights words that could be simpler. Hover the mouse over the word to see suggestions for simpler words or phrases.
             </p>
             `,
-        defaultChecked: false
+        defaultChecked: true
     },
     {
         key: 4,
@@ -48,7 +48,7 @@ const switchListItems = [
             Highlights words that are 4 or more syllables in length.
             </p>
             `,
-        defaultChecked: false
+        defaultChecked: true
     }
    
 ];
@@ -78,39 +78,27 @@ const metricListItems = [
     },
     {
         key: 2,
-        id: 'nSpaces',
-        primary: 'Whitespace',
-        help: 'Total number of whitespace characters (space, newline, tab) in document'
-    },
-    {
-        key: 3,
         id: 'nWords',
         primary: 'Words',
         help: 'Total number of words in document'
     },
     {
-        key: 4,
+        key: 3,
         id: 'avWordsPerSentence',
         primary: 'Average words per sentence',
-        help: 'Average number of words per sentence'
+        help: 'Average number of words per sentence (recommended 15 words per sentence)'
     },
     {
-        key: 5,
+        key: 4,
         id: 'nSentences',
         primary: 'Sentences',
         help: 'Total number of sentences in document'
     },
     {
-        key: 6,
+        key: 5,
         id: 'avSentencesPerParagraph',
         primary: 'Average sentences per paragraph',
-        help: 'Average number of sentences per paragraph'
-    },
-    {
-        key: 7,
-        id: 'nParagraphs',
-        primary: 'Paragraphs',
-        help: 'Total number of paragraphs in document'
+        help: 'Average number of sentences per paragraph (recommended 4 sentences per paragaph)'
     }
 ];
 

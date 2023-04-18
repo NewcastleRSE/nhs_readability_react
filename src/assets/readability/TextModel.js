@@ -50,7 +50,7 @@ export default class TextModel {
      stateUpdate(newEditorState) {
 
         console.group('stateUpdate()');
-        console.log('New editor state:\n', newEditorState);
+        console.debug('New editor state:\n', newEditorState);
 
         let textChanged = false;
         let changeType = newEditorState.getLastChangeType();
@@ -63,12 +63,12 @@ export default class TextModel {
             case 'change-block-type':
             case 'change-inline-style':
                 /* No changes to actual text have occurred */
-                console.log('Change type', changeType, '=> no text changes have occurred');
+                console.debug('Change type', changeType, '=> no text changes have occurred');
                 break;
 
             default:
                 /* Text changes may have occurred */
-                console.log('Change type', changeType, '=> further checks for text changes required');
+                console.debug('Change type', changeType, '=> further checks for text changes required');
                 const currentContentState = this._getCurrentEditorContent();
                 let newContentState = newEditorState.getCurrentContent();
 
@@ -105,22 +105,22 @@ export default class TextModel {
                         liveKeys.push(blockKey);
                     });
 
-                    console.log('Model state', this.modelState);
-                    console.log('Currently live block keys', liveKeys);
+                    console.debug('Model state', this.modelState);
+                    console.debug('Currently live block keys', liveKeys);
 
                     /* Delete all paragraph records for dead blocks */
-                    console.log('Cleaning up dead block keys...');
+                    console.debug('Cleaning up dead block keys...');
                     Object.keys(this.modelState).forEach(k => {
                         if (!liveKeys.includes(k)) {
-                            console.log('Key', k, 'is dead - removing');
+                            console.debug('Key', k, 'is dead - removing');
                             delete this.modelState[k];
                         }
 
                     });                    
 
-                    console.log('Finished');
+                    console.debug('Finished');
                 } else {
-                    console.log('Content state has not changed (e.g. a selection)');
+                    console.debug('Content state has not changed (e.g. a selection)');
                 }                
                 break;
         }
@@ -158,9 +158,9 @@ export default class TextModel {
      */
      findComplexSentences(contentBlock, callback, contentState) {
 
-        console.group('findComplexSentences()');
-        console.log('Determine complex decorations in block', contentBlock.getKey());
-        console.log('Model state', this.modelState);
+       // console.group('findComplexSentences()');
+        console.debug('Determine complex decorations in block', contentBlock.getKey());
+        console.debug('Model state', this.modelState);
 
         if (this.switchState['showComplexSentences'] && this.modelState) {
             let paraRecordKey = Object.keys(this.modelState).find(key => key == contentBlock.getKey());
@@ -168,7 +168,7 @@ export default class TextModel {
                 this.modelState[paraRecordKey] = new ParagraphRecord();     
                 this.modelState[paraRecordKey].stateUpdate(contentBlock);
             }           
-            console.log('Found paragraph record', this.modelState[paraRecordKey], 'with key', paraRecordKey);
+            console.debug('Found paragraph record', this.modelState[paraRecordKey], 'with key', paraRecordKey);
             let complexRanges = this.modelState[paraRecordKey].markComplex();
 
             complexRanges.forEach(cr => {
@@ -213,7 +213,7 @@ export default class TextModel {
      */
     findPrismWords(contentBlock, callback, contentState) {
 
-        console.group('findPrismWords()');
+       // console.group('findPrismWords()');
         console.debug('Determine PRISM words in block', contentBlock.getKey());
         console.debug('Model state', this.modelState);
 
@@ -241,7 +241,7 @@ export default class TextModel {
      */
      findLongWords(contentBlock, callback, contentState) {
 
-        console.group('findLongWords()');
+       // console.group('findLongWords()');
         console.debug('Determine long words in block', contentBlock.getKey());
         console.debug('Model state', this.modelState);
 

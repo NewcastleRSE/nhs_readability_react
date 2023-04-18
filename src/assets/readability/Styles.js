@@ -1,18 +1,13 @@
+import { FormatUnderlined } from "@mui/icons-material";
 import { red, teal, grey, green, amber } from "@mui/material/colors";
 import { createTheme } from '@mui/material/styles';
 
 const highlightingStyles = {
-    'showComplexSentences': {
-        color: '#ffffff',
-        padding: '0.05em',
-        lineHeight: '1.8rem',
-        backgroundColor: '#db6ba5'
-    },
     'showPassiveSentences': {
         color: '#ffffff',
         padding: '0.05em',
         lineHeight: '1.8rem',
-        backgroundColor: '#879a9a'
+        backgroundColor: '#879a9a' 
     },
     'highlightPrismWords': {
         color: '#ffffff',
@@ -25,6 +20,12 @@ const highlightingStyles = {
         padding: '0.05em',
         lineHeight: '1.8rem',
         backgroundColor: '#9971bf'
+    },
+    'showComplexSentences': {
+        color: '#ffffff',
+        padding: '0.05em',
+        lineHeight: '1.8rem',
+        backgroundColor: '#db6ba5'
     },
     'normalText': {
         fontWeight: 'normal',

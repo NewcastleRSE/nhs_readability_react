@@ -10,6 +10,8 @@ import "tippy.js/dist/tippy.css";
 import "tippy.js/animations/scale.css";
 import 'tippy.js/themes/material.css';
 import { prismWords } from '../assets/readability/PrismWords';
+import MultiDecorator from 'draft-js-multidecorators';
+import { ContentState } from 'draft-js';
 
 export default class DocumentAnalyser extends React.Component {
 
@@ -21,7 +23,8 @@ export default class DocumentAnalyser extends React.Component {
                 showComplexSentences: Panel.getSwitchByName('showComplexSentences').defaultChecked,
                 highlightPrismWords: Panel.getSwitchByName('highlightPrismWords').defaultChecked,
                 showLongWords: Panel.getSwitchByName('showLongWords'). defaultChecked,
-                includeMedicalTerms: Panel.getSwitchByName('includeMedicalTerms').defaultChecked
+                includeMedicalTerms: Panel.getSwitchByName('includeMedicalTerms').defaultChecked,
+                showPassiveSentences: Panel.getSwitchByName('showPassiveSentences').defaultChecked
             },
             metrics: {
                 nCharacters: 0,
@@ -61,20 +64,66 @@ export default class DocumentAnalyser extends React.Component {
         const showLong = this.state.switches['showLongWords'];
         const longStyle = showLong ? highlightingStyles['showLongWords'] : highlightingStyles['normalText'];
 
-        return(new CompositeDecorator([
+        return(new MultiDecorator([
+            new CompositeDecorator([
             {
                 strategy: function(contentBlock, callback, contentState) { this.textModel.findComplexSentences(...arguments) }.bind(this),
                 component: (props) => {
-                    return ( <span 
-                        className={showComplex ? "sentence-is-complex" : ""} 
-                        style={complexStyle} 
+                    console.debug('Re-rendering complex sentences', props);
+                    return ( <span
+                        className={showComplex ? "sentence-is-complex" : ""}
+                        style={complexStyle}
                         data-offset-key={props.offsetKey}>
                         {props.children}</span> )
                 }
-            }, 
+            }]),
+            new CompositeDecorator([
             {
                 strategy: function(contentBlock, callback, contentState) { this.textModel.findPassiveSentences(...arguments) }.bind(this),
                 component: (props) => {
+                    console.debug('Re-rendering passive sentences', props);
+                    return ( <span
+                        className={showPassive ? "sentence-is-passive" : ""}
+                        style={passiveStyle}
+                        data-offset-key={props.offsetKey}>
+                        {props.children}</span> )
+                }
+            }]),
+            new CompositeDecorator([
+            {
+                strategy: function(contentBlock, callback, contentState) { this.textModel.findLongWords(...arguments) }.bind(this),
+                component: (props) => {
+                    console.debug('Re-rendering long word', props);
+                    return ( <span
+                        className={showLong ? "long-word" : ""}
+                        style={longStyle}
+                        data-offset-key={props.offsetKey}>
+                        {props.children}</span> )
+                }
+            }]),
+            new CompositeDecorator([
+                {
+                    strategy: function(contentBlock, callback, contentState) { this.textModel.findPrismWords(...arguments) }.bind(this),
+                    component: (props) => {
+                        console.debug('Re-rendering prism word', props);
+                        return (
+                            <span
+                                className={showPrism ? "prism-word" : ""}
+                                style={prismStyle}
+                                data-anchor-offset={props.start}
+                                data-focus-offset={props.end}
+                                data-offset-key={props.offsetKey}
+                            >{props.children}</span>)
+                    }
+                }])
+        ]));
+    } 
+       
+     /*   return(new CompositeDecorator([
+            {
+                strategy: function(contentBlock, callback, contentState) { this.textModel.findPassiveSentences(...arguments) }.bind(this),
+                component: (props) => {
+                    console.debug('Re-rendering passive sentences', props);
                     return ( <span 
                         className={showPassive ? "sentence-is-passive" : ""} 
                         style={passiveStyle} 
@@ -99,6 +148,7 @@ export default class DocumentAnalyser extends React.Component {
             {
                 strategy: function(contentBlock, callback, contentState) { this.textModel.findLongWords(...arguments) }.bind(this),
                 component: (props) => {
+                    console.debug('Re-rendering long word', props);
                     return ( <span 
                         className={showLong ? "long-word" : ""} 
                         style={longStyle} 
@@ -106,8 +156,20 @@ export default class DocumentAnalyser extends React.Component {
                         {props.children}</span> )
                 }
             }, 
-        ]));
-    }
+            {
+                strategy: function(contentBlock, callback, contentState) { this.textModel.findComplexSentences(...arguments) }.bind(this),
+                component: (props) => {
+                    console.debug('Re-rendering complex sentences', props);
+                    return ( <span 
+                        className={showComplex ? "sentence-is-complex" : ""} 
+                        style={complexStyle} 
+                        data-offset-key={props.offsetKey}>
+                        {props.children}</span> )
+                }
+            }
+            
+        ])); 
+    } */
 
     componentDidMount() {        
         
@@ -142,7 +204,7 @@ export default class DocumentAnalyser extends React.Component {
             let blockAnchorOffset = spw.dataset.anchorOffset;
             let blockFocusOffset = spw.dataset.focusOffset;
             console.debug('Highlighted word', spw.innerText, 'block key', blockKey, 'anchor offset', blockAnchorOffset, 'focus offset', blockFocusOffset);
-            let alts = prismWords[spw.innerText.toLowerCase()];
+            let alts = prismWords[spw.innerText.toLowerCase()]; 
             if (alts) {
                 /* Add tooltip indicating alternative words/phrases */
                 let tipFrag = document.createDocumentFragment();
@@ -183,25 +245,6 @@ export default class DocumentAnalyser extends React.Component {
         this.setState({'switches': currentSwitchState});
         console.log('Updated switch state', this.state.switches, 'editor state', this.state.editorState);
         this.textModel.switchStateUpdate(id, checked);
-
-        /* if a switch is on, the others must be off */
-        /*  switches not updating */
-
-       /* if (id == 'highlightPrismWords' && checked == true) {
-            this.textModel.switchStateUpdate('showComplexSentences', false);
-            //Panel.getSwitchByName('showComplexSentences').checked = false;
-            Panel.getSwitchByName('showComplexSentences').defaultChecked = false;
-        }
-        else if (id == 'showComplexSentences' && checked == true) {
-            this.textModel.switchStateUpdate('highlightPrismWords', false);
-            Panel.getSwitchByName('highlightPrismWords').checked = false;
-        }
-        else if (id == 'showLongWords' && checked == true) {
-            this.textModel.switchStateUpdate('highlightPrismWords', false);
-            this.textModel.switchStateUpdate('showComplexSentences', false);
-            Panel.getSwitchByName('highlightPrismWords').checked = false;
-            Panel.getSwitchByName('showComplexSentences').checked = false;
-        } */
             
         if (id == 'includeMedicalTerms') {
             /* Update the SMOG index metric */
@@ -231,7 +274,7 @@ export default class DocumentAnalyser extends React.Component {
             this.setState({ 'metrics': this.textModel.getMetrics() });
             /* Set readability metrics */
             const smog = this.textModel.smogIndex();
-            const fKGrade = this.textModel.fleschKincaidGrade();
+            const fKGrade = this.textModel.fkIndex();
             /* Use FK grade not SMOG for reading age calculation */
             this.setState({ 'readability': {
                 readingTime: this.textModel.averageReadingTime(),
@@ -244,15 +287,17 @@ export default class DocumentAnalyser extends React.Component {
     }
 
     clearStateText(newState) {
-       this.setState({ 'editorState': EditorState.createEmpty(this.getDecorators()) });
-    }
+        const editorState = EditorState.push(this.state.editorState, ContentState.createFromText(''));
+        this.setState({ editorState });
+
+    } 
 
     render() {
         return ( 
             <Grid container spacing={1}>
                 <Grid item xs={12} sm={12} md={9}>
                     <Panel.WhitePaper elevation={5}>
-                    <Button sx={{ padding: 1, margin: 1 }} variant="outlined" onClick={this.clearStateText.bind(this)}>Clear text</Button>    
+                    <Button sx={{ padding: 1, margin: 1, color: "#4666db", border: "1px black solid"  }} variant="outlined" onClick={this.clearStateText.bind(this)}>Clear text</Button>    
                         <Editor
                             ref={ this.editor }
                             placeholder='&nbsp;Type or paste your document here'
