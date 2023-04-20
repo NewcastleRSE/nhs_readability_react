@@ -25,7 +25,9 @@ Becky Osselton or David Herbert, RSE Team, Newcastle University
 
 Clone the repository then:
 
-```npm install --legacy-peer-deps```
+```yarn install ```
+
+The yarn build has areas that could be improved, but these may be breaking changes.
 
 ### Running Locally
 
@@ -38,8 +40,8 @@ How to run tests on your local system.
 ## Roadmap
 
 - [ ] Initial Research  
-- [x] Minimum viable product  
-- [ ] Alpha Release  
+- [ ] Minimum viable product  
+- [x] Alpha Release  
 - [ ] Feature-Complete Release   
 
 
