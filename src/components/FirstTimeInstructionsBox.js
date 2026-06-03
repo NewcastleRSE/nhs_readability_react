@@ -72,7 +72,7 @@ export default class FirstTimeInstructionsBox extends Component {
                         fontSize: 18
                     }}> 
                 
-                    <p>The average reading age of adults in the UK in 9 to 11 years old. The information we write often has a higher reading age than this. This tool helps you write in a simple and clear way for the average UK reading age.</p>
+                    <p>The average reading age of adults in the UK is 9 to 11 years old. The information we write often has a higher reading age than this. This tool helps you write in a simple and clear way for the average UK reading age.</p>
 
                     <p><strong>How to use this tool</strong></p>
 
